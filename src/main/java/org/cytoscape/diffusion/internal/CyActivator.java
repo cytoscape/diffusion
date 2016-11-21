@@ -15,7 +15,7 @@ public class CyActivator extends AbstractCyActivator {
 		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(writerFactory);
 		Properties diffusionTaskFactoryProps = new Properties();
 	  diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
-	  registerService(context, diffusionTaskFactory, DiffusionTaskFactory.class, diffusionTaskFactoryProps);
+	  registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
 	}
 
 

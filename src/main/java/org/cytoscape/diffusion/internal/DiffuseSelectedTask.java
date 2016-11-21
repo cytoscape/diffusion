@@ -4,6 +4,15 @@ import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.io.write.CyWriter;
@@ -36,8 +45,24 @@ public class DiffuseSelectedTask extends AbstractTask {
 		this.ensureEmptyInputTableExists(nodeTable);
 		this.setSelectedNodesInInputTable(nodeTable, selectedNodes);
 		String cx = getNetworkViewsAsCX(this.network);
+		System.out.println("Input:");
 		System.out.println(cx);
+		System.out.println("Output:");
+		sendCXToService(cx);
     //TODO: Send CX and reload here
+	}
+
+
+	private void sendCXToService(String cx) throws ClientProtocolException, IOException {
+			HttpClient client = HttpClients.createDefault();
+			HttpPost post = new HttpPost("diffuse.cytoscape.io");
+			StringEntity cxEntity = new StringEntity(cx);
+			post.setEntity(cxEntity);
+			post.setHeader("Content-type", "application/json");
+			HttpResponse  response = client.execute(post);
+			HttpEntity entity = response.getEntity();
+	    String output = entity != null ? EntityUtils.toString(entity) : null;
+			System.out.println(output);
 	}
 
   //Ensure any previous inputs are deleted and create a new input table
