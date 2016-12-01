@@ -2,6 +2,7 @@ package org.cytoscape.diffusion.internal;
 
 import java.util.Properties;
 
+import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.task.NodeViewTaskFactory;
@@ -11,8 +12,10 @@ public class CyActivator extends AbstractCyActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		OutputPanel panel = new OutputPanel();
+    registerService(context, panel, CytoPanelComponent.class, new Properties());
     CyNetworkViewWriterFactory writerFactory =  getService(context, CyNetworkViewWriterFactory.class, "(id=cxNetworkWriterFactory)");
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(writerFactory);
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(writerFactory, panel);
 		Properties diffusionTaskFactoryProps = new Properties();
 	  diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
 	  registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);

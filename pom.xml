@@ -2,8 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<properties>
-						<bundle.symbolicName>org.cytoscape.diffusion.diffusion</bundle.symbolicName>
+		<bundle.symbolicName>org.cytoscape.diffusion.diffusion</bundle.symbolicName>
 		<bundle.namespace>org.cytoscape.diffusion</bundle.namespace>
+		 <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -70,13 +71,16 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-												<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>${bundle.namespace}</Export-Package>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
 						<Cytoscape-App-Dependencies>CX Support;1.1.1,cyREST;3.3.7</Cytoscape-App-Dependencies>
-											</instructions>
+						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>*;resolution:=optional</Import-Package>
+			   	</instructions>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -113,7 +117,16 @@
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.2.0</version>
 		</dependency>
-
+		<dependency>
+	    <groupId>com.fasterxml.jackson.core</groupId>
+	    <artifactId>jackson-databind</artifactId>
+	    <version>2.8.4</version>
+    </dependency>
+		<dependency>
+		  <groupId>org.cytoscape</groupId>
+			<artifactId>swing-application-api</artifactId>
+			<version>3.4.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>service-api</artifactId>
