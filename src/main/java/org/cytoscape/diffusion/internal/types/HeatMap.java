@@ -2,6 +2,10 @@ package org.cytoscape.diffusion.internal;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import java.io.IOException;
 
@@ -29,7 +33,11 @@ class HeatMap {
   }
 
   public Double getThreshold(Integer percentile) {
-    return 1.0;
+    double percentage = percentile / 100.0;
+    Integer percentileIndex = new Double(this.map.size() * percentage).intValue();
+    List<Double> heats = new ArrayList(this.map.values());
+    Collections.sort(heats);
+    return heats.get(percentileIndex);
   }
 
 }

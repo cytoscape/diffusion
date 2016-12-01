@@ -47,9 +47,16 @@ public class DiffuseSelectedTask extends AbstractTask {
 		//Diffuse the current subnet and parse into  an output heatmap
 		HeatMap heatMap = HeatMap.parseJSON(DiffusionService.diffuse(cx, subnetId));
 		//Create an output column with output heats
-    nodeTable.setOutputHeats(heatMap);
-		//Select all nodes with heat greater than 90th percentile
-		nodeTable.selectNodesOverThreshold(heatMap.getThreshold(90));
+    String outputColumnName = nodeTable.setOutputHeats(heatMap);
+    //Calculate the perentile threshold for the output heats
+		Double threshold = heatMap.getThreshold(90);
+		System.out.println(threshold.toString());
+		//Select all nodes with heat greater than the percentile
+		nodeTable.selectNodesOverThreshold(threshold);
+		//Write output column name to panel
+		panel.setOutputColumn(outputColumnName);
+		//Write theshold to panel
+		panel.setThreshold(threshold);
 	}
 
   //Convert the network and it's associated tables to CX for transport to the service

@@ -36,13 +36,26 @@ public class NodeTable {
     }
   }
 
-  public void setOutputHeats(HeatMap heatMap) {
-    this.ensureEmptyTableExists("diffusion_output");
+  //Sets the output heats on a column and returns the name of that column
+  public String setOutputHeats(HeatMap heatMap) {
+    String columnName = this.getAvailableColumnName("diffusion_output");
+    this.ensureEmptyTableExists(columnName);
     for (Map.Entry<String, Double> entry : heatMap.getHeats()) {
     Long suid = Long.parseLong(entry.getKey());
     CyRow row = this.nodeTable.getRow(suid);
-    row.set("diffusion_output", entry.getValue());
+    row.set(columnName, entry.getValue());
     }
+    return columnName;
+  }
+
+  public String getAvailableColumnName(String baseName) {
+    String desiredName = baseName;
+    Integer numericSuffix = 1;
+    while(this.nodeTable.getColumn(desiredName) != null) {
+      desiredName = String.format("%s_%d", baseName, numericSuffix);
+      numericSuffix += 1;
+    }
+    return desiredName;
   }
 
   public void selectNodesOverThreshold(Double threshold) {

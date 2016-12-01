@@ -32,8 +32,16 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     return CytoPanelName.EAST;
   }
 
+  public void setOutputColumn(String columnName) {
+    this.columnNameField.setText(columnName);
+  }
+
   public Double getThreshold() {
     return Double.parseDouble(this.thresholdValueField.getText());
+  }
+
+  public void setThreshold(Double threshold) {
+    this.thresholdValueField.setText(threshold.toString());
   }
 
   public Component getComponent() {
