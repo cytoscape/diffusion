@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
@@ -24,9 +25,15 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
+import org.cytoscape.work.swing.DialogTaskManager;
+
+import org.cytoscape.model.CyNetwork;
+
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.CyApplicationManager;
 
 public class OutputPanel extends JPanel implements CytoPanelComponent {
 
@@ -35,13 +42,20 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 
   private JSlider thresholdValueSlider;
 
+  private JButton makeSubnetButton = new JButton("Turn Selection into Subnet");
+
   private JLabel thresholdValueLabel = new JLabel("Theshold Value: ");
   private JTextField thresholdValueField = new JTextField("1.0");
 
+  private NewNetworkSelectedNodesAndEdgesTaskFactory networkFactory;
+  private CyApplicationManager applicationManager;
+  private DialogTaskManager taskManager;
   private NodeTable nodeTable;
 
-  public OutputPanel(CyApplicationManager applicationManager) {
+  public OutputPanel(CyApplicationManager applicationManager, DialogTaskManager taskManager, NewNetworkSelectedNodesAndEdgesTaskFactory networkFactory) {
     //Set listener on fields
+    this.taskManager = taskManager;
+    this.applicationManager = applicationManager;
     this.nodeTable = new NodeTable(applicationManager.getCurrentNetwork().getDefaultNodeTable());
     columnNameComboBox = new JComboBox(this.nodeTable.getAvaiableOutputColumns());
     ActionListener listener = this.getSelectNodesListener();
@@ -53,6 +67,12 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     this.thresholdValueSlider = new JSlider(0, this.nodeTable.getTable().getRowCount());
     SliderChangeListener sliderChangeListener = new SliderChangeListener(this);
     this.thresholdValueSlider.addChangeListener(sliderChangeListener);
+
+    makeSubnetButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        createSubnet();
+      }
+    });
     //Add fields and labels to GUI panel
     this.setLayout(new GridLayout(12, 1));
     this.add(columnNameLabel);
@@ -60,6 +80,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     this.add(thresholdValueLabel);
     this.add(thresholdValueSlider);
     this.add(thresholdValueField);
+    this.add(makeSubnetButton);
     this.updateThreshold();
   }
 
@@ -69,6 +90,12 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 
   private ActionListener getSelectNodesListener() {
     return new SelectionListener(this);
+  }
+
+  public void createSubnet() {
+    CyNetwork network = this.applicationManager.getCurrentNetwork();
+    System.out.println(network.toString());
+    this.taskManager.execute(this.networkFactory.createTaskIterator(network));
   }
 
   class SliderChangeListener implements ChangeListener {
