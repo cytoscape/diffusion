@@ -32,12 +32,4 @@ class HeatMap {
     return this.map.entrySet();
   }
 
-  public Double getThreshold(Integer percentile) {
-    double percentage = percentile / 100.0;
-    Integer percentileIndex = new Double(this.map.size() * percentage).intValue();
-    List<Double> heats = new ArrayList(this.map.values());
-    Collections.sort(heats);
-    return heats.get(percentileIndex);
-  }
-
 }

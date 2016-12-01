@@ -49,14 +49,13 @@ public class DiffuseSelectedTask extends AbstractTask {
 		//Create an output column with output heats
     String outputColumnName = nodeTable.setOutputHeats(heatMap);
     //Calculate the perentile threshold for the output heats
-		Double threshold = heatMap.getThreshold(90);
-		System.out.println(threshold.toString());
+		Double threshold = nodeTable.getThreshold(outputColumnName, 90);
 		//Select all nodes with heat greater than the percentile
-		nodeTable.selectNodesOverThreshold(threshold);
+		nodeTable.selectNodesOverThreshold(outputColumnName, threshold);
 		//Write output column name to panel
 		panel.setOutputColumn(outputColumnName);
 		//Write theshold to panel
-		panel.setThreshold(threshold);
+		panel.updateThreshold();
 	}
 
   //Convert the network and it's associated tables to CX for transport to the service

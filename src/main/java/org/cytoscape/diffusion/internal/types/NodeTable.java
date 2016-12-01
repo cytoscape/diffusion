@@ -3,14 +3,19 @@ package org.cytoscape.diffusion.internal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import java.util.Collection;
+import java.util.Collections;
 
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyColumn;
 
 public class NodeTable {
 
@@ -18,6 +23,10 @@ public class NodeTable {
 
   public NodeTable(CyTable nodeTable) {
     this.nodeTable = nodeTable;
+  }
+
+  public CyTable getTable() {
+    return this.nodeTable;
   }
 
   //Ensure any previous inputs are deleted and create a new input table
@@ -58,9 +67,19 @@ public class NodeTable {
     return desiredName;
   }
 
-  public void selectNodesOverThreshold(Double threshold) {
+  public String[] getAvaiableOutputColumns() {
+     ArrayList<String> columns = new ArrayList();
+     for (CyColumn column : this.nodeTable.getColumns()) {
+       if (column.getType().equals(Double.class)) {
+         columns.add(column.getName());
+       }
+     }
+     return columns.toArray(new String[columns.size()]);
+  }
+
+  public void selectNodesOverThreshold(String outputColumn, Double threshold) {
     for (CyRow row : nodeTable.getAllRows()) {
-      Double heatValue = row.get("diffusion_output", Double.class);
+      Double heatValue = row.get(outputColumn, Double.class);
       if (heatValue >= threshold) {
         row.set(CyNetwork.SELECTED, Boolean.TRUE);
       } else {
@@ -69,5 +88,30 @@ public class NodeTable {
 
     }
   }
+
+  public Double getThreshold(String columnName, Integer percentile) {
+    double percentage = percentile / 100.0;
+    List<Double> heats = this.nodeTable.getColumn(columnName).getValues(Double.class);
+    Integer percentileIndex = new Double(heats.size() * percentage).intValue();
+    Collections.sort(heats);
+    return heats.get(getFirstNonZeroHeat(heats, percentileIndex));
+  }
+
+  private Integer getFirstNonZeroHeat(List<Double> heats, Integer index) {
+    while (heats.get(index) == 0) {
+      index += 1;
+    }
+    return index;
+  }
+
+  public Integer getThresholdIndex(String columnName, Integer percentile) {
+    double percentage = percentile / 100.0;
+    List<Double> heats = this.nodeTable.getColumn(columnName).getValues(Double.class);
+    Integer percentileIndex = new Double(heats.size() * percentage).intValue();
+    Collections.sort(heats);
+    return getFirstNonZeroHeat(heats, percentileIndex);
+  }
+
+
 
 }
