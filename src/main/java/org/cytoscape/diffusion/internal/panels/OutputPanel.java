@@ -60,6 +60,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     this.add(thresholdValueLabel);
     this.add(thresholdValueSlider);
     this.add(thresholdValueField);
+    this.updateThreshold();
   }
 
   private MenuListener getMenuListener() {
