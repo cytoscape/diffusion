@@ -10,16 +10,16 @@ import org.cytoscape.work.TaskIterator;
 
 public class DiffusionTaskFactory extends AbstractNodeViewTaskFactory {
 
+  private DiffusionNetworkManager networkManager;
   private CyNetworkViewWriterFactory writerFactory;
-  private OutputPanel panel;
 
-	public DiffusionTaskFactory(CyNetworkViewWriterFactory writerFactory, OutputPanel panel) {
+	public DiffusionTaskFactory(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory) {
+    this.networkManager = networkManager;
 		this.writerFactory = writerFactory;
-    this.panel = panel;
 	}
 
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-		return new TaskIterator( new DiffuseSelectedTask(nodeView, networkView, writerFactory, panel) );
+		return new TaskIterator( new DiffuseSelectedTask(networkManager, writerFactory) );
 	}
 
 }

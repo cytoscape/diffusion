@@ -26,6 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
+import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.work.swing.DialogTaskManager;
 
 import org.cytoscape.model.CyNetwork;
@@ -47,15 +48,16 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
   private JLabel thresholdValueLabel = new JLabel("Theshold Value: ");
   private JTextField thresholdValueField = new JTextField("1.0");
 
-  private NewNetworkSelectedNodesAndEdgesTaskFactory networkFactory;
+  private NewNetworkSelectedNodesOnlyTaskFactory networkFactory;
   private CyApplicationManager applicationManager;
   private DialogTaskManager taskManager;
   private NodeTable nodeTable;
 
-  public OutputPanel(CyApplicationManager applicationManager, DialogTaskManager taskManager, NewNetworkSelectedNodesAndEdgesTaskFactory networkFactory) {
+  public OutputPanel(CyApplicationManager applicationManager, DialogTaskManager taskManager, NewNetworkSelectedNodesOnlyTaskFactory networkFactory) {
     //Set listener on fields
     this.taskManager = taskManager;
     this.applicationManager = applicationManager;
+    this.networkFactory = networkFactory;
     this.nodeTable = new NodeTable(applicationManager.getCurrentNetwork().getDefaultNodeTable());
     columnNameComboBox = new JComboBox(this.nodeTable.getAvaiableOutputColumns());
     ActionListener listener = this.getSelectNodesListener();
@@ -81,7 +83,12 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     this.add(thresholdValueSlider);
     this.add(thresholdValueField);
     this.add(makeSubnetButton);
-    this.updateThreshold();
+
+    System.out.println("Culmn was");
+    System.out.println(this.getOutputColumn());
+    if (this.getOutputColumn() != null) {
+      this.updateThreshold();
+    }
   }
 
   private MenuListener getMenuListener() {
@@ -93,8 +100,11 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
   }
 
   public void createSubnet() {
+
     CyNetwork network = this.applicationManager.getCurrentNetwork();
     System.out.println(network.toString());
+    System.out.println(this.networkFactory);
+    System.out.println(this.taskManager);
     this.taskManager.execute(this.networkFactory.createTaskIterator(network));
   }
 
