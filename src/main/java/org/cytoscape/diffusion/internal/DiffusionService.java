@@ -26,7 +26,6 @@ public class DiffusionService {
       HttpResponse  response = client.execute(post);
       HttpEntity entity = response.getEntity();
       String output = entity != null ? EntityUtils.toString(entity) : null;
-      System.out.println(output);
       return output;
   }
 

@@ -20,32 +20,41 @@ class DiffusionTableFactory {
   }
 
   public DiffusionTable createTable(String base) {
+      System.out.println(base);
+      System.out.println(base.length());
+    if (hasDiffusionSuffix(base)) {
+      base = base.substring(0, base.length()-heatSuffix.length());
+      System.out.println("New base");
+      System.out.println(base);
+    }
     return new DiffusionTable(nodeTable,
                               formatColumnName(base, rankSuffix),
                               formatColumnName(base, heatSuffix));
   }
+
 
   public void writeColumns(String base, Map<String, NodeAttributes> nodes) {
     createColumns(base);
     for (Map.Entry<String, NodeAttributes> entry : nodes.entrySet()) {
       Long suid = Long.parseLong(entry.getKey());
       CyRow row = nodeTable.getRow(suid);
-      System.out.println(suid);
-      System.out.println(entry.getValue().getHeat());
-      System.out.println(entry.getValue().getRank());
       row.set(formatColumnName(base, heatSuffix), entry.getValue().getHeat());
       row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
     }
   }
 
-  public String[] getAvailableColumns() {
+  public String[] getAvailableOutputColumns() {
     List<String> columns = new ArrayList();
     for (CyColumn column : nodeTable.getColumns()) {
-      if (column.getType().equals(Double.class) || column.getType().equals(Integer.class)) {
+      if ((column.getType().equals(Double.class) || column.getType().equals(Integer.class)) && hasDiffusionSuffix(column.getName())) {
         columns.add(column.getName());
       }
     }
     return columns.toArray(new String[columns.size()]);
+  }
+
+  private Boolean hasDiffusionSuffix(String columnName) {
+    return columnName.endsWith("_heat") || columnName.endsWith("_rank");
   }
 
   private void createColumns(String base) {
@@ -73,8 +82,6 @@ class DiffusionTableFactory {
     return String.format("%s_%d", base, index);
   }
 
-  private String formatColumnName(String base, String typeSuffix) {
-    return String.format("%s_%s", base, typeSuffix);
-  }
+  private String formatColumnName(String base, String typeSuffix) { return String.format("%s%s", base, typeSuffix); }
 
 }

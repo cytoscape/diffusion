@@ -22,12 +22,12 @@ class DiffusionTable {
 
   //Get the heat of the hotest node
   public Double getMaxHeat() {
-    return rankToHeat(nodeTable.getRowCount());
+    return rankToHeat(0);
   }
 
   //Get the heat of the coldests node
   public Double getMinHeat() {
-    return rankToHeat(0);
+    return rankToHeat(getMaxRank());
   }
 
   //NOTE: This should always be 0
@@ -39,7 +39,7 @@ class DiffusionTable {
   //NOTE: This should always be equal to the number of nodes
   //Get the maximum rank of all the nodes (rank of the hottest node)
   public Integer getMaxRank() {
-    return nodeTable.getRowCount();
+    return nodeTable.getRowCount()-1;
   }
 
   //Get the heat of the node with the given rank
@@ -62,8 +62,17 @@ class DiffusionTable {
     return getFirstMatchingRow(rankColumnName, rank);
   }
 
+  public String getRankColumnName() {
+    return rankColumnName;
+  }
+
+  public String getHeatColumnName() {
+    return heatColumnName;
+  }
+
   //Get the first row that matches the given value at the given column name
   public CyRow getFirstMatchingRow(String columnName, Object value) {
+      System.out.println(columnName);
     Collection<CyRow> matchedRows = nodeTable.getMatchingRows(columnName, value);
     if (matchedRows.size() != 0) {
       List<CyRow> rowList = new ArrayList(matchedRows);

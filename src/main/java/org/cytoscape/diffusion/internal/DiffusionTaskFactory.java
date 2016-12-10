@@ -12,14 +12,16 @@ public class DiffusionTaskFactory extends AbstractNodeViewTaskFactory {
 
   private DiffusionNetworkManager networkManager;
   private CyNetworkViewWriterFactory writerFactory;
+  private OutputPanel outputPanel;
 
-	public DiffusionTaskFactory(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory) {
+	public DiffusionTaskFactory(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel) {
     this.networkManager = networkManager;
 		this.writerFactory = writerFactory;
+    this.outputPanel = outputPanel;
 	}
 
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-		return new TaskIterator( new DiffuseSelectedTask(networkManager, writerFactory) );
+		return new TaskIterator( new DiffuseSelectedTask(networkManager, writerFactory, outputPanel) );
 	}
 
 }

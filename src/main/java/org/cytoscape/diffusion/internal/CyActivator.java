@@ -21,13 +21,13 @@ public class CyActivator extends AbstractCyActivator {
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
 		DiffusionNetworkManager diffusionNetworkManager = new DiffusionNetworkManager(cyApplicationManagerService, dialogTaskManager, networkFactory);
 
-		//OutputPanel panel = new OutputPanel(cyApplicationManagerService, dialogTaskManager, networkFactory);
-    //registerService(context, panel, CytoPanelComponent.class, new Properties());
-    CyNetworkViewWriterFactory writerFactory =  getService(context, CyNetworkViewWriterFactory.class, "(id=cxNetworkWriterFactory)");
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, writerFactory);
+		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager);
+		registerService(context, outputPanel, CytoPanelComponent.class, new Properties());
+        CyNetworkViewWriterFactory writerFactory =  getService(context, CyNetworkViewWriterFactory.class, "(id=cxNetworkWriterFactory)");
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, writerFactory, outputPanel);
 		Properties diffusionTaskFactoryProps = new Properties();
-	  diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
-	  registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
+	    diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
+	    registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
 	}
 
 
