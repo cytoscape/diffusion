@@ -28,7 +28,7 @@ public class DiffuseSelectedTask extends AbstractTask {
 
 	public DiffuseSelectedTask(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel) {
 		this.diffusionNetworkManager = networkManager;
-		this.diffusionTableFactory = new DiffusionTableFactory(diffusionNetworkManager.getNodeTable());
+		this.diffusionTableFactory = new DiffusionTableFactory(diffusionNetworkManager.appManager);
 		this.diffusionJSON = new DiffusionJSON(writerFactory);
 		this.outputPanel = outputPanel;
 	}

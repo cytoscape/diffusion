@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyRow;
 
@@ -12,10 +13,10 @@ class DiffusionTable {
 
   String rankColumnName, heatColumnName;
 
-  CyTable nodeTable;
+  CyApplicationManager manager;
 
-  DiffusionTable(CyTable nodeTable, String rankColumnName, String heatColumnName) {
-    this.nodeTable = nodeTable;
+  DiffusionTable(CyApplicationManager manager, String rankColumnName, String heatColumnName) {
+    this.manager = manager;
     this.rankColumnName = rankColumnName;
     this.heatColumnName = heatColumnName;
   }
@@ -39,11 +40,13 @@ class DiffusionTable {
   //NOTE: This should always be equal to the number of nodes
   //Get the maximum rank of all the nodes (rank of the hottest node)
   public Integer getMaxRank() {
-    return nodeTable.getRowCount()-1;
+    return getNodeTable().getRowCount()-1;
   }
 
   //Get the heat of the node with the given rank
   public Double rankToHeat(Integer rank) {
+      System.out.println("This is a joke");
+      System.out.println(heatColumnName);
     return getRowForRank(rank).get(heatColumnName, Double.class);
   }
 
@@ -73,7 +76,10 @@ class DiffusionTable {
   //Get the first row that matches the given value at the given column name
   public CyRow getFirstMatchingRow(String columnName, Object value) {
       System.out.println(columnName);
-    Collection<CyRow> matchedRows = nodeTable.getMatchingRows(columnName, value);
+      System.out.println(getNodeTable().getColumns());
+      System.out.println(getNodeTable().getColumn(columnName));
+    Collection<CyRow> matchedRows = getNodeTable().getMatchingRows(columnName, value);
+    System.out.println(matchedRows);
     if (matchedRows.size() != 0) {
       List<CyRow> rowList = new ArrayList(matchedRows);
       return rowList.get(0);
@@ -81,5 +87,7 @@ class DiffusionTable {
       return null;
     }
   }
+
+  private CyTable getNodeTable() { return manager.getCurrentNetwork().getDefaultNodeTable(); }
 
 }

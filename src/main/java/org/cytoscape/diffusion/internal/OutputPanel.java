@@ -2,6 +2,7 @@ package org.cytoscape.diffusion.internal;
 
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.view.vizmap.VisualStyle;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -9,6 +10,7 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Set;
 
 class OutputPanel extends JPanel implements CytoPanelComponent {
 
@@ -18,14 +20,16 @@ class OutputPanel extends JPanel implements CytoPanelComponent {
 	private DiffusionTableFactory diffusionTableFactory;
 	private DiffusionNetworkManager networkManager;
 
-	OutputPanel(DiffusionNetworkManager networkManager) {
+	OutputPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles) {
 	    this.networkManager = networkManager;
-	    this.diffusionTableFactory = new DiffusionTableFactory(networkManager.getNodeTable());
+	    this.diffusionTableFactory = new DiffusionTableFactory(networkManager.appManager);
 	    selectionPanel = new JPanel();
-	    SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager);
+	    SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles);
         configureColumnNameComboBox();
-        //this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        columnNameComboBox.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
         this.add(columnNameComboBox);
+        subnetPanel.setMinimumSize(new Dimension(Short.MAX_VALUE, 120));
         this.add(subnetPanel);
         this.add(selectionPanel);
 	}
@@ -46,6 +50,8 @@ class OutputPanel extends JPanel implements CytoPanelComponent {
             public void popupMenuCanceled(PopupMenuEvent e) {}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                System.out.println("Looking for columns");
+                System.out.println(diffusionTableFactory.getAvailableOutputColumns());
                 columnNameComboBox.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
             }
         });
@@ -59,8 +65,6 @@ class OutputPanel extends JPanel implements CytoPanelComponent {
 
     private void columnNameSelected(String columnName) {
 	    System.out.println("Column name selected");
-
-
 
 	    System.out.println(columnName);
 	    DiffusionTable diffusionTable = diffusionTableFactory.createTable(columnName);
