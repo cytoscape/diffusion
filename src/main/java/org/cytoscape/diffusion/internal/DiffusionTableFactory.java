@@ -7,6 +7,7 @@ import java.util.Map;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 
 class DiffusionTableFactory {
@@ -35,6 +36,11 @@ class DiffusionTableFactory {
 
 
   public void writeColumns(String base, Map<String, NodeAttributes> nodes) {
+	final CyTable table = this.getNodeTable();
+	if(table == null) {
+		throw new IllegalStateException("Table does not exists yet.");
+	}
+		
     createColumns(base);
     for (Map.Entry<String, NodeAttributes> entry : nodes.entrySet()) {
       Long suid = Long.parseLong(entry.getKey());
@@ -45,7 +51,13 @@ class DiffusionTableFactory {
   }
 
   public String[] getAvailableOutputColumns() {
-    List<String> columns = new ArrayList();
+    final List<String> columns = new ArrayList<>();
+    
+	final CyTable table = this.getNodeTable();
+	if(table == null) {
+		return new String[0];
+	}
+	
     for (CyColumn column : getNodeTable().getColumns()) {
       if ((column.getType().equals(Double.class) || column.getType().equals(Integer.class)) && hasDiffusionSuffix(column.getName())) {
         columns.add(column.getName());
@@ -61,8 +73,14 @@ class DiffusionTableFactory {
   private void createColumns(String base) {
       System.out.println("Creating columns");
       System.out.println(formatColumnName(base, rankSuffix));
-    getNodeTable().createColumn(formatColumnName(base, rankSuffix), Integer.class, false, 0);
-    getNodeTable().createColumn(formatColumnName(base, heatSuffix), Double.class, false, 0.0);
+    
+	final CyTable table = this.getNodeTable();
+	if(table == null) {
+		return;
+	}
+	
+    table.createColumn(formatColumnName(base, rankSuffix), Integer.class, false, 0);
+    table.createColumn(formatColumnName(base, heatSuffix), Double.class, false, 0.0);
     System.out.println(getNodeTable().getColumn(formatColumnName(base, rankSuffix)));
       System.out.println(getNodeTable().getColumns());
   }
@@ -78,12 +96,24 @@ class DiffusionTableFactory {
 
   //Check if either the heat or rank exists for the given
   private Boolean columnsExist(String base) {
+	final CyTable table = this.getNodeTable();
+	if(table == null) {
+		return false;
+	}
+	
     Boolean heatExists = this.getNodeTable().getColumn(formatColumnName(base, heatSuffix)) != null;
     Boolean rankExists = this.getNodeTable().getColumn(formatColumnName(base, rankSuffix)) != null;
     return (heatExists || rankExists);
   }
 
-  private CyTable getNodeTable() { return manager.getCurrentNetwork().getDefaultNodeTable(); }
+  private final CyTable getNodeTable() { 
+	  final CyNetwork curNet = manager.getCurrentNetwork();
+	  if(curNet != null) {
+		  return curNet.getDefaultNodeTable();
+	  } else {
+		  return null;
+	  }
+  }
 
   private String formatColumnName(String base, Integer index) {
     return String.format("%s_%d", base, index);

@@ -1,10 +1,10 @@
 package org.cytoscape.diffusion.internal;
 
-import java.io.File;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
@@ -13,10 +13,7 @@ import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.vizmap.VisualStyle;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.swing.DialogTaskManager;
-import org.cytoscape.application.CyApplicationManager;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
@@ -25,6 +22,12 @@ public class CyActivator extends AbstractCyActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+
+		// OSGi service listener to import dependency dynamically
+		final ViewWriterFactoryManager viewWriterManager = new ViewWriterFactoryManager();
+		registerServiceListener(context, viewWriterManager, "addFactory", "removeFactory",
+				CyNetworkViewWriterFactory.class);
+		
 		DialogTaskManager taskManager = getService(context, DialogTaskManager.class);
 		NewNetworkSelectedNodesAndEdgesTaskFactory nFactory = getService(context, NewNetworkSelectedNodesAndEdgesTaskFactory.class);
 		NewNetworkSelectedNodesOnlyTaskFactory networkFactory = getService(context, NewNetworkSelectedNodesOnlyTaskFactory.class);
@@ -39,8 +42,10 @@ public class CyActivator extends AbstractCyActivator {
 
 		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager, styles);
 		registerService(context, outputPanel, CytoPanelComponent.class, new Properties());
-        CyNetworkViewWriterFactory writerFactory =  getService(context, CyNetworkViewWriterFactory.class, "(id=cxNetworkWriterFactory)");
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, writerFactory, outputPanel);
+		
+		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
+		
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication);
 		Properties diffusionTaskFactoryProps = new Properties();
 	    diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
 	    registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);

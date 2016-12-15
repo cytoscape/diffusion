@@ -1,27 +1,37 @@
 package org.cytoscape.diffusion.internal;
 
-import org.cytoscape.io.write.CyWriter;
+import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.task.AbstractNodeViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
-import org.cytoscape.task.AbstractNodeViewTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
 public class DiffusionTaskFactory extends AbstractNodeViewTaskFactory {
 
-  private DiffusionNetworkManager networkManager;
-  private CyNetworkViewWriterFactory writerFactory;
-  private OutputPanel outputPanel;
+	private final ViewWriterFactoryManager factoryManager;
+	private final DiffusionNetworkManager networkManager;
+	private final OutputPanel outputPanel;
+	private final CySwingApplication swingApplication;
 
-	public DiffusionTaskFactory(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel) {
-    this.networkManager = networkManager;
-		this.writerFactory = writerFactory;
-    this.outputPanel = outputPanel;
+	public DiffusionTaskFactory(DiffusionNetworkManager networkManager, OutputPanel outputPanel,
+			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication) {
+		this.networkManager = networkManager;
+		this.outputPanel = outputPanel;
+		this.factoryManager = factoryManager;
+		this.swingApplication = swingApplication;
 	}
 
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-		return new TaskIterator( new DiffuseSelectedTask(networkManager, writerFactory, outputPanel) );
+		final CyNetworkViewWriterFactory writerFactory = this.factoryManager.getCxFactory();
+
+		if (writerFactory == null) {
+			throw new IllegalStateException(
+					"CXWriterFactory is not available.  " + "Please make sure you have proper dependencies");
+		}
+
+		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication));
 	}
 
 }
