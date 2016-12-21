@@ -1,18 +1,34 @@
-package org.cytoscape.diffusion.internal;
+package org.cytoscape.diffusion.internal.ui;
 
-import org.cytoscape.application.swing.CytoPanelComponent;
-import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.view.vizmap.VisualStyle;
-
-import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Set;
 
-class OutputPanel extends JPanel implements CytoPanelComponent {
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
+import org.cytoscape.diffusion.internal.util.DiffusionTable;
+import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyle;
+
+
+public class OutputPanel extends JPanel implements CytoPanelComponent {
 
 	private JComboBox columnNameComboBox;
 	private JPanel selectionPanel;
@@ -20,18 +36,36 @@ class OutputPanel extends JPanel implements CytoPanelComponent {
 	private DiffusionTableFactory diffusionTableFactory;
 	private DiffusionNetworkManager networkManager;
 
-	OutputPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles) {
+	public OutputPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles, 
+			final CyApplicationManager appManager, final VisualMappingManager vmm) {
 	    this.networkManager = networkManager;
-	    this.diffusionTableFactory = new DiffusionTableFactory(networkManager.appManager);
+	    this.diffusionTableFactory = new DiffusionTableFactory(appManager);
+	    
 	    selectionPanel = new JPanel();
-	    SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles);
+	    SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
+        
+	    
+	    this.setLayout(new BorderLayout());
+//	    this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        
+        
+        this.add(createSelector(), BorderLayout.NORTH);
+        this.add(subnetPanel, BorderLayout.CENTER);
+        this.add(selectionPanel, BorderLayout.SOUTH);
+	}
+	
+	private final JPanel createSelector() {
+		final JPanel selectorPanel = new JPanel();
+		selectorPanel.setLayout(new BorderLayout());
+		
         configureColumnNameComboBox();
-        this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        columnNameComboBox.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
-        this.add(columnNameComboBox);
-        subnetPanel.setMinimumSize(new Dimension(Short.MAX_VALUE, 120));
-        this.add(subnetPanel);
-        this.add(selectionPanel);
+//        columnNameComboBox.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
+        
+		final JLabel selectorLabel = new JLabel("Select Column");
+		selectorPanel.add(selectorLabel, BorderLayout.WEST);
+		selectorPanel.add(columnNameComboBox, BorderLayout.CENTER);
+		
+		return selectorPanel;
 	}
 
     private void configureColumnNameComboBox() {

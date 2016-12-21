@@ -1,10 +1,16 @@
-package org.cytoscape.diffusion.internal;
+package org.cytoscape.diffusion.internal.ui;
 
-import javax.swing.*;
+import java.util.Hashtable;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.util.Hashtable;
+
+import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
+import org.cytoscape.diffusion.internal.util.DiffusionTable;
 
 /**
  * Created by sage on 12/9/2016.

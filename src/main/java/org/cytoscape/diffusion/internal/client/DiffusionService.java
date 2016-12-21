@@ -1,6 +1,5 @@
-package org.cytoscape.diffusion.internal;
+package org.cytoscape.diffusion.internal.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;

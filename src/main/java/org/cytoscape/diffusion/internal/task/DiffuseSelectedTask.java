@@ -1,15 +1,23 @@
-package org.cytoscape.diffusion.internal;
+package org.cytoscape.diffusion.internal.task;
 
 import javax.swing.SwingUtilities;
 
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
+import org.cytoscape.diffusion.internal.client.DiffusionJSON;
+import org.cytoscape.diffusion.internal.client.DiffusionResponse;
+import org.cytoscape.diffusion.internal.client.DiffusionService;
+import org.cytoscape.diffusion.internal.ui.OutputPanel;
+import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
+import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 
 public class DiffuseSelectedTask extends AbstractTask {
+	
 	
 	private DiffusionNetworkManager diffusionNetworkManager;
 	private DiffusionTableFactory diffusionTableFactory;
@@ -18,9 +26,9 @@ public class DiffuseSelectedTask extends AbstractTask {
 	private final CySwingApplication swingApplication;
 
 	public DiffuseSelectedTask(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory,
-			OutputPanel outputPanel, final CySwingApplication swingApplication) {
+			OutputPanel outputPanel, final CySwingApplication swingApplication, final CyApplicationManager appManager) {
 		this.diffusionNetworkManager = networkManager;
-		this.diffusionTableFactory = new DiffusionTableFactory(diffusionNetworkManager.appManager);
+		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
 		this.diffusionJSON = new DiffusionJSON(writerFactory);
 		this.outputPanel = outputPanel;
 		this.swingApplication = swingApplication;

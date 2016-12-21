@@ -6,12 +6,16 @@ import java.util.Set;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.diffusion.internal.task.DiffusionTaskFactory;
+import org.cytoscape.diffusion.internal.ui.OutputPanel;
+import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.task.NodeViewTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
+import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
@@ -28,6 +32,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(context, viewWriterManager, "addFactory", "removeFactory",
 				CyNetworkViewWriterFactory.class);
 		
+		VisualMappingManager vmm = getService(context, VisualMappingManager.class);
 		DialogTaskManager taskManager = getService(context, DialogTaskManager.class);
 		NewNetworkSelectedNodesAndEdgesTaskFactory nFactory = getService(context, NewNetworkSelectedNodesAndEdgesTaskFactory.class);
 		NewNetworkSelectedNodesOnlyTaskFactory networkFactory = getService(context, NewNetworkSelectedNodesOnlyTaskFactory.class);
@@ -40,12 +45,12 @@ public class CyActivator extends AbstractCyActivator {
         Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
         System.out.println(styles);
 
-		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager, styles);
+		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager, styles, cyApplicationManagerService, vmm);
 		registerService(context, outputPanel, CytoPanelComponent.class, new Properties());
 		
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 		
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication);
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService);
 		Properties diffusionTaskFactoryProps = new Properties();
 	    diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
 	    registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
