@@ -6,19 +6,21 @@ import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
-import org.cytoscape.work.AbstractTaskFactory;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.task.AbstractNodeViewTaskFactory;
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
 
-public class DiffusionTaskFactory extends AbstractTaskFactory {
-	
+public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory {
+
 	private final ViewWriterFactoryManager factoryManager;
 	private final DiffusionNetworkManager networkManager;
 	private final OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
 	private final CyApplicationManager appManager;
-	
-	public DiffusionTaskFactory(
-			DiffusionNetworkManager networkManager, OutputPanel outputPanel,
+
+	public DiffusionContextMenuTaskFactory(DiffusionNetworkManager networkManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager) {
 		this.networkManager = networkManager;
@@ -28,9 +30,7 @@ public class DiffusionTaskFactory extends AbstractTaskFactory {
 		this.appManager = appManager;
 	}
 
-
-	@Override
-	public TaskIterator createTaskIterator() {
+	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
 		final CyNetworkViewWriterFactory writerFactory = this.factoryManager.getCxFactory();
 
 		if (writerFactory == null) {

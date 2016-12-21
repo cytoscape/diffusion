@@ -9,6 +9,7 @@ import java.util.Set;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.DiffusionTaskFactory;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
@@ -20,6 +21,7 @@ import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
+import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
@@ -53,11 +55,18 @@ public class CyActivator extends AbstractCyActivator {
 		
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 		
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService);
+		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService);
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffusion");
 	    diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
-	    registerService(context, diffusionTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
+	    
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService);
+		Properties diffusionTaskFactoryPropsTool = new Properties();
+		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, "Tools");
+	    diffusionTaskFactoryPropsTool.setProperty("title", "Diffuse Selected Nodes");
+	    
+	    registerService(context, diffusionContextMenuTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
+		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
 	}
 
 

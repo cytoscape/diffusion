@@ -1,23 +1,24 @@
 package org.cytoscape.diffusion.internal.util;
 
-import java.awt.*;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.diffusion.internal.task.EmptyTaskMonitor;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
+import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.task.AbstractNetworkCollectionTask;
 import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.work.*;
+import org.cytoscape.work.ObservableTask;
+import org.cytoscape.work.Task;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.swing.DialogTaskManager;
-
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyTableUtil;
-import org.cytoscape.model.CyTable;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
 
 public class DiffusionNetworkManager {
 
@@ -43,26 +44,7 @@ public class DiffusionNetworkManager {
 		try {
 			while (taskIterator.hasNext()) {
 				final Task task = taskIterator.next();
-				task.run(new TaskMonitor() {
-					@Override
-					public void setTitle(String s) {
-					}
-
-					@Override
-					public void setProgress(double v) {
-
-					}
-
-					@Override
-					public void setStatusMessage(String s) {
-
-					}
-
-					@Override
-					public void showMessage(Level level, String s) {
-
-					}
-				});
+				task.run(new EmptyTaskMonitor());
 				// finalIterator.append(task);
 				if (task instanceof ObservableTask) {
 					viewTask = (AbstractNetworkCollectionTask) task;
