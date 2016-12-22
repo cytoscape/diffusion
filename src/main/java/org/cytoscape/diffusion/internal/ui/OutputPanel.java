@@ -3,6 +3,7 @@ package org.cytoscape.diffusion.internal.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,6 +33,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 
 	private JComboBox columnNameComboBox;
 	private JPanel selectionPanel;
+	private JPanel bottomPanel;
 
 	private DiffusionTableFactory diffusionTableFactory;
 	private DiffusionNetworkManager networkManager;
@@ -41,17 +43,21 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 	    this.networkManager = networkManager;
 	    this.diffusionTableFactory = new DiffusionTableFactory(appManager);
 	    
-	    selectionPanel = new JPanel();
-	    SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
-        
-	    
+	    final FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
 	    this.setLayout(new BorderLayout());
-//	    this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+	    
+	    selectionPanel = new JPanel();
+	    final SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
+	    
         
+	    bottomPanel = new JPanel();
+	    bottomPanel.setLayout(new BorderLayout());
+	    bottomPanel.add(subnetPanel, BorderLayout.NORTH);
+        bottomPanel.add(selectionPanel, BorderLayout.CENTER);
         
+
         this.add(createSelector(), BorderLayout.NORTH);
-        this.add(subnetPanel, BorderLayout.CENTER);
-        this.add(selectionPanel, BorderLayout.SOUTH);
+        this.add(bottomPanel, BorderLayout.CENTER);
 	}
 	
 	private final JPanel createSelector() {
@@ -59,7 +65,6 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		selectorPanel.setLayout(new BorderLayout());
 		
         configureColumnNameComboBox();
-//        columnNameComboBox.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
         
 		final JLabel selectorLabel = new JLabel("Select Column");
 		selectorPanel.add(selectorLabel, BorderLayout.WEST);
@@ -114,9 +119,10 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
     }
 
     private void setSelectionPanel(JPanel panel) {
-	    this.remove(selectionPanel);
+	    bottomPanel.remove(selectionPanel);
 	    selectionPanel = panel;
-	    this.add(selectionPanel);
+        bottomPanel.add(selectionPanel, BorderLayout.CENTER);
+//	    this.add(selectionPanel);
 	    this.validate();
 	    this.repaint();
     }

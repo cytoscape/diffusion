@@ -2,10 +2,12 @@ package org.cytoscape.diffusion.internal.ui;
 
 import java.util.Hashtable;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -17,8 +19,8 @@ import org.cytoscape.diffusion.internal.util.DiffusionTable;
  */
 public class HeatSelectionPanel extends JPanel {
 
+    private static final Border TITLE = BorderFactory.createTitledBorder("Heat threshold");
     private JSlider thresholdSlider;
-    private JLabel label = new JLabel("Heat threshold");
 
     private DiffusionTable diffusionTable;
     private DiffusionNetworkManager networkManager;
@@ -44,7 +46,7 @@ public class HeatSelectionPanel extends JPanel {
         setThreshold(ninteithPercentile);
         thresholdSlider.setValue(ninteithPercentile);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        this.add(label);
+        this.setBorder(TITLE);
         this.add(thresholdSlider);
 
     }

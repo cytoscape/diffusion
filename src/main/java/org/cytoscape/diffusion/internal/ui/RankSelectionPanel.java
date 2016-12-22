@@ -1,11 +1,14 @@
 package org.cytoscape.diffusion.internal.ui;
 
+import java.awt.Dimension;
 import java.util.Hashtable;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -17,8 +20,9 @@ import org.cytoscape.diffusion.internal.util.DiffusionTable;
  */
 public class RankSelectionPanel extends JPanel {
 
+    private static final Border TITLE = BorderFactory.createTitledBorder("Rank threshold");
+    
     private JSlider thresholdSlider;
-    private JLabel label = new JLabel("Rank threshold");
 
     private DiffusionTable diffusionTable;
     private DiffusionNetworkManager networkManager;
@@ -32,7 +36,7 @@ public class RankSelectionPanel extends JPanel {
         System.out.println("Max heat");
         System.out.println(diffusionTable.getMaxRank());
         String maxHeat = String.format("%.2f", diffusionTable.getMaxHeat());
-        labelTable.put(diffusionTable.getMaxRank(), new JLabel(maxHeat));
+        labelTable.put(1000, new JLabel(maxHeat));
         thresholdSlider.setLabelTable(labelTable);
         thresholdSlider.setPaintLabels(true);
         thresholdSlider.addChangeListener(new ChangeListener() {
@@ -48,9 +52,9 @@ public class RankSelectionPanel extends JPanel {
         thresholdSlider.setValue(ninteithPercentile);
         thresholdSlider.setInverted(true);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        //this.setLayout(new GridLayout(2, 1));
-        this.add(label);
+        this.setBorder(TITLE);
         this.add(thresholdSlider);
+        this.setMaximumSize(new Dimension(1000, 100));
 
     }
 
