@@ -30,7 +30,7 @@ public class SubnetCreatorPanel extends JPanel {
     private JComboBox styleComboBox;
     private Set<VisualStyle> visualStyles;
 
-    private JButton makeSubnetButton = new JButton("Turn Selection into Subnet");
+    private JButton makeSubnetButton = new JButton("Create Subnetwork");
 
     SubnetCreatorPanel(DiffusionNetworkManager networkManager, 
     		Set<VisualStyle> styles, final VisualMappingManager vmm, CyApplicationManager appManager) {
@@ -38,7 +38,7 @@ public class SubnetCreatorPanel extends JPanel {
     		final VisualStyle defStyle = vmm.getDefaultVisualStyle();
     		
     		this.setMaximumSize(new Dimension(1000, 100));
-    		this.setBorder(BorderFactory.createTitledBorder("Subnet Creator"));
+    		this.setBorder(BorderFactory.createTitledBorder("Subnetwork Creator"));
         
     		visualStyles = styles;
 
