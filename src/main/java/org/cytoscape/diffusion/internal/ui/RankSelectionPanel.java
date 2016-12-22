@@ -47,9 +47,11 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				final int newVal = slider.getValue();
-				setThreshold(newVal);
-				valuePanel.setValue(newVal);
+				if (!slider.getValueIsAdjusting()) {
+					final int newVal = slider.getValue();
+					setThreshold(newVal);
+					valuePanel.setValue(newVal);
+				}
 			}
 		});
 

@@ -66,7 +66,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		
         configureColumnNameComboBox();
         
-		final JLabel selectorLabel = new JLabel("Select Column");
+		final JLabel selectorLabel = new JLabel("Range Column: ");
 		selectorPanel.add(selectorLabel, BorderLayout.WEST);
 		selectorPanel.add(columnNameComboBox, BorderLayout.CENTER);
 		
