@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.cytoscape.application.CyApplicationManager;
@@ -27,60 +28,56 @@ import org.cytoscape.view.vizmap.VisualStyle;
 
 public class SubnetCreatorPanel extends JPanel {
 
-    private JComboBox styleComboBox;
-    private Set<VisualStyle> visualStyles;
-
-    private JButton makeSubnetButton = new JButton("Create Subnetwork");
-
-    SubnetCreatorPanel(DiffusionNetworkManager networkManager, 
-    		Set<VisualStyle> styles, final VisualMappingManager vmm, CyApplicationManager appManager) {
-    	
-    		final VisualStyle defStyle = vmm.getDefaultVisualStyle();
-    		
-    		this.setMaximumSize(new Dimension(1000, 100));
-    		this.setBorder(BorderFactory.createTitledBorder("Subnetwork Creator"));
-        
-    		visualStyles = styles;
-
-    		visualStyles.add(defStyle);
-    		
-        final List<String> styleNames = 
-        		styles.stream()
-        		.map(style->style.getTitle())
-        		.collect(Collectors.toList());
-
-        styleComboBox = new JComboBox(styleNames.toArray());
-        styleComboBox.setSelectedItem(defStyle.getTitle());
-        
-        makeSubnetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            		final VisualStyle style = getSelectedStyle();
-            		System.out.println(style.getTitle());
-            		
-                final CyNetworkView view = networkManager.createSubnet();
-                appManager.setCurrentNetwork(view.getModel());
-                
-                vmm.setVisualStyle(style, view);
-                style.apply(view);
-                view.fitContent();
-                view.updateView();
-
-            }
-        });
-        this.setLayout(new BorderLayout());
-        this.add(styleComboBox, BorderLayout.WEST);
-        this.add(makeSubnetButton, BorderLayout.CENTER);
-    }
+	private static final long serialVersionUID = 7578596629235573519L;
+	
+	private JComboBox<String> styleComboBox;
+	private Set<VisualStyle> visualStyles;
 
 
-    private VisualStyle getSelectedStyle() {
-        for (VisualStyle style: visualStyles) {
-            if (style.getTitle() == (String)styleComboBox.getSelectedItem()) {
-                return style;
-            }
-        }
-        return null;
-    }
+	SubnetCreatorPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles, final VisualMappingManager vmm,
+			CyApplicationManager appManager) {
 
+		final VisualStyle defStyle = vmm.getDefaultVisualStyle();
+		
+		this.setLayout(new BorderLayout());
+		this.setMaximumSize(new Dimension(1000, 100));
+		this.setBorder(BorderFactory.createTitledBorder("Create subnetwork from selected nodes"));
 
+		JLabel styleLabel = new JLabel("Visual Style: ");
+		
+		visualStyles = styles;
+		visualStyles.add(defStyle);
+
+		final List<String> styleNames = styles.stream().map(style -> style.getTitle()).collect(Collectors.toList());
+		styleComboBox = new JComboBox<>(styleNames.toArray(new String[styleNames.size()]));
+		styleComboBox.setSelectedItem(defStyle.getTitle());
+		styleComboBox.setToolTipText("Selected Visual Style will be applied to the new subnetwork.");
+		
+		JButton makeSubnetButton = new JButton("Create");
+		makeSubnetButton.setMaximumSize(new Dimension(100, 40));
+		makeSubnetButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final VisualStyle style = getSelectedStyle();
+				final CyNetworkView view = networkManager.createSubnet();
+				appManager.setCurrentNetwork(view.getModel());
+				vmm.setVisualStyle(style, view);
+				style.apply(view);
+				view.fitContent();
+				view.updateView();
+			}
+		});
+		
+		this.add(styleLabel, BorderLayout.LINE_START);
+		this.add(styleComboBox, BorderLayout.CENTER);
+		this.add(makeSubnetButton, BorderLayout.LINE_END);
+	}
+
+	private final VisualStyle getSelectedStyle() {
+		for (VisualStyle style : visualStyles) {
+			if (style.getTitle() == styleComboBox.getSelectedItem()) {
+				return style;
+			}
+		}
+		return null;
+	}
 }

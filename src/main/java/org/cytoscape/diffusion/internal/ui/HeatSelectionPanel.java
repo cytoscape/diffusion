@@ -2,6 +2,7 @@ package org.cytoscape.diffusion.internal.ui;
 
 import java.beans.PropertyChangeEvent;
 
+import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

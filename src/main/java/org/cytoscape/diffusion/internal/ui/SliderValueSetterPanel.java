@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -15,10 +16,12 @@ public class SliderValueSetterPanel extends JPanel {
 	
 	final static String SET_VALUE_EVENT = "VALUE_SET";
 	
-	private final JButton setButton;
+	private final JLabel label;
+ 	private final JButton setButton;
 	private final JTextField valueTextField;
 
 	public SliderValueSetterPanel() {
+		this.label = new JLabel("Current Threshold:");
 		this.setButton = new JButton("Set");
 		this.setButton.addActionListener(new ActionListener() {
 			@Override
@@ -36,8 +39,9 @@ public class SliderValueSetterPanel extends JPanel {
 
 		this.setLayout(new BorderLayout());
 
+		this.add(label, BorderLayout.LINE_START);
 		this.add(valueTextField, BorderLayout.CENTER);
-		this.add(setButton, BorderLayout.EAST);
+		this.add(setButton, BorderLayout.LINE_END);
 	}
 
 	void setValue(final Number value) {

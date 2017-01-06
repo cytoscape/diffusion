@@ -1,9 +1,14 @@
 package org.cytoscape.diffusion.internal.task;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Panel;
+
 import javax.swing.SwingUtilities;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionJSON;
@@ -67,7 +72,13 @@ public class DiffuseSelectedTask extends AbstractTask {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					swingApplication.getCytoPanel(CytoPanelName.EAST).setState(CytoPanelState.DOCK);
+					final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
+					panel.setState(CytoPanelState.DOCK);
+					final Component panelComponent = panel.getThisComponent();
+					final Dimension defSize = new Dimension(380, 300);
+					panelComponent.setPreferredSize(defSize);
+					panelComponent.setMinimumSize(defSize);
+					panelComponent.setSize(defSize);
 				}
 			});
 		}

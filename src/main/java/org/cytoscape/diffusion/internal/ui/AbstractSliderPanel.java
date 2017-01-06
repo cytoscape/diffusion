@@ -1,13 +1,17 @@
 package org.cytoscape.diffusion.internal.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.border.Border;
 
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
@@ -32,24 +36,29 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 		this.networkManager = networkManager;
 
 		// Setup base panel
-		final Border titleBorder = BorderFactory.createTitledBorder(title);
-		this.setBorder(titleBorder);
-		this.setLayout(new BorderLayout());
-
+		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		this.setBackground(Color.white);
+		
 		// Value text field panel
+		JLabel label = new JLabel(title);
+		label.setFont(new Font("SansSerif", Font.BOLD, 14));
+		JPanel labelPanel = new JPanel();
+		labelPanel.setMaximumSize(new Dimension(1000, 20));
+		labelPanel.setOpaque(false);
+		labelPanel.setLayout(new BorderLayout());
+		labelPanel.add(label, BorderLayout.LINE_START);
+
 		this.valuePanel = new SliderValueSetterPanel();
+		this.valuePanel.setOpaque(false);
+		this.valuePanel.setMaximumSize(new Dimension(1000, 30));
 		valuePanel.addPropertyChangeListener(this);
 
 		// Create Slider
 		this.thresholdSlider = createSlider();
 
-		final JPanel contentsPanel = new JPanel();
-		contentsPanel.setLayout(new GridLayout(2, 1));
-
-		contentsPanel.add(thresholdSlider);
-		contentsPanel.add(valuePanel);
-
-		this.add(contentsPanel, BorderLayout.NORTH);
+		this.add(labelPanel);
+		this.add(thresholdSlider);
+		this.add(valuePanel);
 	}
 
 	protected abstract JSlider createSlider();
