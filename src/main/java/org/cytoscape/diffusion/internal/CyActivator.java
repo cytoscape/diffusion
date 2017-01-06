@@ -1,5 +1,6 @@
 package org.cytoscape.diffusion.internal;
 
+import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 
 import java.util.Properties;
@@ -76,8 +77,9 @@ public class CyActivator extends AbstractCyActivator {
 	    
 		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
 		Properties diffusionTaskFactoryPropsTool = new Properties();
-		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, "Tools");
-	    diffusionTaskFactoryPropsTool.setProperty("title", "Diffuse Selected Nodes");
+		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, "Tools.Diffuse");
+		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");
+	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 	    
 	    registerService(context, diffusionContextMenuTaskFactory, NodeViewTaskFactory.class, diffusionTaskFactoryProps);
 		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
