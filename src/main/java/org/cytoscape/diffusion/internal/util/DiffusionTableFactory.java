@@ -8,6 +8,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
@@ -108,7 +109,7 @@ public class DiffusionTableFactory {
 	private final CyTable getNodeTable() {
 		final CyNetwork curNet = manager.getCurrentNetwork();
 		if (curNet != null) {
-			return curNet.getDefaultNodeTable();
+			return curNet.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		} else {
 			return null;
 		}
