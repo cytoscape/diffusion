@@ -29,6 +29,7 @@ import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
 
+	private static final String DIFFUSION_MENU = "Tools.Diffuse[2100]";
     private static final String STYLES = "/styles.xml";
 
 	@Override
@@ -72,12 +73,12 @@ public class CyActivator extends AbstractCyActivator {
 		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
 		Properties diffusionTaskFactoryProps = new Properties();
-		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffusion");
-	    diffusionTaskFactoryProps.setProperty("title", "Diffuse Selected Nodes");
+		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
+	    diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
 	    
 		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
 		Properties diffusionTaskFactoryPropsTool = new Properties();
-		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, "Tools.Diffuse");
+		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, DIFFUSION_MENU);
 		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");
 	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 	    
