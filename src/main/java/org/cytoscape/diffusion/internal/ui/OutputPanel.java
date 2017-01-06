@@ -70,7 +70,13 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		mainPanel.add(columnSelectorPanel, BorderLayout.NORTH);
 		mainPanel.add(bottomPanel, BorderLayout.CENTER);
 
+		
+		JPanel spacePanel = new JPanel();
+		spacePanel.setOpaque(false);
+		spacePanel.setMaximumSize(new Dimension(1200, 20));
+		
 		this.add(mainPanel);
+		this.add(spacePanel);
 		this.add(subnetPanel);
 	}
 
