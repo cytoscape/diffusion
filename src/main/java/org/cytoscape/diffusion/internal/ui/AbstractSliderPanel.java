@@ -40,7 +40,7 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 		this.setBackground(Color.white);
 		
 		// Value text field panel
-		JLabel label = new JLabel(title);
+		JLabel label = new JLabel(title + ":");
 		label.setFont(new Font("SansSerif", Font.BOLD, 14));
 		JPanel labelPanel = new JPanel();
 		labelPanel.setMaximumSize(new Dimension(1000, 20));

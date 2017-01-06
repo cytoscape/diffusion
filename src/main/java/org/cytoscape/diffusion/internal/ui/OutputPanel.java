@@ -4,13 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Set;
 
-import javax.sound.sampled.Line;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
@@ -44,12 +43,13 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
 
 		// Basic setup for this parent panel
-		this.setLayout(new BorderLayout());
+		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		this.setBackground(Color.white);
 
 		selectionPanel = new JPanel();
 		final SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
-		subnetPanel.setBackground(Color.white);
+		subnetPanel.setOpaque(false);
+		subnetPanel.setMaximumSize(new Dimension(1200, 56));
 		
 		bottomPanel = new JPanel();
 		bottomPanel.setBackground(Color.white);
@@ -59,7 +59,8 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		final JPanel columnSelectorPanel = createSelector();
 
 		JPanel mainPanel = new JPanel();
-		final Border padding = BorderFactory.createEmptyBorder(15, 5, 15, 5);
+		mainPanel.setMaximumSize(new Dimension(1200, 160));
+		final Border padding = BorderFactory.createEmptyBorder(0, 5, 0, 5);
 		mainPanel.setBackground(Color.WHITE);
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createTitledBorder("Node Selector"));
@@ -69,8 +70,8 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 		mainPanel.add(columnSelectorPanel, BorderLayout.NORTH);
 		mainPanel.add(bottomPanel, BorderLayout.CENTER);
 
-		this.add(mainPanel, BorderLayout.CENTER);
-		this.add(subnetPanel, BorderLayout.SOUTH);
+		this.add(mainPanel);
+		this.add(subnetPanel);
 	}
 
 	private final JPanel createSelector() {
