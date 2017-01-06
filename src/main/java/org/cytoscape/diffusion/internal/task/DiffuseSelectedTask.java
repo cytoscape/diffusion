@@ -1,7 +1,6 @@
 package org.cytoscape.diffusion.internal.task;
 
 import javax.swing.SwingUtilities;
-import javax.xml.ws.http.HTTPException;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
@@ -16,7 +15,6 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

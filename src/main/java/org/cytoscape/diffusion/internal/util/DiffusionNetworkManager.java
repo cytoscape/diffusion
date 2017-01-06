@@ -17,7 +17,6 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.swing.DialogTaskManager;
 
 public class DiffusionNetworkManager {

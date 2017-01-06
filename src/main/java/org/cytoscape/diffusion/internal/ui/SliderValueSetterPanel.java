@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -39,17 +40,20 @@ public class SliderValueSetterPanel extends JPanel {
 		this.add(setButton, BorderLayout.EAST);
 	}
 
-	public void setValue(final Number value) {
+	void setValue(final Number value) {
 		this.valueTextField.setText(value.toString());
 	}
 
-	public void setButtonPressed() {
+	private final void setButtonPressed() {
 		final String value = this.valueTextField.getText();
 		try {
 			final Double numberValue = Double.parseDouble(value);
 			firePropertyChange(SET_VALUE_EVENT, "", numberValue);
 		} catch (Exception e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(
+					this, "Please enter valid number.  You entered: " + value, 
+					"Invalid Number", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 

@@ -2,15 +2,12 @@ package org.cytoscape.diffusion.internal.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;

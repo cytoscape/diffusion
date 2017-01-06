@@ -81,7 +81,7 @@ public class DiffusionTable {
 		Collection<CyRow> matchedRows = getNodeTable().getMatchingRows(columnName, value);
 		System.out.println(matchedRows);
 		if (matchedRows.size() != 0) {
-			List<CyRow> rowList = new ArrayList(matchedRows);
+			List<CyRow> rowList = new ArrayList<>(matchedRows);
 			return rowList.get(0);
 		} else {
 			return null;
