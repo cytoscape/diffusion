@@ -9,11 +9,12 @@ import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
+import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
 
-public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory {
+public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
 	private final ViewWriterFactoryManager factoryManager;
 	private final DiffusionNetworkManager networkManager;
@@ -33,7 +34,22 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 		this.client = client;
 	}
 
+	@Override
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+		return create();
+	}
+
+	@Override
+	public TaskIterator createTaskIterator(CyNetworkView networkView) {
+		return create();
+	}
+
+	@Override
+	public boolean isReady(CyNetworkView networkView) {
+		return true;
+	}
+
+	private final TaskIterator create() {
 		final CyNetworkViewWriterFactory writerFactory = this.factoryManager.getCxFactory();
 
 		if (writerFactory == null) {
@@ -41,7 +57,9 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 					"CXWriterFactory is not available.  " + "Please make sure you have proper dependencies");
 		}
 
-		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication, appManager, client));
+		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication,
+				appManager, client));
+
 	}
 
 }
