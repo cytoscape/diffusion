@@ -17,7 +17,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>cy-diffusion</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>CyDiffusion</name>
 	<packaging>bundle</packaging>
 
