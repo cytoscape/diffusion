@@ -30,7 +30,7 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 	protected final DiffusionNetworkManager networkManager;
 
 	AbstractSliderPanel(final DiffusionNetworkManager networkManager, final DiffusionTable diffusionTable,
-			final String title) {
+			final String title, final String prefix, final String suffix) {
 
 		this.diffusionTable = diffusionTable;
 		this.networkManager = networkManager;
@@ -40,7 +40,7 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 		this.setBackground(Color.white);
 		
 		// Value text field panel
-		JLabel label = new JLabel(title + ":");
+		JLabel label = new JLabel(prefix + title + suffix + ":");
 		label.setFont(new Font("SansSerif", Font.BOLD, 14));
 		JPanel labelPanel = new JPanel();
 		labelPanel.setMaximumSize(new Dimension(1000, 20));
@@ -48,7 +48,7 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 		labelPanel.setLayout(new BorderLayout());
 		labelPanel.add(label, BorderLayout.LINE_START);
 
-		this.valuePanel = new SliderValueSetterPanel();
+		this.valuePanel = new SliderValueSetterPanel(title);
 		this.valuePanel.setOpaque(false);
 		this.valuePanel.setMaximumSize(new Dimension(1000, 30));
 		valuePanel.addPropertyChangeListener(this);
@@ -63,8 +63,4 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 
 	protected abstract JSlider createSlider();
 
-	protected void setThreshold(final Integer index) {
-		final Double threshold = diffusionTable.rankToHeat(index);
-		networkManager.selectNodesOverThreshold(diffusionTable.getHeatColumnName(), threshold);
-	}
 }

@@ -130,12 +130,12 @@ public class OutputPanel extends JPanel implements CytoPanelComponent {
 
 		System.out.println(columnName);
 		DiffusionTable diffusionTable = diffusionTableFactory.createTable(columnName);
-		if (columnName.endsWith("_heat")) {
+		if (columnName.endsWith("_rank")) {
 			System.out.println("Switching to heat");
-			setSelectionPanel(new HeatSelectionPanel(networkManager, diffusionTable, "Heat Threshold"));
-		} else if (columnName.endsWith("_rank")) {
+			setSelectionPanel(new RankSelectionPanel(networkManager, diffusionTable, "Rank"));
+		} else if (columnName.endsWith("_heat")) {
 			System.out.println("Switching to rank");
-			setSelectionPanel(new RankSelectionPanel(networkManager, diffusionTable, "Rank Threshold"));
+			setSelectionPanel(new HeatSelectionPanel(networkManager, diffusionTable, "Heat"));
 		} else {
 			setSelectionPanel(new JPanel());
 		}

@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 
 public class SliderValueSetterPanel extends JPanel {
 
@@ -20,8 +21,8 @@ public class SliderValueSetterPanel extends JPanel {
  	private final JButton setButton;
 	private final JTextField valueTextField;
 
-	public SliderValueSetterPanel() {
-		this.label = new JLabel("Current Threshold:");
+	public SliderValueSetterPanel(final String title) {
+		this.label = new JLabel("Current " + title + ":");
 		this.setButton = new JButton("Set");
 		this.setButton.addActionListener(new ActionListener() {
 			@Override
@@ -45,7 +46,13 @@ public class SliderValueSetterPanel extends JPanel {
 	}
 
 	void setValue(final Number value) {
-		this.valueTextField.setText(value.toString());
+		final String valText;
+		if(value instanceof Integer) {
+			valText = value.toString();
+		} else {
+			valText = String.format("%.5f", value);
+		}
+		this.valueTextField.setText(valText);
 	}
 
 	private final void setButtonPressed() {
