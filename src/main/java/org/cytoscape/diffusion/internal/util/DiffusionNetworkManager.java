@@ -21,6 +21,8 @@ import org.cytoscape.work.swing.DialogTaskManager;
 
 public class DiffusionNetworkManager {
 
+	private static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
+	
 	private CyApplicationManager appManager;
 	DialogTaskManager taskManager;
 	NewNetworkSelectedNodesOnlyTaskFactory networkFactory;
@@ -63,11 +65,11 @@ public class DiffusionNetworkManager {
 	}
 
 	public void setNodeHeats() {
-		this.ensureEmptyTableExists("diffusion_input");
+		this.ensureEmptyTableExists(DIFFUSION_INPUT_COL_NAME);
 		for (CyNode node : getSelectedNodes()) {
 			Long suid = node.getSUID();
 			CyRow row = getNodeTable().getRow(suid);
-			row.set("diffusion_input", 1.0);
+			row.set(DIFFUSION_INPUT_COL_NAME, 1.0);
 		}
 	}
 
@@ -96,7 +98,7 @@ public class DiffusionNetworkManager {
 	}
 
 	public CyTable getNodeTable() {
-		return getNetwork().getDefaultNodeTable();
+		return getNetwork().getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 	}
 
 }
