@@ -1,6 +1,6 @@
 package org.cytoscape.diffusion.internal;
 
-import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
+import static org.cytoscape.work.ServiceProperties.*;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_ACTION;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 
@@ -13,6 +13,7 @@ import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.DiffusionTaskFactory;
+import org.cytoscape.diffusion.internal.task.EdgeContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
@@ -75,7 +76,16 @@ public class CyActivator extends AbstractCyActivator {
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
+		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
+		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
 	    diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
+	    
+		EdgeContextMenuTaskFactory diffusionContextMenuTaskFactory2 = new EdgeContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
+		Properties diffusionTaskFactoryProps2 = new Properties();
+		diffusionTaskFactoryProps2.setProperty(PREFERRED_MENU, "Diffuse");
+		diffusionTaskFactoryProps2.setProperty(IN_MENU_BAR, "false");
+//		diffusionTaskFactoryProps2.setProperty(IN_CONTEXT_MENU, "true");
+	    diffusionTaskFactoryProps2.setProperty("title", "Selected Nodes");
 	    
 		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
 		Properties diffusionTaskFactoryPropsTool = new Properties();
@@ -84,6 +94,7 @@ public class CyActivator extends AbstractCyActivator {
 	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 	    
 	    registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
+	    registerAllServices(context, diffusionContextMenuTaskFactory2, diffusionTaskFactoryProps2);
 		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
 	}
 
