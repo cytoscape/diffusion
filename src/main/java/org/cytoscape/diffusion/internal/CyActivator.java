@@ -69,7 +69,7 @@ public class CyActivator extends AbstractCyActivator {
         }
 
 		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager, styles, cyApplicationManagerService, vmm);
-		registerService(context, outputPanel, CytoPanelComponent.class, new Properties());
+		registerAllServices(context, outputPanel, new Properties());
 		
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 		
