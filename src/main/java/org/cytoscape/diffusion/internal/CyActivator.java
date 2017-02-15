@@ -26,6 +26,7 @@ import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.TaskFactory;
+import org.cytoscape.work.TunableSetter;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
@@ -41,6 +42,8 @@ public class CyActivator extends AbstractCyActivator {
 		final ViewWriterFactoryManager viewWriterManager = new ViewWriterFactoryManager();
 		registerServiceListener(context, viewWriterManager, "addFactory", "removeFactory",
 				CyNetworkViewWriterFactory.class);
+		
+		final TunableSetter tunableSetterServiceRef = getService(context,TunableSetter.class);
 		
 		VisualMappingManager vmm = getService(context, VisualMappingManager.class);
 		DialogTaskManager taskManager = getService(context, DialogTaskManager.class);
@@ -73,21 +76,21 @@ public class CyActivator extends AbstractCyActivator {
 		
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 		
-		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
+		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
 	    diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
 	    
-		EdgeContextMenuTaskFactory diffusionContextMenuTaskFactory2 = new EdgeContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
+		EdgeContextMenuTaskFactory diffusionContextMenuTaskFactory2 = new EdgeContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps2 = new Properties();
 		diffusionTaskFactoryProps2.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps2.setProperty(IN_MENU_BAR, "false");
 //		diffusionTaskFactoryProps2.setProperty(IN_CONTEXT_MENU, "true");
 	    diffusionTaskFactoryProps2.setProperty("title", "Selected Nodes");
 	    
-		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client);
+		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryPropsTool = new Properties();
 		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, DIFFUSION_MENU);
 		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");

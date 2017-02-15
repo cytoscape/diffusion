@@ -13,6 +13,7 @@ import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TunableSetter;
 
 public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
@@ -22,16 +23,18 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 	private final CySwingApplication swingApplication;
 	private final CyApplicationManager appManager;
 	private final DiffusionServiceClient client;
+	private final TunableSetter setter;
 
 	public DiffusionContextMenuTaskFactory(DiffusionNetworkManager networkManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
-			final CyApplicationManager appManager, final DiffusionServiceClient client) {
+			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter) {
 		this.networkManager = networkManager;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
 		this.swingApplication = swingApplication;
 		this.appManager = appManager;
 		this.client = client;
+		this.setter = setter;
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 		}
 
 		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication,
-				appManager, client));
+				appManager, client, setter));
 
 	}
 

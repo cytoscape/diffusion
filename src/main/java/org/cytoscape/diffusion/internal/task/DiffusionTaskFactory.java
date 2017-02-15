@@ -9,6 +9,7 @@ import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TunableSetter;
 
 public class DiffusionTaskFactory extends AbstractTaskFactory {
 	
@@ -18,17 +19,19 @@ public class DiffusionTaskFactory extends AbstractTaskFactory {
 	private final CySwingApplication swingApplication;
 	private final CyApplicationManager appManager;
 	private final DiffusionServiceClient client;
+	private final TunableSetter setter;
 	
 	public DiffusionTaskFactory(
 			DiffusionNetworkManager networkManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
-			final CyApplicationManager appManager, final DiffusionServiceClient client) {
+			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter) {
 		this.networkManager = networkManager;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
 		this.swingApplication = swingApplication;
 		this.appManager = appManager;
 		this.client = client;
+		this.setter = setter;
 	}
 
 
@@ -41,7 +44,7 @@ public class DiffusionTaskFactory extends AbstractTaskFactory {
 					"CXWriterFactory is not available.  " + "Please make sure you have proper dependencies");
 		}
 
-		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication, appManager, client));
+		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication, appManager, client, setter));
 	}
 
 }

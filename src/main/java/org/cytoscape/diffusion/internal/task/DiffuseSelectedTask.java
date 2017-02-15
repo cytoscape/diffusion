@@ -20,6 +20,7 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
+import org.cytoscape.work.TunableSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +32,16 @@ public class DiffuseSelectedTask extends AbstractTask {
 	private OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
 	private final DiffusionServiceClient client;
+	
+	
 	private final static Logger logger = LoggerFactory.getLogger(DiffuseSelectedTask.class);
 
 	public DiffuseSelectedTask(DiffusionNetworkManager networkManager, CyNetworkViewWriterFactory writerFactory,
 			OutputPanel outputPanel, final CySwingApplication swingApplication, final CyApplicationManager appManager,
-			final DiffusionServiceClient client) {
+			final DiffusionServiceClient client, final TunableSetter setter) {
 		this.diffusionNetworkManager = networkManager;
 		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
-		this.diffusionJSON = new DiffusionJSON(writerFactory);
+		this.diffusionJSON = new DiffusionJSON(writerFactory, setter);
 		this.outputPanel = outputPanel;
 		this.swingApplication = swingApplication;
 		this.client = client;
