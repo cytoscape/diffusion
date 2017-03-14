@@ -83,6 +83,16 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
 	    diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
 	    
+		DiffusionContextMenuTaskFactory withOptionsTaskFactory = 
+				new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, 
+						viewWriterManager, swingApplication, cyApplicationManagerService, 
+						client, tunableSetterServiceRef, true);
+		Properties wOptsProps = new Properties();
+		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
+		wOptsProps.setProperty(IN_MENU_BAR, "false");
+		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
+		wOptsProps.setProperty("title", "Selected Nodes with Options");
+	    
 		EdgeContextMenuTaskFactory diffusionContextMenuTaskFactory2 = new EdgeContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps2 = new Properties();
 		diffusionTaskFactoryProps2.setProperty(PREFERRED_MENU, "Diffuse");
@@ -97,6 +107,8 @@ public class CyActivator extends AbstractCyActivator {
 	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 	    
 	    registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
+	    registerAllServices(context, withOptionsTaskFactory, wOptsProps);
+
 	    registerAllServices(context, diffusionContextMenuTaskFactory2, diffusionTaskFactoryProps2);
 		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
 	}

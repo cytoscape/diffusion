@@ -24,10 +24,19 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 	private final CyApplicationManager appManager;
 	private final DiffusionServiceClient client;
 	private final TunableSetter setter;
+	
+	private Boolean withOptions = false;
 
 	public DiffusionContextMenuTaskFactory(DiffusionNetworkManager networkManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter) {
+		this(networkManager, outputPanel, factoryManager, swingApplication, appManager, client, setter, false);
+	}
+
+	public DiffusionContextMenuTaskFactory(DiffusionNetworkManager networkManager, OutputPanel outputPanel,
+			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
+			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter,
+			final Boolean withOptions) {
 		this.networkManager = networkManager;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
@@ -35,6 +44,7 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 		this.appManager = appManager;
 		this.client = client;
 		this.setter = setter;
+		this.withOptions = withOptions;
 	}
 
 	@Override
@@ -60,6 +70,11 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 					"CXWriterFactory is not available.  " + "Please make sure you have proper dependencies");
 		}
 
+		if(withOptions) {
+			return new TaskIterator(new DiffuseSelectedWithOptionsTask(networkManager, writerFactory, outputPanel, swingApplication,
+				appManager, client, setter));
+		}
+		
 		return new TaskIterator(new DiffuseSelectedTask(networkManager, writerFactory, outputPanel, swingApplication,
 				appManager, client, setter));
 
