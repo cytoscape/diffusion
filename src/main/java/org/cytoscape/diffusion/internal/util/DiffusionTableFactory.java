@@ -24,12 +24,8 @@ public class DiffusionTableFactory {
 	}
 
 	public DiffusionTable createTable(String base) {
-		System.out.println(base);
-		System.out.println(base.length());
 		if (hasDiffusionSuffix(base)) {
 			base = base.substring(0, base.length() - heatSuffix.length());
-			System.out.println("New base");
-			System.out.println(base);
 		}
 		return new DiffusionTable(manager, formatColumnName(base, rankSuffix), formatColumnName(base, heatSuffix));
 	}
@@ -71,7 +67,6 @@ public class DiffusionTableFactory {
 	}
 
 	private void createColumns(String base) {
-		System.out.println("Creating columns");
 		System.out.println(formatColumnName(base, rankSuffix));
 
 		final CyTable table = this.getNodeTable();

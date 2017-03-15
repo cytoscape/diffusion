@@ -13,14 +13,15 @@ import org.cytoscape.work.TunableSetter;
 
 public class DiffusionTaskFactory extends AbstractTaskFactory {
 	
-	private final ViewWriterFactoryManager factoryManager;
-	private final DiffusionNetworkManager networkManager;
-	private final OutputPanel outputPanel;
-	private final CySwingApplication swingApplication;
-	private final CyApplicationManager appManager;
-	private final DiffusionServiceClient client;
-	private final TunableSetter setter;
+	protected final ViewWriterFactoryManager factoryManager;
+	protected final DiffusionNetworkManager networkManager;
+	protected final OutputPanel outputPanel;
+	protected final CySwingApplication swingApplication;
+	protected final CyApplicationManager appManager;
+	protected final DiffusionServiceClient client;
+	protected final TunableSetter setter;
 	
+
 	public DiffusionTaskFactory(
 			DiffusionNetworkManager networkManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,

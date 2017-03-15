@@ -2,7 +2,6 @@ package org.cytoscape.diffusion.internal.task;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Panel;
 
 import javax.swing.SwingUtilities;
 
@@ -18,6 +17,7 @@ import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
@@ -25,13 +25,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DiffuseSelectedTask extends AbstractTask {
+	
+	private static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
+	private static final String DIFFUSION_OUTPUT_COL_NAME = "diffusion_output";
 
-	private DiffusionNetworkManager diffusionNetworkManager;
-	private DiffusionTableFactory diffusionTableFactory;
-	private DiffusionJSON diffusionJSON;
-	private OutputPanel outputPanel;
-	private final CySwingApplication swingApplication;
-	private final DiffusionServiceClient client;
+	protected DiffusionNetworkManager diffusionNetworkManager;
+	protected DiffusionTableFactory diffusionTableFactory;
+	protected DiffusionJSON diffusionJSON;
+	protected OutputPanel outputPanel;
+	protected final CySwingApplication swingApplication;
+	protected final DiffusionServiceClient client;
 	
 	
 	private final static Logger logger = LoggerFactory.getLogger(DiffuseSelectedTask.class);
@@ -48,46 +51,63 @@ public class DiffuseSelectedTask extends AbstractTask {
 	}
 
 	public void run(TaskMonitor tm) throws Exception {
-		diffusionNetworkManager.setNodeHeats();
-		System.out.println("Getting cx");
-		String cx = diffusionJSON.encode(diffusionNetworkManager.getNetwork());
-		String subnetId = Long.toString(diffusionNetworkManager.getNetwork().getSUID());
-		System.out.println("Getting suid");
-		System.out.println(diffusionNetworkManager.getNetwork().getSUID());
-		System.out.println("Getting response");
-		String responseJSON = client.diffuse(cx, subnetId);
-		System.out.println("Got response");
-		System.out.println(responseJSON);
-		DiffusionResponse response = diffusionJSON.decode(responseJSON);
-		System.out.println("Repsponse decoded");
-		if (response.getErrors().size() != 0) {
-			System.out.println("Called error");
-			System.out.println(response.getErrors().get(0).toString());
-			logger.error("Problem with the remote diffusion service!");
-			logger.error(response.getErrors().get(0).toString(), new Exception());
-			throw new Exception(createServiceError(response.getErrors().get(0).toString()));
-		} else {
-			String columnBaseName = diffusionTableFactory.getNextAvailableColumnName("diffusion_output");
-			diffusionTableFactory.writeColumns(columnBaseName, response.getData());
-			System.out.println(columnBaseName);
-			outputPanel.setColumnName(String.format("%s_rank", columnBaseName));
-			// Show the panel
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
-					panel.setState(CytoPanelState.DOCK);
-					final Component panelComponent = panel.getThisComponent();
-					final Dimension defSize = new Dimension(380, 300);
-					panelComponent.setPreferredSize(defSize);
-					panelComponent.setMinimumSize(defSize);
-					panelComponent.setSize(defSize);
-				}
-			});
+		diffuse(null, null);
+	}
+	
+	protected void diffuse(final String columnName, final Double time) throws Exception {
+		
+		String inputCol = columnName;
+		
+		// Case 1: create new input heat column with default values
+		if(columnName == null) {
+			inputCol = DIFFUSION_INPUT_COL_NAME;
+			diffusionNetworkManager.setNodeHeats(inputCol);
 		}
+		
+		// Case 2: Use existing column as-is
+
+		final CyNetwork network = diffusionNetworkManager.getNetwork();		
+		final String cx = diffusionJSON.encode(network, inputCol);
+		
+		
+		// Call the service
+		final String responseJSON = client.diffuse(cx, columnName, time);
+		
+		// Parse the result
+		final DiffusionResponse response = diffusionJSON.decode(responseJSON);
+	
+		
+		// Error should be empty, otherwise, it's failed.
+		if (response.getErrors().size() != 0) {
+			throw new IllegalStateException(createServiceError(response.getErrors().get(0).toString()));
+		}
+
+		final String columnBaseName = diffusionTableFactory.getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
+		diffusionTableFactory.writeColumns(columnBaseName, response.getData());
+		
+		outputPanel.setColumnName(String.format("%s_rank", columnBaseName));
+	
+		showResult();
 	}
 
-	private String createServiceError(String errorMessage) {
+	protected void showResult() {
+		// Show the result in a CytoPanel
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
+				panel.setState(CytoPanelState.DOCK);
+				final Component panelComponent = panel.getThisComponent();
+				final Dimension defSize = new Dimension(380, 300);
+				panelComponent.setPreferredSize(defSize);
+				panelComponent.setMinimumSize(defSize);
+				panelComponent.setSize(defSize);
+			}
+		});
+	}
+	
+	
+	protected String createServiceError(String errorMessage) {
 		return String.format("Oops! Could not complete diffusion. The heat diffusion service in the cloud told us something went wrong while processing your request.\n" +
 				"Here is the error message we received from the service, email the service author with this message if you need assistance.\n\n" +
 		        "Error:\n %s", errorMessage);

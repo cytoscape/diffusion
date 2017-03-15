@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
 
 public class DiffusionServiceClient {
 
+//	private static final String BASE_URL = "http://heat-diffusion.cytoscape.io/";
 	private static final String BASE_URL = "http://diffuse.cytoscape.io";
+	
+	private static final String HEAT_COLUMN = "heat_attribute";
 
 	private final String url;
 	final HttpClient client;
@@ -36,9 +39,15 @@ public class DiffusionServiceClient {
 		this.client = HttpClients.createDefault();
 	}
 
-	public String diffuse(final String cx, final String subnetId) throws URISyntaxException, IOException {
+	public String diffuse(final String cx, final String inputHeatCol, final Double time) throws IOException {
 		try {
-			final HttpPost post = new HttpPost(getReqeuestURI(subnetId));
+			
+			final URI uri = getReqeuestURI(inputHeatCol, time);
+			
+			System.out.println("URI2 ===========> " + uri.toString());
+			
+			final HttpPost post = new HttpPost(uri.toString());
+			
 			final StringEntity cxEntity = new StringEntity(cx);
 			post.setEntity(cxEntity);
 			post.setHeader("Content-type", "application/json");
@@ -50,12 +59,19 @@ public class DiffusionServiceClient {
 			logger.error(createConnectionError(e.toString()), new IOException());
 			throw new IOException(createConnectionError(e.toString()));
 		}
-
 	}
 
-	private URI getReqeuestURI(String subnetId) throws URISyntaxException {
-		List<NameValuePair> postParams = new ArrayList<>();
-		postParams.add(new BasicNameValuePair("subnetworkid", subnetId));
+	private URI getReqeuestURI(final String inputHeatCol, final Object time) throws URISyntaxException {
+		final List<NameValuePair> postParams = new ArrayList<>();
+		
+//		if(time != null) {
+//			postParams.add(new BasicNameValuePair("time", time.toString()));
+//		}
+		
+		if(inputHeatCol != null) {
+			postParams.add(new BasicNameValuePair(HEAT_COLUMN, inputHeatCol));
+		}
+		
 		URIBuilder uriBuilder = new URIBuilder(this.url);
 		uriBuilder.addParameters(postParams);
 		return uriBuilder.build();

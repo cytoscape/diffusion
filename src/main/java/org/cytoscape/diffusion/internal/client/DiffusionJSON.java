@@ -27,23 +27,22 @@ public class DiffusionJSON {
 		this.tunableSetter = setter;
 	}
 
-	public String encode(CyNetwork network) throws IOException {
+	public String encode(final CyNetwork network, final String inputHeatColumn) throws IOException {
+		
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		
 		// This is a CXWriter object
 		final CyWriter writer = this.writerFactory.createWriter(stream, network);
-		
-		
 		
 		// Warning: this is a hack.
 		// Use reflection to force to set filter
 		
 		final Class<? extends CyWriter> cxWriterClass = writer.getClass();
 		
-		// Node column filter
+		// Node column filter.  Add only name and input heat
 		final List<String> nodeFilter = new ArrayList<>();
 		nodeFilter.add(CyNetwork.NAME);
-		nodeFilter.add("diffusion_input");
+		nodeFilter.add(inputHeatColumn);
 		
 		// Specify aspect name to be written in the CX
 		final List<String> aspects = new ArrayList<>();

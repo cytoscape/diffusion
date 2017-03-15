@@ -21,7 +21,6 @@ import org.cytoscape.work.swing.DialogTaskManager;
 
 public class DiffusionNetworkManager {
 
-	private static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
 	
 	private CyApplicationManager appManager;
 	DialogTaskManager taskManager;
@@ -64,13 +63,20 @@ public class DiffusionNetworkManager {
 		return CyTableUtil.getNodesInState(getNetwork(), CyNetwork.SELECTED, true);
 	}
 
-	public void setNodeHeats() {
-		this.ensureEmptyTableExists(DIFFUSION_INPUT_COL_NAME);
+	public void setNodeHeats(final String columnName) {
+		
+		this.ensureEmptyTableExists(columnName);
+		
 		for (CyNode node : getSelectedNodes()) {
 			Long suid = node.getSUID();
 			CyRow row = getNodeTable().getRow(suid);
-			row.set(DIFFUSION_INPUT_COL_NAME, 1.0);
+			row.set(columnName, 1.0);
 		}
+	}	
+
+	private void ensureEmptyTableExists(final String columnName) {
+		getNodeTable().deleteColumn(columnName);
+		getNodeTable().createColumn(columnName, Double.class, false, 0.0);
 	}
 
 	public void selectNodesOverThreshold(String heatColumn, Double threshold) {
@@ -84,10 +90,6 @@ public class DiffusionNetworkManager {
 		}
 	}
 
-	private void ensureEmptyTableExists(String tableName) {
-		getNodeTable().deleteColumn(tableName);
-		getNodeTable().createColumn(tableName, Double.class, false, 0.0);
-	}
 
 	public CyNetworkView getNetworkView() {
 		return appManager.getCurrentNetworkView();

@@ -45,8 +45,6 @@ public class DiffusionTable {
 
 	// Get the heat of the node with the given rank
 	public Double rankToHeat(Integer rank) {
-		System.out.println("This is a joke");
-		System.out.println(heatColumnName);
 		return getRowForRank(rank).get(heatColumnName, Double.class);
 	}
 
