@@ -44,6 +44,23 @@ public class DiffusionTableFactory {
 			row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
 		}
 	}
+	
+	public void setResults(String base, Map<String, NodeAttributes> nodes) {
+		
+		final CyTable table = this.getNodeTable();
+		
+		if (table == null) {
+			throw new IllegalStateException("Table does not exists yet.");
+		}
+
+		createColumns(base);
+		for (Map.Entry<String, NodeAttributes> entry : nodes.entrySet()) {
+			Long suid = Long.parseLong(entry.getKey());
+			CyRow row = getNodeTable().getRow(suid);
+			row.set(formatColumnName(base, heatSuffix), entry.getValue().getHeat());
+			row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
+		}
+	}
 
 	public String[] getAvailableOutputColumns() {
 		final List<String> columns = new ArrayList<>();

@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
 
 public class DiffusionServiceClient {
 
-//	private static final String BASE_URL = "http://heat-diffusion.cytoscape.io/";
-	private static final String BASE_URL = "http://diffuse.cytoscape.io";
+	private static final String BASE_URL = "http://v2.heat-diffusion.cytoscape.io/";
+//	private static final String BASE_URL = "http://diffuse.cytoscape.io";
 	
 	private static final String HEAT_COLUMN = "heat_attribute";
 

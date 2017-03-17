@@ -41,7 +41,7 @@
 					</compilerArguments>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -87,14 +87,14 @@
 	</repositories>
 
 	<dependencies>
-	
+
 		<!-- Common dependencies -->
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
 		</dependency>
-		
+
 		<!-- Cytoscape API dependencies -->
 		<dependency>
 			<groupId>org.cytoscape</groupId>
@@ -122,20 +122,20 @@
 			<version>${cytoscape.api.version}</version>
 		</dependency>
 
-        <!-- For logging -->
+		<!-- For logging -->
 		<dependency>
-	    	<groupId>org.ops4j.pax.logging</groupId>
-		    <artifactId>pax-logging-api</artifactId>
-		    <version>1.5.3</version>
-		    <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-		    <groupId>org.ops4j.pax.logging</groupId>
-		    <artifactId>pax-logging-service</artifactId>
-		    <version>1.5.3</version>
-		    <scope>provided</scope>
-    	</dependency>
-		
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<version>1.5.3</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-service</artifactId>
+			<version>1.5.3</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- 3rd party -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -148,6 +148,12 @@
 			<version>4.5.2</version>
 		</dependency>
 		
+		<dependency>
+			<groupId>org.cxio</groupId>
+			<artifactId>cxio</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+
 
 		<!-- For testing -->
 		<dependency>

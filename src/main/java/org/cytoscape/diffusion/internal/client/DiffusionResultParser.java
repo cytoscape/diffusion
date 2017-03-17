@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
+import org.cxio.core.CxReader;
+import org.cxio.core.interfaces.AspectElement;
+import org.cxio.util.CxioUtil;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
@@ -17,12 +21,12 @@ import org.cytoscape.work.TunableSetter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DiffusionJSON {
+public class DiffusionResultParser {
 
 	private CyNetworkViewWriterFactory writerFactory;
 	private final TunableSetter tunableSetter;
 
-	public DiffusionJSON(CyNetworkViewWriterFactory writerFactory, final TunableSetter setter) {
+	public DiffusionResultParser(CyNetworkViewWriterFactory writerFactory, final TunableSetter setter) {
 		this.writerFactory = writerFactory;
 		this.tunableSetter = setter;
 	}
@@ -95,9 +99,9 @@ public class DiffusionJSON {
 		return jsonString;
 	}
 
-	public DiffusionResponse decode(String json) throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		return objectMapper.readValue(json, DiffusionResponse.class);
+	public Map<String, List<AspectElement>> decode(String json) throws IOException {
+        final CxReader reader = CxReader.createInstance(json, CxioUtil.getAllAvailableAspectFragmentReaders());
+        return CxReader.parseAsMap(reader);
 	}
 
 }
