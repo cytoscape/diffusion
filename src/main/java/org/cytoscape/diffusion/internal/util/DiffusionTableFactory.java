@@ -3,7 +3,11 @@ package org.cytoscape.diffusion.internal.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
+import org.cxio.aspects.datamodels.NodeAttributesElement;
+import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.model.CyColumn;
@@ -30,19 +34,37 @@ public class DiffusionTableFactory {
 		return new DiffusionTable(manager, formatColumnName(base, rankSuffix), formatColumnName(base, heatSuffix));
 	}
 
-	public void writeColumns(String base, Map<String, NodeAttributes> nodes) {
+	public void writeColumns(String base, final List<AspectElement> nodeAttrs) {
 		final CyTable table = this.getNodeTable();
 		if (table == null) {
 			throw new IllegalStateException("Table does not exists yet.");
 		}
 
 		createColumns(base);
-		for (Map.Entry<String, NodeAttributes> entry : nodes.entrySet()) {
-			Long suid = Long.parseLong(entry.getKey());
+		
+		final SortedMap<Double, Long> rankMap = new TreeMap<>();
+		
+		final String heatColName = formatColumnName(base, heatSuffix);
+		final String rankColName = formatColumnName(base, rankSuffix);
+		
+		for (AspectElement attr : nodeAttrs) {
+			NodeAttributesElement nodeAttr = (NodeAttributesElement) attr;
+			Long suid = nodeAttr.getPropertyOf().get(0);
 			CyRow row = getNodeTable().getRow(suid);
-			row.set(formatColumnName(base, heatSuffix), entry.getValue().getHeat());
-			row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
+			Double heat = Double.parseDouble(nodeAttr.getValue());
+			row.set(heatColName, heat);
+			rankMap.put(heat, suid);
+//			row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
 		}
+		Integer rank = 1;
+		for(Long suid: rankMap.values()) {
+			setValue(table, rankColName, suid, rank++);
+		}
+	}
+	
+	private void setValue(final CyTable table,final String name, final Long suid, final Integer rank) {
+			CyRow row = getNodeTable().getRow(suid);
+			row.set(name, rank);
 	}
 	
 	public void setResults(String base, Map<String, NodeAttributes> nodes) {

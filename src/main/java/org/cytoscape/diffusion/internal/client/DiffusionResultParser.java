@@ -32,57 +32,57 @@ public class DiffusionResultParser {
 	}
 
 	public String encode(final CyNetwork network, final String inputHeatColumn) throws IOException {
-		
+
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		
+
 		// This is a CXWriter object
 		final CyWriter writer = this.writerFactory.createWriter(stream, network);
-		
+
 		// Warning: this is a hack.
 		// Use reflection to force to set filter
-		
+
 		final Class<? extends CyWriter> cxWriterClass = writer.getClass();
-		
-		// Node column filter.  Add only name and input heat
+
+		// Node column filter. Add only name and input heat
 		final List<String> nodeFilter = new ArrayList<>();
 		nodeFilter.add(CyNetwork.NAME);
 		nodeFilter.add(inputHeatColumn);
-		
+
 		// Specify aspect name to be written in the CX
 		final List<String> aspects = new ArrayList<>();
 		aspects.add("nodes");
 		aspects.add("edges");
 		aspects.add("nodeAttributes");
-		
+
 		try {
 			Field aspectFilter = cxWriterClass.getField("aspectFilter");
-		    aspectFilter.setAccessible(true);
-		    final Object fieldValue = aspectFilter.get(writer);
-		    final Class<? extends Object> fieldClass = fieldValue.getClass();
-		    final Method setMethod = fieldClass.getDeclaredMethod("setSelectedValues", new Class[]{List.class});
-		    setMethod.invoke(fieldValue, aspects);
+			aspectFilter.setAccessible(true);
+			final Object fieldValue = aspectFilter.get(writer);
+			final Class<? extends Object> fieldClass = fieldValue.getClass();
+			final Method setMethod = fieldClass.getDeclaredMethod("setSelectedValues", new Class[] { List.class });
+			setMethod.invoke(fieldValue, aspects);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			Field colFilter = cxWriterClass.getField("nodeColFilter");
-			
-			 // make it accessible
-		    colFilter.setAccessible(true);
-		    Object fieldValue = colFilter.get(writer);
-		    Method myMethod =fieldValue.getClass().getDeclaredMethod("setSelectedValues", new Class[]{List.class});
-		    myMethod.invoke(fieldValue, nodeFilter);
+
+			// make it accessible
+			colFilter.setAccessible(true);
+			Object fieldValue = colFilter.get(writer);
+			Method myMethod = fieldValue.getClass().getDeclaredMethod("setSelectedValues", new Class[] { List.class });
+			myMethod.invoke(fieldValue, nodeFilter);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		// Add aspect filter
 		final Map<String, Object> m = new HashMap<String, Object>();
 		m.put("writeSiblings", false);
-		
+
 		this.tunableSetter.applyTunables(writer, m);
-		
+
 		String jsonString = null;
 		try {
 			writer.run(null);
@@ -91,17 +91,30 @@ public class DiffusionResultParser {
 		} catch (Exception e) {
 			throw new IOException();
 		}
-		
+
 		System.out.println("\n\n\n ======================== Filtered CX ================");
-		System.out.println(jsonString);
+//		System.out.println(jsonString);
 		System.out.println("\n\n\n ======================== Filtered CX END=============");
-		
+
 		return jsonString;
 	}
 
-	public Map<String, List<AspectElement>> decode(String json) throws IOException {
-        final CxReader reader = CxReader.createInstance(json, CxioUtil.getAllAvailableAspectFragmentReaders());
-        return CxReader.parseAsMap(reader);
+	public Map<String, List<AspectElement>> decode(String response) throws IOException {
+		
+		System.out.println(response);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		CIResponse res = objectMapper.readValue(response, CIResponse.class);
+		
+		if(res.errors.size()!= 0) {
+			throw new IOException(res.errors.toString());
+		}
+		
+		System.out.println("¥n¥n" + res.data);
+		System.out.println("¥n¥n============================");
+		
+		final CxReader reader = CxReader.createInstance(objectMapper.writeValueAsString(res.data), CxioUtil.getAllAvailableAspectFragmentReaders());
+		return CxReader.parseAsMap(reader);
 	}
 
 }

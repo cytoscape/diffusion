@@ -16,6 +16,7 @@ import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
 import org.cytoscape.diffusion.internal.client.DiffusionResponse;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
@@ -34,7 +35,7 @@ public class DiffuseSelectedTask extends AbstractTask {
 
 	protected DiffusionNetworkManager diffusionNetworkManager;
 	protected DiffusionTableFactory diffusionTableFactory;
-	protected DiffusionResultParser diffusionJSON;
+	protected DiffusionResultParser resultParser;
 	protected OutputPanel outputPanel;
 	protected final CySwingApplication swingApplication;
 	protected final DiffusionServiceClient client;
@@ -47,7 +48,7 @@ public class DiffuseSelectedTask extends AbstractTask {
 			final DiffusionServiceClient client, final TunableSetter setter) {
 		this.diffusionNetworkManager = networkManager;
 		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
-		this.diffusionJSON = new DiffusionResultParser(writerFactory, setter);
+		this.resultParser = new DiffusionResultParser(writerFactory, setter);
 		this.outputPanel = outputPanel;
 		this.swingApplication = swingApplication;
 		this.client = client;
@@ -69,37 +70,31 @@ public class DiffuseSelectedTask extends AbstractTask {
 		
 		// Case 2: Use existing column as-is
 
-		final CyNetwork network = diffusionNetworkManager.getNetwork();		
-		final String cx = diffusionJSON.encode(network, inputCol);
+		final CyNetwork network = diffusionNetworkManager.getNetwork();
+		final String cx = resultParser.encode(network, inputCol);
 		
 		
 		// Call the service
-		final String responseJSON = client.diffuse(cx, columnName, time);
+		final String responseJSONString = client.diffuse(cx, columnName, time);
 		
 		// Parse the result
-		final Map<String, List<AspectElement>> response = diffusionJSON.decode(responseJSON);
-	
-		final List<AspectElement> errors = response.get("errors");
-		
-		// Error should be empty, otherwise, it's failed.
-		if (errors.size() != 0) {
-			throw new IllegalStateException(createServiceError(errors.get(0).toString()));
+		Map<String, List<AspectElement>> response = null;
+				
+		try {
+			response = resultParser.decode(responseJSONString);
+		} catch(Exception e) {
+			throw new IllegalStateException("Error occured when parsing result.", e);
+			
 		}
-
+		
 		final String columnBaseName = diffusionTableFactory.getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
 		
+		final List<AspectElement> nodeAttributes = response.get("nodeAttributes");
+		System.out.println("---------------");
+		System.out.println(nodeAttributes);
 		
-		final List<AspectElement> dataAspect = response.get("data");
-		AspectElement nodeAttributes = null;
 		
-		for(final AspectElement a: dataAspect) {
-			final String name = a.getAspectName();
-			if(name.equals("nodeAttributes")) {
-				nodeAttributes = a;
-			}
-				
-		}
-		diffusionTableFactory.writeColumns(columnBaseName, response.getData());
+		diffusionTableFactory.writeColumns(columnBaseName, nodeAttributes);
 		
 		outputPanel.setColumnName(String.format("%s_rank", columnBaseName));
 	

@@ -4,10 +4,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class DiffusionJSONTest {
+public class DiffusionResultParserTest {
 
 	@Test
-	public void test() {
+	public void testResultParser() {
 	}
 
 }
