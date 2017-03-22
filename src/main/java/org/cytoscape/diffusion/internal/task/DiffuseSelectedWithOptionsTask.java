@@ -19,12 +19,13 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableSetter;
 import org.cytoscape.work.util.ListSingleSelection;
 
-
 /**
  * Diffusion service caller with optional parameters.
  *
  */
 public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask {
+
+	private static final String FROM_SELECTION_MENU = "(Use selected nodes)";
 
 	@Tunable(description = "Time:")
 	public Double time = 0.1;
@@ -35,7 +36,7 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask {
 	public DiffuseSelectedWithOptionsTask(DiffusionNetworkManager networkManager,
 			CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel, CySwingApplication swingApplication,
 			CyApplicationManager appManager, DiffusionServiceClient client, TunableSetter setter) {
-		
+
 		super(networkManager, writerFactory, outputPanel, swingApplication, appManager, client, setter);
 
 		initColumnList();
@@ -43,19 +44,31 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask {
 
 	private final void initColumnList() {
 		// Get available columns
+
 		final CyNetwork targetNetwork = diffusionNetworkManager.getNetwork();
 		final CyTable localTbl = targetNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		final Collection<CyColumn> cols = localTbl.getColumns();
 
 		final List<String> colNames = cols.stream().filter(col -> col.getType() == Double.class)
 				.map(col -> col.getName()).collect(Collectors.toList());
+
+		// Add extra column for input heats from new selection
+		colNames.add(FROM_SELECTION_MENU);
+
 		heatColumnName = new ListSingleSelection<>(colNames);
+		heatColumnName.setSelectedValue(FROM_SELECTION_MENU);
 	}
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		final String selectedColumnName = this.heatColumnName.getSelectedValue();
-		// Initialize the selected column with input heat parameter
-		diffuse(selectedColumnName, time);
+
+		// Special case: new heat column
+		if (selectedColumnName.equals(FROM_SELECTION_MENU)) {
+			diffuse(null, time);
+		} else {
+			// Initialize the selected column with input heat parameter
+			diffuse(selectedColumnName, time);
+		}
 	}
 }
