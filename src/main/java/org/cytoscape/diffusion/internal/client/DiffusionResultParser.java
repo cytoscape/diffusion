@@ -92,16 +92,10 @@ public class DiffusionResultParser {
 			throw new IOException();
 		}
 
-		System.out.println("\n\n\n ======================== Filtered CX ================");
-//		System.out.println(jsonString);
-		System.out.println("\n\n\n ======================== Filtered CX END=============");
-
 		return jsonString;
 	}
 
 	public Map<String, List<AspectElement>> decode(String response) throws IOException {
-		
-		System.out.println(response);
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		CIResponse res = objectMapper.readValue(response, CIResponse.class);
@@ -109,9 +103,6 @@ public class DiffusionResultParser {
 		if(res.errors.size()!= 0) {
 			throw new IOException(res.errors.toString());
 		}
-		
-		System.out.println("¥n¥n" + res.data);
-		System.out.println("¥n¥n============================");
 		
 		final CxReader reader = CxReader.createInstance(objectMapper.writeValueAsString(res.data), CxioUtil.getAllAvailableAspectFragmentReaders());
 		return CxReader.parseAsMap(reader);

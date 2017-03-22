@@ -44,8 +44,6 @@ public class DiffusionServiceClient {
 			
 			final URI uri = getReqeuestURI(inputHeatCol, time);
 			
-			System.out.println("URI2 ===========> " + uri.toString());
-			
 			final HttpPost post = new HttpPost(uri.toString());
 			
 			final StringEntity cxEntity = new StringEntity(cx);

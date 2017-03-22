@@ -52,8 +52,6 @@ public class DiffusionNetworkManager {
 			}
 		} catch (Exception e) {
 		}
-		System.out.println(viewTask);
-		// taskManager.execute(finalIterator);
 		System.out.println(((ObservableTask) viewTask).getResults(Collection.class));
 		final Collection<?> result = ((ObservableTask) viewTask).getResults(Collection.class);
 		return ((CyNetworkView) result.iterator().next());

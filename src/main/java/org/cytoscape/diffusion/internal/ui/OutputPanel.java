@@ -108,12 +108,6 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 		final String[] cols = diffusionTableFactory.getAvailableOutputColumns();
 
-		System.out.println("COLS");
-		for (String c : cols) {
-
-			System.out.println(c);
-		}
-
 		columnNameComboBox = new JComboBox<String>(cols);
 
 		columnNameComboBox.addActionListener(new ActionListener() {
@@ -132,8 +126,6 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 			}
 
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				System.out.println("Looking for columns");
-				System.out.println(diffusionTableFactory.getAvailableOutputColumns());
 				columnNameComboBox
 						.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
 			}
