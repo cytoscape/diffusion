@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
+import org.cxio.aspects.datamodels.NodeAttributesElement;
 import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
@@ -14,9 +15,7 @@ import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
-import org.cytoscape.diffusion.internal.client.DiffusionResponse;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
-import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
@@ -69,10 +68,8 @@ public class DiffuseSelectedTask extends AbstractTask {
 		}
 		
 		// Case 2: Use existing column as-is
-
 		final CyNetwork network = diffusionNetworkManager.getNetwork();
 		final String cx = resultParser.encode(network, inputCol);
-		
 		
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
@@ -80,23 +77,19 @@ public class DiffuseSelectedTask extends AbstractTask {
 		// Parse the result
 		Map<String, List<AspectElement>> response = null;
 				
+		// Parse the result and catch exeption if there is an error in it. 
 		try {
 			response = resultParser.decode(responseJSONString);
 		} catch(Exception e) {
 			throw new IllegalStateException("Error occured when parsing result.", e);
-			
 		}
 		
-		final String columnBaseName = diffusionTableFactory.getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
+		final String outputColumnName = diffusionTableFactory.getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
 		
-		final List<AspectElement> nodeAttributes = response.get("nodeAttributes");
-		System.out.println("---------------");
-		System.out.println(nodeAttributes);
+		final List<AspectElement> nodeAttributes = response.get(NodeAttributesElement.ASPECT_NAME);
 		
-		
-		diffusionTableFactory.writeColumns(columnBaseName, nodeAttributes);
-		
-		outputPanel.setColumnName(String.format("%s_rank", columnBaseName));
+		diffusionTableFactory.writeColumns(outputColumnName, nodeAttributes);
+		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 	
 		showResult();
 	}

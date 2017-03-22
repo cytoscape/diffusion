@@ -23,7 +23,7 @@ public class DiffusionTable {
 
 	// Get the heat of the hotest node
 	public Double getMaxHeat() {
-		return rankToHeat(0);
+		return rankToHeat(1);
 	}
 
 	// Get the heat of the coldests node
@@ -45,6 +45,8 @@ public class DiffusionTable {
 
 	// Get the heat of the node with the given rank
 	public Double rankToHeat(Integer rank) {
+		System.out.println("****** Rank = " + rank);
+		
 		return getRowForRank(rank).get(heatColumnName, Double.class);
 	}
 
@@ -73,6 +75,8 @@ public class DiffusionTable {
 
 	// Get the first row that matches the given value at the given column name
 	public CyRow getFirstMatchingRow(String columnName, Object value) {
+		
+		System.out.println("##################################");
 		System.out.println(columnName);
 		System.out.println(getNodeTable().getColumns());
 		System.out.println(getNodeTable().getColumn(columnName));

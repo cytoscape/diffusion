@@ -25,7 +25,7 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 
 	@Override
 	protected JSlider createSlider() {
-		final JSlider slider = new JSlider(0, diffusionTable.getMaxRank());
+		final JSlider slider = new JSlider(1, diffusionTable.getMaxRank());
 		slider.setMajorTickSpacing(50);
 		slider.setMinorTickSpacing(10);
 		slider.setPaintTicks(true);
@@ -59,12 +59,12 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 
 		final Double value = (Double) evt.getNewValue();
 		final Integer max = diffusionTable.getMaxRank();
-		if (0 <= value && max >= value) {
+		if (1 <= value && max >= value) {
 			this.thresholdSlider.setValue(value.intValue());
 		} else if (max < value) {
 			this.thresholdSlider.setValue(max);
 		} else {
-			this.thresholdSlider.setValue(0);
+			this.thresholdSlider.setValue(1);
 		}
 
 	}

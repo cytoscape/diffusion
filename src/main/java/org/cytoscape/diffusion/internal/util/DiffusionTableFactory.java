@@ -3,9 +3,8 @@ package org.cytoscape.diffusion.internal.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
+import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
 import org.cxio.aspects.datamodels.NodeAttributesElement;
 import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.application.CyApplicationManager;
@@ -18,54 +17,94 @@ import org.cytoscape.model.CyTable;
 
 public class DiffusionTableFactory {
 
-	private String heatSuffix = "_heat";
-	private String rankSuffix = "_rank";
+	private static final String heatSuffix = "_heat";
+	private static final String rankSuffix = "_rank";
+	
+	private static final String ORIGINAL_HEAT_ATTR_NAME = "diffusion_output_heat";
+	private static final String ORIGINAL_RANK_ATTR_NAME = "diffusion_output_rank";
 
-	CyApplicationManager manager;
+	private final CyApplicationManager manager;
 
+	
 	public DiffusionTableFactory(final CyApplicationManager manager) {
 		this.manager = manager;
 	}
 
-	public DiffusionTable createTable(String base) {
-		if (hasDiffusionSuffix(base)) {
-			base = base.substring(0, base.length() - heatSuffix.length());
+
+	public DiffusionTable createTable(final String baseColumnName) {
+		String base = baseColumnName;
+		if (hasDiffusionSuffix(baseColumnName)) {
+			base = baseColumnName.substring(0, baseColumnName.length() - heatSuffix.length());
 		}
+		
+		// TODO: avoid calling formatColumnName everywhere...
 		return new DiffusionTable(manager, formatColumnName(base, rankSuffix), formatColumnName(base, heatSuffix));
 	}
 
-	public void writeColumns(String base, final List<AspectElement> nodeAttrs) {
+
+	public void writeColumns(final String baseColumnName, final List<AspectElement> nodeAttrs) {
+		
 		final CyTable table = this.getNodeTable();
 		if (table == null) {
 			throw new IllegalStateException("Table does not exists yet.");
 		}
+	
+		// This is a HACK.  Create pre-defined columns first.
+		createColumns(baseColumnName);
+		
+		final String rankColumnName = formatColumnName(baseColumnName, rankSuffix);
+		final String heatColumnName = formatColumnName(baseColumnName, heatSuffix);
 
-		createColumns(base);
-		
-		final SortedMap<Double, Long> rankMap = new TreeMap<>();
-		
-		final String heatColName = formatColumnName(base, heatSuffix);
-		final String rankColName = formatColumnName(base, rankSuffix);
-		
-		for (AspectElement attr : nodeAttrs) {
-			NodeAttributesElement nodeAttr = (NodeAttributesElement) attr;
-			Long suid = nodeAttr.getPropertyOf().get(0);
-			CyRow row = getNodeTable().getRow(suid);
-			Double heat = Double.parseDouble(nodeAttr.getValue());
-			row.set(heatColName, heat);
-			rankMap.put(heat, suid);
-//			row.set(formatColumnName(base, rankSuffix), entry.getValue().getRank());
-		}
-		Integer rank = 1;
-		for(Long suid: rankMap.values()) {
-			setValue(table, rankColName, suid, rank++);
+		for (final AspectElement attr : nodeAttrs) {
+			
+			final NodeAttributesElement nodeAttr = (NodeAttributesElement) attr;
+			final Long suid = nodeAttr.getPropertyOf().get(0);
+			final CyRow row = getNodeTable().getRow(suid);
+			
+			final String attrName = nodeAttr.getName();
+			final String valueStr = nodeAttr.getValue();
+			
+			if(attrName.equals(ORIGINAL_HEAT_ATTR_NAME)) {
+				row.set(heatColumnName, parseValue(ATTRIBUTE_DATA_TYPE.DOUBLE, valueStr));
+			} else if(attrName.equals(ORIGINAL_RANK_ATTR_NAME)) {
+				row.set(rankColumnName, parseValue(ATTRIBUTE_DATA_TYPE.INTEGER, valueStr));				
+			} else {
+				continue;
+			}
 		}
 	}
 	
-	private void setValue(final CyTable table,final String name, final Long suid, final Integer rank) {
-			CyRow row = getNodeTable().getRow(suid);
-			row.set(name, rank);
-	}
+	private final Class<?> toClass(final ATTRIBUTE_DATA_TYPE type) {
+        if (type.equals(ATTRIBUTE_DATA_TYPE.STRING)) {
+            return String.class;
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.INTEGER)) {
+            return Integer.class;
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.LONG)) {
+            return Long.class;
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.DOUBLE) || type.equals(ATTRIBUTE_DATA_TYPE.FLOAT)) {
+            return Double.class;
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.BOOLEAN)) {
+            return Boolean.class;
+        } else {
+            throw new IllegalArgumentException("don't know how to deal with type '" + type.toString() + "'");
+        }
+    }
+	
+	private final Object parseValue(final ATTRIBUTE_DATA_TYPE type, final String valueStr) {
+        if (type.equals(ATTRIBUTE_DATA_TYPE.STRING)) {
+            return valueStr;
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.INTEGER)) {
+            return Integer.parseInt(valueStr);
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.LONG)) {
+            return Long.parseLong(valueStr);
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.DOUBLE) || type.equals(ATTRIBUTE_DATA_TYPE.FLOAT)) {
+            return Double.parseDouble(valueStr);
+        } else if (type.equals(ATTRIBUTE_DATA_TYPE.BOOLEAN)) {
+            return Boolean.parseBoolean(valueStr);
+        } else {
+            throw new IllegalArgumentException("don't know how to deal with type '" + type.toString() + "'");
+        }
+    }
 	
 	public void setResults(String base, Map<String, NodeAttributes> nodes) {
 		
@@ -113,10 +152,10 @@ public class DiffusionTableFactory {
 			return;
 		}
 
-		table.createColumn(formatColumnName(base, rankSuffix), Integer.class, false, 0);
+		table.createColumn(formatColumnName(base, rankSuffix), Integer.class, false);
 		table.createColumn(formatColumnName(base, heatSuffix), Double.class, false, 0.0);
-		System.out.println(getNodeTable().getColumn(formatColumnName(base, rankSuffix)));
-		System.out.println(getNodeTable().getColumns());
+//		System.out.println(getNodeTable().getColumn(formatColumnName(base, rankSuffix)));
+//		System.out.println(getNodeTable().getColumns());
 	}
 
 	// Generate an available base name for diffusion output

@@ -145,10 +145,9 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 	}
 
 	private void columnNameSelected(String columnName) {
-		System.out.println("Column name selected");
 
-		System.out.println(columnName);
-		DiffusionTable diffusionTable = diffusionTableFactory.createTable(columnName);
+		final DiffusionTable diffusionTable = diffusionTableFactory.createTable(columnName);
+		
 		if (columnName.endsWith("_rank")) {
 			System.out.println("Switching to heat");
 			setSelectionPanel(new RankSelectionPanel(networkManager, diffusionTable, "Rank"));
