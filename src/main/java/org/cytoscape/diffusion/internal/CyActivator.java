@@ -4,6 +4,8 @@ import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
 import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
+import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
 import java.util.Properties;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.Set;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.rest.DiffusionResource;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.DiffusionTaskFactory;
 import org.cytoscape.diffusion.internal.task.EdgeContextMenuTaskFactory;
@@ -24,6 +27,7 @@ import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TunableSetter;
 import org.cytoscape.work.swing.DialogTaskManager;
@@ -52,6 +56,8 @@ public class CyActivator extends AbstractCyActivator {
 		DiffusionNetworkManager diffusionNetworkManager = new DiffusionNetworkManager(cyApplicationManagerService, taskManager, networkFactory, nFactory);
 
         LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
+        SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
+        
         System.out.println(getClass());
         System.out.println(getClass().getResource("/styles.xml"));
         Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
@@ -77,6 +83,8 @@ public class CyActivator extends AbstractCyActivator {
 		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps = new Properties();
+		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
+		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -87,6 +95,8 @@ public class CyActivator extends AbstractCyActivator {
 						viewWriterManager, swingApplication, cyApplicationManagerService, 
 						client, tunableSetterServiceRef, true);
 		Properties wOptsProps = new Properties();
+		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
+		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -104,6 +114,9 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, DIFFUSION_MENU);
 		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");
 	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
+	    
+	    DiffusionResource diffusionResource = new DiffusionResource(synchronousTaskManager, diffusionTaskFactory, withOptionsTaskFactory);
+	    registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 	    
 	    registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
 	    registerAllServices(context, withOptionsTaskFactory, wOptsProps);
