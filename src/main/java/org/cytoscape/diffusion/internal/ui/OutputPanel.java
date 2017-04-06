@@ -39,6 +39,8 @@ import org.cytoscape.view.vizmap.VisualStyle;
 public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurrentNetworkListener, 
 	ColumnCreatedListener {
 
+	private static final Dimension PANEL_SIZE = new Dimension(400, 200);
+	
 	private JComboBox<String> columnNameComboBox;
 	private JPanel selectionPanel;
 	private JPanel bottomPanel;
@@ -61,8 +63,9 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		selectionPanel = new JPanel();
 		final SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
 		subnetPanel.setOpaque(false);
-		subnetPanel.setMaximumSize(new Dimension(1200, 56));
-
+		subnetPanel.setMaximumSize(new Dimension(5000, 56));
+		subnetPanel.setMinimumSize(new Dimension(400, 56));
+		
 		bottomPanel = new JPanel();
 		bottomPanel.setBackground(Color.white);
 		bottomPanel.setLayout(new BorderLayout());
@@ -71,7 +74,9 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		final JPanel columnSelectorPanel = createSelector();
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setMaximumSize(new Dimension(1200, 160));
+		mainPanel.setMinimumSize(new Dimension(400, 160));
+		mainPanel.setMaximumSize(new Dimension(5000, 160));
+		
 		final Border padding = BorderFactory.createEmptyBorder(0, 5, 0, 5);
 		mainPanel.setBackground(Color.WHITE);
 		mainPanel.setLayout(new BorderLayout());
@@ -82,12 +87,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		mainPanel.add(columnSelectorPanel, BorderLayout.NORTH);
 		mainPanel.add(bottomPanel, BorderLayout.CENTER);
 
-		JPanel spacePanel = new JPanel();
-		spacePanel.setOpaque(false);
-		spacePanel.setMaximumSize(new Dimension(1200, 20));
-
 		this.add(mainPanel);
-		this.add(spacePanel);
 		this.add(subnetPanel);
 	}
 
