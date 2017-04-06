@@ -7,6 +7,7 @@ import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
+import java.util.Dictionary;
 import java.util.Properties;
 import java.util.Set;
 
@@ -32,11 +33,13 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.TunableSetter;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class CyActivator extends AbstractCyActivator {
 
 	private static final String DIFFUSION_MENU = "Tools.Diffuse[2100]";
-    private static final String STYLES = "/styles.xml";
+	private static final String STYLES = "/styles.xml";
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -45,9 +48,9 @@ public class CyActivator extends AbstractCyActivator {
 		final ViewWriterFactoryManager viewWriterManager = new ViewWriterFactoryManager();
 		registerServiceListener(context, viewWriterManager, "addFactory", "removeFactory",
 				CyNetworkViewWriterFactory.class);
-		
+
 		final TunableSetter tunableSetterServiceRef = getService(context,TunableSetter.class);
-		
+
 		VisualMappingManager vmm = getService(context, VisualMappingManager.class);
 		DialogTaskManager taskManager = getService(context, DialogTaskManager.class);
 		NewNetworkSelectedNodesAndEdgesTaskFactory nFactory = getService(context, NewNetworkSelectedNodesAndEdgesTaskFactory.class);
@@ -55,32 +58,32 @@ public class CyActivator extends AbstractCyActivator {
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
 		DiffusionNetworkManager diffusionNetworkManager = new DiffusionNetworkManager(cyApplicationManagerService, taskManager, networkFactory, nFactory);
 
-        LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
-        SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
-        
-        System.out.println(getClass());
-        System.out.println(getClass().getResource("/styles.xml"));
-        Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
-        System.out.println(styles);
-        
-        // Create service client instance
+		LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
+		SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
+
+		System.out.println(getClass());
+		System.out.println(getClass().getResource("/styles.xml"));
+		Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
+		System.out.println(styles);
+
+		// Create service client instance
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class,
 				"(cyPropertyName=cytoscape3.props)");
-		
+
 		final DiffusionServiceClient client;
 		final Object serviceUrlProp = props.getProperties().get("diffusion.url");
 		if(serviceUrlProp != null) {
-        		client = new DiffusionServiceClient(serviceUrlProp.toString());
-        } else {
-        		client = new DiffusionServiceClient();
-        }
+			client = new DiffusionServiceClient(serviceUrlProp.toString());
+		} else {
+			client = new DiffusionServiceClient();
+		}
 
 		OutputPanel outputPanel = new OutputPanel(diffusionNetworkManager, styles, cyApplicationManagerService, vmm);
 		registerAllServices(context, outputPanel, new Properties());
-		
+
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
-		
+
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
@@ -88,8 +91,8 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
-	    diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
-	    
+		diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
+
 		DiffusionContextMenuTaskFactory withOptionsTaskFactory = 
 				new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, 
 						viewWriterManager, swingApplication, cyApplicationManagerService, 
@@ -101,27 +104,48 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
-	    
+
 		EdgeContextMenuTaskFactory diffusionContextMenuTaskFactory2 = new EdgeContextMenuTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryProps2 = new Properties();
 		diffusionTaskFactoryProps2.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps2.setProperty(IN_MENU_BAR, "false");
-//		diffusionTaskFactoryProps2.setProperty(IN_CONTEXT_MENU, "true");
-	    diffusionTaskFactoryProps2.setProperty("title", "Selected Nodes");
-	    
+		//		diffusionTaskFactoryProps2.setProperty(IN_CONTEXT_MENU, "true");
+		diffusionTaskFactoryProps2.setProperty("title", "Selected Nodes");
+
 		DiffusionTaskFactory diffusionTaskFactory = new DiffusionTaskFactory(diffusionNetworkManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client, tunableSetterServiceRef);
 		Properties diffusionTaskFactoryPropsTool = new Properties();
 		diffusionTaskFactoryPropsTool.setProperty(PREFERRED_MENU, DIFFUSION_MENU);
 		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");
-	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
-	    
-	    DiffusionResource diffusionResource = new DiffusionResource(synchronousTaskManager, diffusionTaskFactory, withOptionsTaskFactory);
-	    registerService(context, diffusionResource, DiffusionResource.class, new Properties());
-	    
-	    registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
-	    registerAllServices(context, withOptionsTaskFactory, wOptsProps);
+		diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 
-	    registerAllServices(context, diffusionContextMenuTaskFactory2, diffusionTaskFactoryProps2);
+
+		final String logLocation;
+
+		// Extract Karaf's log file location for DiffusionResource's error reporting.
+		ConfigurationAdmin configurationAdmin = getService(context, ConfigurationAdmin.class);
+		if (configurationAdmin != null) {
+			Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
+
+			Dictionary<?,?> dictionary = config.getProperties();
+			Object logObject = dictionary.get("log4j.appender.file.File");
+			if (logObject != null && logObject instanceof String) {
+				logLocation = (String) logObject;
+			}
+			else {
+				logLocation = null;
+			}
+		}
+		else {
+			logLocation = null;
+		}
+
+		DiffusionResource diffusionResource = new DiffusionResource(synchronousTaskManager, diffusionNetworkManager, diffusionTaskFactory, withOptionsTaskFactory, logLocation);
+		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
+
+		registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
+		registerAllServices(context, withOptionsTaskFactory, wOptsProps);
+
+		registerAllServices(context, diffusionContextMenuTaskFactory2, diffusionTaskFactoryProps2);
 		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
 	}
 
