@@ -105,11 +105,22 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryPropsTool.setProperty(MENU_GRAVITY,"1.0");
 	    diffusionTaskFactoryPropsTool.setProperty("title", "Selected Nodes");
 	    
+		final DiffusionContextMenuTaskFactory withOptionsTaskFactoryTool = 
+				new DiffusionContextMenuTaskFactory(diffusionNetworkManager, outputPanel, 
+						viewWriterManager, swingApplication, cyApplicationManagerService, 
+						client, tunableSetterServiceRef, true);
+		Properties diffusionTaskFactoryPropsTool2 = new Properties();
+		diffusionTaskFactoryPropsTool2.setProperty(PREFERRED_MENU, DIFFUSION_MENU);
+		diffusionTaskFactoryPropsTool2.setProperty(MENU_GRAVITY,"1.0");
+		diffusionTaskFactoryProps2.setProperty(IN_CONTEXT_MENU, "false");
+	    diffusionTaskFactoryPropsTool2.setProperty("title", "Selected Nodes with Options");
+	    
 	    registerAllServices(context, diffusionContextMenuTaskFactory, diffusionTaskFactoryProps);
 	    registerAllServices(context, withOptionsTaskFactory, wOptsProps);
 
 	    registerAllServices(context, diffusionContextMenuTaskFactory2, diffusionTaskFactoryProps2);
 		registerService(context, diffusionTaskFactory, TaskFactory.class, diffusionTaskFactoryPropsTool);
+		registerAllServices(context, withOptionsTaskFactoryTool, diffusionTaskFactoryPropsTool2);
 	}
 
 
