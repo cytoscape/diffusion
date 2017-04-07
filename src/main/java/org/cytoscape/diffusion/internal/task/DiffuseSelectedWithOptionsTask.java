@@ -1,5 +1,6 @@
 package org.cytoscape.diffusion.internal.task;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +18,14 @@ import org.cytoscape.model.CyTable;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableSetter;
+import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListSingleSelection;
 
 /**
  * Diffusion service caller with optional parameters.
  *
  */
-public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask {
+public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implements TunableValidator {
 
 	private static final String FROM_SELECTION_MENU = "(Use selected nodes)";
 
@@ -72,5 +74,20 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask {
 			// Initialize the selected column with input heat parameter
 			diffuse(selectedColumnName, time);
 		}
+	}
+
+	@Override
+	public ValidationState getValidationState(Appendable message) {
+		if (time < 0) {
+			
+            try {
+				message.append("Please enter positive value for time parameter.");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            return TunableValidator.ValidationState.INVALID;
+        } else {
+            return TunableValidator.ValidationState.OK;
+        }
 	}
 }

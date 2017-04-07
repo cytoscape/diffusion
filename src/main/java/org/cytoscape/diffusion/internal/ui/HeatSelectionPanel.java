@@ -32,9 +32,6 @@ public class HeatSelectionPanel extends AbstractSliderPanel {
 		final Hashtable labelTable = new Hashtable();
 		labelTable.put(0, new JLabel("Hot"));
 
-		System.out.println("Max heat");
-		System.out.println(diffusionTable.getMaxRank());
-
 		final String maxHeat = String.format("%.2f", diffusionTable.getMaxHeat());
 
 		labelTable.put(1000, new JLabel("Cold"));
@@ -54,8 +51,6 @@ public class HeatSelectionPanel extends AbstractSliderPanel {
 		});
 
 		Integer ninteithPercentile = 900;
-		System.out.println("Percentile was");
-		System.out.println(ninteithPercentile);
 		final Double threshold = (diffusionTable.getMaxHeat() / 1000) * ninteithPercentile;
 		setThreshold(threshold);
 		valuePanel.setValue(threshold);
@@ -72,7 +67,6 @@ public class HeatSelectionPanel extends AbstractSliderPanel {
 		}
 		final Double original = (Double) evt.getNewValue();
 		Double value = (MAX * original) / diffusionTable.getMaxHeat();
-		System.out.println("New value ===>  " + value);
 
 		if (0 <= value && MAX >= value) {
 			this.thresholdSlider.setValue(value.intValue());
