@@ -63,6 +63,9 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
+		tm.setTitle("Running Heat Diffusion");
+		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
+		
 		final String selectedColumnName = this.heatColumnName.getSelectedValue();
 
 		// Special case: new heat column

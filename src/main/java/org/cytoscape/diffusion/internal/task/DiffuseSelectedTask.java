@@ -54,6 +54,8 @@ public class DiffuseSelectedTask extends AbstractTask {
 	}
 
 	public void run(TaskMonitor tm) throws Exception {
+		tm.setTitle("Running Heat Diffusion");
+		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
 	}
 	

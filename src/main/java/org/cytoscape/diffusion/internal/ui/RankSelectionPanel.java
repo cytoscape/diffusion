@@ -1,6 +1,8 @@
 package org.cytoscape.diffusion.internal.ui;
 
+import java.awt.Label;
 import java.beans.PropertyChangeEvent;
+import java.util.Hashtable;
 
 import javax.swing.JLabel;
 import javax.swing.JSlider;
@@ -25,11 +27,17 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 
 	@Override
 	protected JSlider createSlider() {
-		final JSlider slider = new JSlider(1, diffusionTable.getMaxRank());
-		slider.setMajorTickSpacing(50);
-		slider.setMinorTickSpacing(10);
+		final Integer rankMax = diffusionTable.getMaxRank();
+		final JSlider slider = new JSlider(1, rankMax);
+		slider.setOpaque(false);
+		
+		int delta = rankMax/4;
+		
+		final Hashtable labels = slider.createStandardLabels(delta);
+		slider.setLabelTable(labels);
+		
+		slider.setMajorTickSpacing(delta);
 		slider.setPaintTicks(true);
-		slider.setLabelTable(slider.createStandardLabels(50));
 		slider.setPaintLabels(true);
 
 		slider.addChangeListener(new ChangeListener() {
@@ -43,7 +51,7 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 			}
 		});
 
-		final Integer ninteithPercentile = (diffusionTable.getMaxRank() / 100) * 10;
+		final Integer ninteithPercentile = (diffusionTable.getMaxRank() / 100) * 10 + 1;
 		setThreshold(ninteithPercentile);
 		slider.setValue(ninteithPercentile);
 		valuePanel.setValue(ninteithPercentile);

@@ -31,20 +31,21 @@ public class DiffusionTable {
 		return rankToHeat(getMaxRank());
 	}
 
-	// NOTE: This should always be 0
+	// NOTE: This should always be 1
 	// Get the mimimum rank of all the nodes (rank of the coldest node)
 	public Integer getMinRank() {
-		return 0;
+		return 1;
 	}
 
 	// NOTE: This should always be equal to the number of nodes
 	// Get the maximum rank of all the nodes (rank of the hottest node)
 	public Integer getMaxRank() {
-		return getNodeTable().getRowCount() - 1;
+		return getNodeTable().getRowCount();
 	}
 
 	// Get the heat of the node with the given rank
 	public Double rankToHeat(Integer rank) {
+		System.out.println("* RANK = " + rank);
 		return getRowForRank(rank).get(heatColumnName, Double.class);
 	}
 
