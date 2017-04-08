@@ -58,7 +58,6 @@ public class CyActivator extends AbstractCyActivator {
 		System.out.println(getClass());
 		System.out.println(getClass().getResource("/styles.xml"));
 		Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
-		System.out.println(styles);
 
 		// Create service client instance
 		@SuppressWarnings("unchecked")

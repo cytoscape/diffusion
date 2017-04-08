@@ -27,20 +27,21 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
+import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.events.ColumnCreatedEvent;
 import org.cytoscape.model.events.ColumnCreatedListener;
+import org.cytoscape.model.events.NetworkAddedEvent;
+import org.cytoscape.model.events.NetworkAddedListener;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
 @SuppressWarnings("serial")
 public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurrentNetworkListener, 
-	ColumnCreatedListener {
+	ColumnCreatedListener, NetworkAddedListener {
 
-	private static final Dimension PANEL_SIZE = new Dimension(400, 200);
-	
 	private JComboBox<String> columnNameComboBox;
 	private JPanel selectionPanel;
 	private JPanel bottomPanel;
@@ -49,22 +50,40 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 	private DiffusionTableFactory diffusionTableFactory;
 	private DiffusionNetworkManager networkManager;
+	private final VisualMappingManager vmm;
+	private final Set<VisualStyle> styles;
+	
+	private final NoResultPanel emptyPanel;
+	private JPanel mainPanel;
+	private SubnetCreatorPanel subnetPanel;
 
 	public OutputPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles,
 			final CyApplicationManager appManager, final VisualMappingManager vmm) {
 		this.appManager = appManager;
 		this.networkManager = networkManager;
+		this.styles = styles;
+		this.vmm = vmm;
+		
+		this.emptyPanel = new NoResultPanel();
 		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
-
-		// Basic setup for this parent panel
-		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		
 		this.setBackground(Color.white);
+		
+		initPanel();
+		this.add(emptyPanel);
+
+	}
+	
+	private final void initPanel() {
+		// Basic setup for this parent panel
 
 		selectionPanel = new JPanel();
-		final SubnetCreatorPanel subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
+		mainPanel = new JPanel();
+		
+		subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
 		subnetPanel.setOpaque(false);
 		subnetPanel.setMaximumSize(new Dimension(5000, 56));
-		subnetPanel.setMinimumSize(new Dimension(400, 56));
+		subnetPanel.setMinimumSize(new Dimension(380, 56));
 		
 		bottomPanel = new JPanel();
 		bottomPanel.setBackground(Color.white);
@@ -72,13 +91,13 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		bottomPanel.add(selectionPanel, BorderLayout.CENTER);
 
 		final JPanel columnSelectorPanel = createSelector();
+		columnSelectorPanel.setOpaque(false);
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setMinimumSize(new Dimension(400, 160));
-		mainPanel.setMaximumSize(new Dimension(5000, 160));
+		mainPanel.setMinimumSize(new Dimension(380, 155));
+		mainPanel.setMaximumSize(new Dimension(5000, 155));
 		
 		final Border padding = BorderFactory.createEmptyBorder(0, 5, 0, 5);
-		mainPanel.setBackground(Color.WHITE);
+		mainPanel.setOpaque(false);
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.setBorder(BorderFactory.createTitledBorder("Node Selector"));
 
@@ -86,9 +105,20 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		bottomPanel.setBorder(padding);
 		mainPanel.add(columnSelectorPanel, BorderLayout.NORTH);
 		mainPanel.add(bottomPanel, BorderLayout.CENTER);
-
-		this.add(mainPanel);
-		this.add(subnetPanel);
+	}
+	
+	public void swapPanel(boolean showResult) {
+		if(showResult) {
+			this.removeAll();
+			this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+			this.add(mainPanel);
+			this.add(subnetPanel);
+		} else {
+			this.removeAll();
+			this.setLayout(new BorderLayout());
+			this.add(emptyPanel, BorderLayout.CENTER);
+		}
+		this.updateUI();
 	}
 
 	private final JPanel createSelector() {
@@ -199,10 +229,10 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 		if (cols == null || cols.length == 0) {
 			columnNameComboBox.setEnabled(false);
-			this.setEnabled(false);
+			swapPanel(false);
 		} else {
 			columnNameComboBox.setEnabled(true);
-			this.setEnabled(true);
+			swapPanel(true);
 		}
 	}
 
@@ -222,5 +252,25 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 			columnNameComboBox.setEnabled(true);
 			this.setEnabled(true);
 		}
+	}
+
+	@Override
+	public void handleEvent(NetworkAddedEvent nae) {
+		// Remove all local columns copied from original one.
+		
+		final String[] cols = diffusionTableFactory.getAvailableOutputColumns();
+		
+		final CyNetwork net = nae.getNetwork();
+		final CyTable localTable = net.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+		
+		for(final String colName: cols) {
+			final CyColumn col = localTable.getColumn(colName);
+			if(col != null) {
+				localTable.deleteColumn(colName);
+			}
+		}
+		
+		// Disable UI
+		swapPanel(false);
 	}
 }

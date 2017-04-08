@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.cxio.aspects.datamodels.NodeAttributesElement;
@@ -92,6 +93,7 @@ public class DiffuseSelectedTask extends AbstractTask {
 		
 		diffusionTableFactory.writeColumns(outputColumnName, nodeAttributes);
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
+		outputPanel.swapPanel(true);
 	
 		showResult();
 	}
@@ -103,11 +105,14 @@ public class DiffuseSelectedTask extends AbstractTask {
 			public void run() {
 				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 				panel.setState(CytoPanelState.DOCK);
+				
 				final Component panelComponent = panel.getThisComponent();
-				final Dimension defSize = new Dimension(380, 300);
+				final Dimension defSize = new Dimension(380, 400);
 				panelComponent.setPreferredSize(defSize);
-				panelComponent.setMinimumSize(defSize);
 				panelComponent.setSize(defSize);
+				panelComponent.repaint();
+				((JPanel)panelComponent).updateUI();
+				swingApplication.getJFrame().pack();
 			}
 		});
 	}
