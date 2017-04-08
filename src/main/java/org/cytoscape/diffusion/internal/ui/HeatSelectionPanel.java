@@ -29,12 +29,14 @@ public class HeatSelectionPanel extends AbstractSliderPanel {
 	protected JSlider createSlider() {
 
 		final JSlider slider = new JSlider(MIN, MAX);
-		final Hashtable labelTable = new Hashtable();
-		labelTable.put(0, new JLabel("Hot"));
+		slider.setOpaque(false);
 
 		final String maxHeat = String.format("%.2f", diffusionTable.getMaxHeat());
+		final String minHeat = String.format("%.2f", diffusionTable.getMinHeat());
+		final Hashtable labelTable = new Hashtable();
+		labelTable.put(0, new JLabel("Cold ("+ minHeat +")"));
+		labelTable.put(1000, new JLabel("Hot (" + maxHeat + ")"));
 
-		labelTable.put(1000, new JLabel("Cold"));
 		slider.setLabelTable(labelTable);
 		slider.setPaintLabels(true);
 
