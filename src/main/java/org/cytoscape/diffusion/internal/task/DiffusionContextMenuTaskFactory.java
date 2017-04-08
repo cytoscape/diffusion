@@ -1,5 +1,7 @@
 package org.cytoscape.diffusion.internal.task;
 
+import java.util.List;
+
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
@@ -7,15 +9,21 @@ import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTableUtil;
+import org.cytoscape.task.AbstractNetworkViewTaskFactory;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
+import org.cytoscape.task.EdgeViewTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TunableSetter;
 
-public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
+public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory 
+	implements NetworkViewTaskFactory {
 
 	private final ViewWriterFactoryManager factoryManager;
 	private final DiffusionNetworkManager networkManager;
@@ -47,10 +55,6 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 		this.withOptions = withOptions;
 	}
 
-	@Override
-	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-		return create();
-	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView) {
@@ -58,8 +62,23 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 	}
 
 	@Override
+	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+		return create();
+	}
+
+	@Override
 	public boolean isReady(CyNetworkView networkView) {
-		return true;
+		if (networkView == null) {
+			return false;
+		}
+
+		// Make sure we've got something selected
+		List<CyNode> selNodes = CyTableUtil.getNodesInState(networkView.getModel(), CyNetwork.SELECTED, true);
+		if (selNodes != null && selNodes.size() > 0) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private final TaskIterator create() {
@@ -79,5 +98,7 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 				appManager, client, setter));
 
 	}
+
+
 
 }
