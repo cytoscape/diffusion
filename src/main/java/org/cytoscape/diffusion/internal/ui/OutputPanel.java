@@ -16,17 +16,14 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
-import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
+import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
@@ -35,6 +32,7 @@ import org.cytoscape.model.events.ColumnCreatedEvent;
 import org.cytoscape.model.events.ColumnCreatedListener;
 import org.cytoscape.model.events.NetworkAddedEvent;
 import org.cytoscape.model.events.NetworkAddedListener;
+import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
@@ -47,25 +45,29 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 	private JPanel bottomPanel;
 	
 	private final CyApplicationManager appManager;
+	
+	private final DiffusionTableManager tableManager;
 
-	private DiffusionTableFactory diffusionTableFactory;
-	private DiffusionNetworkManager networkManager;
 	private final VisualMappingManager vmm;
 	private final Set<VisualStyle> styles;
 	
 	private final NoResultPanel emptyPanel;
 	private JPanel mainPanel;
 	private SubnetCreatorPanel subnetPanel;
+	
+	final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory;
+	
 
-	public OutputPanel(DiffusionNetworkManager networkManager, Set<VisualStyle> styles,
-			final CyApplicationManager appManager, final VisualMappingManager vmm) {
+	public OutputPanel(DiffusionTableManager tableManager, Set<VisualStyle> styles,
+			final CyApplicationManager appManager, final VisualMappingManager vmm, 
+			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory) {
 		this.appManager = appManager;
-		this.networkManager = networkManager;
 		this.styles = styles;
 		this.vmm = vmm;
+		this.tableManager = tableManager;
+		this.createSubnetworkFactory = createSubnetworkFactory;
 		
 		this.emptyPanel = new NoResultPanel();
-		this.diffusionTableFactory = new DiffusionTableFactory(appManager);
 		
 		this.setBackground(Color.white);
 		
@@ -80,7 +82,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		selectionPanel = new JPanel();
 		mainPanel = new JPanel();
 		
-		subnetPanel = new SubnetCreatorPanel(networkManager, styles, vmm, appManager);
+		subnetPanel = new SubnetCreatorPanel(tableManager, styles, vmm, createSubnetworkFactory, appManager);
 		subnetPanel.setOpaque(false);
 		subnetPanel.setMaximumSize(new Dimension(5000, 56));
 		subnetPanel.setMinimumSize(new Dimension(380, 56));
@@ -136,46 +138,53 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 	private void configureColumnNameComboBox() {
 
-		final String[] cols = diffusionTableFactory.getAvailableOutputColumns();
+		DiffusionTable currentTable = tableManager.getCurrentTable();
+		if(currentTable == null) {
+			columnNameComboBox = new JComboBox<String>(new String[0]);
+		} else {
+			final String[] cols = currentTable.getAvailableOutputColumns();
+			columnNameComboBox = new JComboBox<String>(cols);
+		}
+		
 
-		columnNameComboBox = new JComboBox<String>(cols);
 
 		columnNameComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String columnName = getColumnName();
+				final String columnName = getColumnName();
 				columnNameComboBox.setSelectedItem(columnName);
 				columnNameSelected(columnName);
 			}
 		});
 
-		columnNameComboBox.addPopupMenuListener(new PopupMenuListener() {
-			public void popupMenuCanceled(PopupMenuEvent e) {
-			}
+//		columnNameComboBox.addPopupMenuListener(new PopupMenuListener() {
+//			public void popupMenuCanceled(PopupMenuEvent e) {
+//			}
+//
+//			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+//			}
+//
+//			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+//				columnNameComboBox
+//						.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
+//			}
+//		});
 
-			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-			}
-
-			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				columnNameComboBox
-						.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
-			}
-		});
-
-		if (diffusionTableFactory.getAvailableOutputColumns().length != 0) {
-			columnNameSelected(getColumnName());
-		}
+//		if (diffusionTableFactory.getAvailableOutputColumns().length != 0) {
+//			columnNameSelected(getColumnName());
+//		}
 	}
 
 	private void columnNameSelected(String columnName) {
 
-		final DiffusionTable diffusionTable = diffusionTableFactory.createTable(columnName);
+		final CyNetwork network = this.appManager.getCurrentNetwork();
+		final DiffusionTable diffusionTable = tableManager.getTable(network.getSUID());
 		
 		if (columnName.endsWith("_rank")) {
 			System.out.println("Switching to heat");
-			setSelectionPanel(new RankSelectionPanel(networkManager, diffusionTable, "Rank"));
+			setSelectionPanel(new RankSelectionPanel(diffusionTable, "Rank"));
 		} else if (columnName.endsWith("_heat")) {
 			System.out.println("Switching to rank");
-			setSelectionPanel(new HeatSelectionPanel(networkManager, diffusionTable, "Heat"));
+			setSelectionPanel(new HeatSelectionPanel(diffusionTable, "Heat"));
 		} else {
 			setSelectionPanel(new JPanel());
 		}
@@ -185,13 +194,12 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		bottomPanel.remove(selectionPanel);
 		selectionPanel = panel;
 		bottomPanel.add(selectionPanel, BorderLayout.CENTER);
-		// this.add(selectionPanel);
 		this.validate();
 		this.repaint();
 	}
 
 	public void setColumnName(String columnName) {
-		columnNameComboBox.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
+		columnNameComboBox.setModel(new DefaultComboBoxModel(tableManager.getCurrentTable().getAvailableOutputColumns()));
 		columnNameComboBox.setSelectedItem(columnName);
 		columnNameSelected(columnName);
 	}
@@ -223,7 +231,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent evt) {
 
-		final String[] cols = diffusionTableFactory.getAvailableOutputColumns();
+		final String[] cols = tableManager.getCurrentTable().getAvailableOutputColumns();
 		final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(cols);
 		columnNameComboBox.setModel(model);
 
@@ -256,11 +264,17 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 	@Override
 	public void handleEvent(NetworkAddedEvent nae) {
+		final CyNetwork net = nae.getNetwork();
+
 		// Remove all local columns copied from original one.
 		
-		final String[] cols = diffusionTableFactory.getAvailableOutputColumns();
+		DiffusionTable newTable = this.tableManager.getTable(net.getSUID());
+		if(newTable == null) {
+			return;
+		}
 		
-		final CyNetwork net = nae.getNetwork();
+		final String[] cols = newTable.getAvailableOutputColumns();
+		
 		final CyTable localTable = net.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		
 		for(final String colName: cols) {

@@ -1,90 +1,90 @@
 
 package org.cytoscape.diffusion.internal.util;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyTable;
+import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 
 public class DiffusionTable {
 
-	String rankColumnName, heatColumnName;
+	private final CyNetwork network;
+	private final CyTable table;
+	
+	private final Map<String, DiffusionResult> runs;
+	
+	private DiffusionResult currentResult;
+	
 
-	CyApplicationManager manager;
-
-	public DiffusionTable(CyApplicationManager manager, String rankColumnName, String heatColumnName) {
-		this.manager = manager;
-		this.rankColumnName = rankColumnName;
-		this.heatColumnName = heatColumnName;
+	public DiffusionTable(final CyNetwork network) {
+		if(network == null) {
+			throw new NullPointerException("Network cannot be null.");
+		}
+		
+		this.network = network;
+		this.table = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+		
+		this.runs = new HashMap<>();
+	}
+	
+	public CyNetwork getAssociatedNetwork() {
+		return network;
 	}
 
-	// Get the heat of the hotest node
-	public Double getMaxHeat() {
-		return rankToHeat(1);
+	
+	public DiffusionResult getCurrentResult() {
+		return currentResult;
 	}
-
-	// Get the heat of the coldests node
-	public Double getMinHeat() {
-		return rankToHeat(getMaxRank());
+	
+	public void setCurrentDiffusionResult(DiffusionResult result) {
+		this.currentResult = result;
 	}
-
-	// NOTE: This should always be 1
-	// Get the mimimum rank of all the nodes (rank of the coldest node)
-	public Integer getMinRank() {
-		return 1;
+	
+	public void setDiffusionResult(String runId, DiffusionResult result) {
+		this.currentResult = result;
+		this.runs.put(runId, result);
 	}
+	
+	public String[] getAvailableOutputColumns() {
+		final List<String> columns = new ArrayList<>();
 
-	// NOTE: This should always be equal to the number of nodes
-	// Get the maximum rank of all the nodes (rank of the hottest node)
-	public Integer getMaxRank() {
-		return getNodeTable().getRowCount();
+		if (table == null) {
+			return new String[0];
+		}
+
+		for (CyColumn column : table.getColumns()) {
+			if ((column.getType().equals(Double.class) || column.getType().equals(Integer.class))
+					&& hasDiffusionSuffix(column.getName())) {
+				columns.add(column.getName());
+			}
+		}
+		return columns.toArray(new String[columns.size()]);
 	}
-
-	// Get the heat of the node with the given rank
-	public Double rankToHeat(Integer rank) {
-		System.out.println("* RANK = " + rank);
-		return getRowForRank(rank).get(heatColumnName, Double.class);
-	}
-
-	// Get the heat of the first node with the given heat
-	public Integer heatToRank(Double heat) {
-		return getRowForHeat(heat).get(rankColumnName, Integer.class);
-	}
-
-	// Get the row for first node with the given heat
-	public CyRow getRowForHeat(Double heat) {
-		return getFirstMatchingRow(heatColumnName, heat);
-	}
-
-	// Get the row for the node with the given rank
-	public CyRow getRowForRank(Integer rank) {
-		return getFirstMatchingRow(rankColumnName, rank);
-	}
-
-	public String getRankColumnName() {
-		return rankColumnName;
-	}
-
-	public String getHeatColumnName() {
-		return heatColumnName;
+	
+	private Boolean hasDiffusionSuffix(String columnName) {
+		return columnName.endsWith("_heat") || columnName.endsWith("_rank");
 	}
 
 	// Get the first row that matches the given value at the given column name
-	public CyRow getFirstMatchingRow(String columnName, Object value) {
-		Collection<CyRow> matchedRows = getNodeTable().getMatchingRows(columnName, value);
-		if (matchedRows.size() != 0) {
-			List<CyRow> rowList = new ArrayList<>(matchedRows);
-			return rowList.get(0);
+	private final CyRow getFirstMatchingRow(final String columnName, Object value) {
+		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+		final CyColumn column = localTable.getColumn(columnName);
+		if(column == null) {
+			throw new IllegalArgumentException("Local column does not exist: " + columnName);
+		}
+		
+		final Collection<CyRow> matchedRows = localTable.getMatchingRows(columnName, value);
+		if (!matchedRows.isEmpty()) {
+			return matchedRows.iterator().next();
 		} else {
 			return null;
 		}
 	}
-
-	private CyTable getNodeTable() {
-		return manager.getCurrentNetwork().getDefaultNodeTable();
-	}
-
 }
