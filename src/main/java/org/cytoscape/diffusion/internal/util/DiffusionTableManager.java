@@ -23,6 +23,14 @@ public class DiffusionTableManager implements SetCurrentNetworkListener {
 		return currentTable;
 	}
 	
+	public void setCurrentTable(DiffusionTable table) {
+		if(this.tables.containsValue(table)) {
+			this.currentTable = table;
+		} else {
+			throw new IllegalArgumentException("Table does not exist in manager.  You need to register it first.");
+		}
+	}
+	
 	public DiffusionTable createTable(CyNetwork network) {
 		final DiffusionTable table = new DiffusionTable(network);
 		this.tables.put(network.getSUID(), table);
@@ -58,6 +66,7 @@ public class DiffusionTableManager implements SetCurrentNetworkListener {
 		final CyNetwork currentNetwork = cne.getNetwork();
 		
 		if(this.tables.get(currentNetwork.getSUID()) != null) {
+			System.out.println("New table selected.-------------------");;
 			this.currentTable = tables.get(currentNetwork.getSUID());
 		}
 	}

@@ -93,6 +93,9 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
 
+		System.out.println("\n\n" + responseJSONString);
+		
+		
 		// Parse the result
 		Map<String, List<AspectElement>> response = null;
 
@@ -157,9 +160,14 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		final String heatColumnName = formatColumnName(baseColumnName, heatSuffix);
 		
 		// Create result object
-		final DiffusionTable diffTable = tableManager.createTable(network);
+		DiffusionTable diffTable = tableManager.getTable(network.getSUID());
+		if(diffTable == null) {
+			diffTable = tableManager.createTable(network);
+		}
+				
 		final DiffusionResult result = new DiffusionResult(network, rankColumnName, heatColumnName);
-		diffTable.setDiffusionResult(heatColumnName, result);
+		System.out.println("Registering new result: " + baseColumnName);
+		diffTable.setDiffusionResult(baseColumnName, result);
 
 		for (final AspectElement attr : nodeAttrs) {
 
@@ -236,7 +244,8 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 	}
 
 	// Generate an available base name for diffusion output
-	public String getNextAvailableColumnName(String baseName) {
+	public String getNextAvailableColumnName(final String baseName) {
+		
 		String desiredName = baseName;
 		for (int index = 1; columnsExist(desiredName); index++) {
 			desiredName = formatColumnName(baseName, index);
@@ -282,7 +291,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 				panelComponent.setSize(defSize);
 				panelComponent.repaint();
 				((JPanel) panelComponent).updateUI();
-				swingApplication.getJFrame().pack();
+//				swingApplication.getJFrame().pack();
 			}
 		});
 	}

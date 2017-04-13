@@ -155,35 +155,24 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 				columnNameSelected(columnName);
 			}
 		});
-
-//		columnNameComboBox.addPopupMenuListener(new PopupMenuListener() {
-//			public void popupMenuCanceled(PopupMenuEvent e) {
-//			}
-//
-//			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-//			}
-//
-//			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-//				columnNameComboBox
-//						.setModel(new DefaultComboBoxModel(diffusionTableFactory.getAvailableOutputColumns()));
-//			}
-//		});
-
-//		if (diffusionTableFactory.getAvailableOutputColumns().length != 0) {
-//			columnNameSelected(getColumnName());
-//		}
 	}
 
 	private void columnNameSelected(String columnName) {
-
+		
 		final CyNetwork network = this.appManager.getCurrentNetwork();
 		final DiffusionTable diffusionTable = tableManager.getTable(network.getSUID());
 		
 		if (columnName.endsWith("_rank")) {
-			System.out.println("Switching to heat");
+			final String base = columnName.replace("_rank", "");
+			
+			System.out.println("Switching to heat for: " + base);
+			diffusionTable.setCurrentDiffusionResult(base);
 			setSelectionPanel(new RankSelectionPanel(diffusionTable, "Rank"));
 		} else if (columnName.endsWith("_heat")) {
-			System.out.println("Switching to rank");
+			final String base = columnName.replace("_heat", "");
+			
+			System.out.println("Switching to rank for: " + base);
+			diffusionTable.setCurrentDiffusionResult(base);
 			setSelectionPanel(new HeatSelectionPanel(diffusionTable, "Heat"));
 		} else {
 			setSelectionPanel(new JPanel());
@@ -230,16 +219,35 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent evt) {
-
-		final String[] cols = tableManager.getCurrentTable().getAvailableOutputColumns();
+		if(this.appManager.getCurrentNetwork() == null) {
+			swapPanel(false);
+			return;
+		}
+		
+		final CyNetwork network = evt.getNetwork();
+		final DiffusionTable table = tableManager.getTable(network.getSUID());
+		
+		// No result yet.
+		if(table == null) {
+			// Disable UI
+			swapPanel(false);
+			return;
+		}
+		
+		tableManager.setCurrentTable(table);
+		
+		final String[] cols = table.getAvailableOutputColumns();
 		final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(cols);
 		columnNameComboBox.setModel(model);
-
+		
 		if (cols == null || cols.length == 0) {
 			columnNameComboBox.setEnabled(false);
 			swapPanel(false);
 		} else {
 			columnNameComboBox.setEnabled(true);
+			
+			// Select first item
+			columnNameSelected(cols[0]);	
 			swapPanel(true);
 		}
 	}
@@ -265,16 +273,11 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 	@Override
 	public void handleEvent(NetworkAddedEvent nae) {
 		final CyNetwork net = nae.getNetwork();
+		System.out.println(" --------------- NAE: for "  + net.getSUID());
 
 		// Remove all local columns copied from original one.
-		
-		DiffusionTable newTable = this.tableManager.getTable(net.getSUID());
-		if(newTable == null) {
-			return;
-		}
-		
+		final DiffusionTable newTable = this.tableManager.createTable(net);
 		final String[] cols = newTable.getAvailableOutputColumns();
-		
 		final CyTable localTable = net.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		
 		for(final String colName: cols) {

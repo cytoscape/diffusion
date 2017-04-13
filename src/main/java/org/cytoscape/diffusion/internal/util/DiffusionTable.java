@@ -2,7 +2,6 @@
 package org.cytoscape.diffusion.internal.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
 public class DiffusionTable {
@@ -43,7 +41,16 @@ public class DiffusionTable {
 		return currentResult;
 	}
 	
-	public void setCurrentDiffusionResult(DiffusionResult result) {
+	public void setCurrentDiffusionResult(final String runId) {
+		
+		for(String key: runs.keySet()) {
+			
+			System.out.println("### RUNKEY = "  + key);
+		}
+		final DiffusionResult result = runs.get(runId);
+		if(result == null) {
+			throw new IllegalArgumentException("No result is available for " + runId);
+		}
 		this.currentResult = result;
 	}
 	
@@ -70,21 +77,5 @@ public class DiffusionTable {
 	
 	private Boolean hasDiffusionSuffix(String columnName) {
 		return columnName.endsWith("_heat") || columnName.endsWith("_rank");
-	}
-
-	// Get the first row that matches the given value at the given column name
-	private final CyRow getFirstMatchingRow(final String columnName, Object value) {
-		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
-		final CyColumn column = localTable.getColumn(columnName);
-		if(column == null) {
-			throw new IllegalArgumentException("Local column does not exist: " + columnName);
-		}
-		
-		final Collection<CyRow> matchedRows = localTable.getMatchingRows(columnName, value);
-		if (!matchedRows.isEmpty()) {
-			return matchedRows.iterator().next();
-		} else {
-			return null;
-		}
 	}
 }

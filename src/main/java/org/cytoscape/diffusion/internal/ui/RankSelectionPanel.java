@@ -8,6 +8,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 
 
 @SuppressWarnings("serial")
@@ -18,8 +22,21 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 	}
 	
 	private final void setThreshold(final Integer index) {
-		final Double threshold = diffusionTable.getCurrentResult().rankToHeat(index);
-		selectNodesOverThreshold(diffusionTable.getCurrentResult().getHeatColumnName(), threshold);
+	
+		final String rankColName = diffusionTable.getCurrentResult().getRankColumnName();
+		final CyNetwork network = this.diffusionTable.getAssociatedNetwork();
+		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+		
+		
+		for (final CyRow row : localTable.getAllRows()) {
+			final Integer rank = row.get(rankColName, Integer.class);
+			
+			if (rank <= index) {
+				row.set(CyNetwork.SELECTED, Boolean.TRUE);
+			} else {
+				row.set(CyNetwork.SELECTED, Boolean.FALSE);
+			}
+		}
 	}
 
 	@Override
