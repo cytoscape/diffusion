@@ -89,11 +89,12 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 
 		// Case 2: Use existing column as-is
 		final String cx = resultParser.encode(network, inputCol);
+		System.out.println("\n\n" + cx);
 
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
 
-		System.out.println("\n\n" + responseJSONString);
+//		System.out.println("\n\n" + responseJSONString);
 		
 		
 		// Parse the result
@@ -291,7 +292,6 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 				panelComponent.setSize(defSize);
 				panelComponent.repaint();
 				((JPanel) panelComponent).updateUI();
-//				swingApplication.getJFrame().pack();
 			}
 		});
 	}

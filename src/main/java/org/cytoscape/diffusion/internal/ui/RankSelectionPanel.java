@@ -65,7 +65,8 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 			}
 		});
 
-		final Integer ninteithPercentile = (diffusionTable.getCurrentResult().getMaxRank() / 100) * 10 + 1;
+		final Double maxRank = diffusionTable.getCurrentResult().getMaxRank().doubleValue();
+		final Integer ninteithPercentile = ((Double)(maxRank * 0.1d)).intValue();
 		setThreshold(ninteithPercentile);
 		slider.setValue(ninteithPercentile);
 		valuePanel.setValue(ninteithPercentile);
