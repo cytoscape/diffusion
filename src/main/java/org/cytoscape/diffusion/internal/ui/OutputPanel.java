@@ -21,6 +21,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
@@ -37,7 +38,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
 @SuppressWarnings("serial")
-public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurrentNetworkListener, 
+public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurrentNetworkListener, 
 	ColumnCreatedListener, NetworkAddedListener {
 
 	private JComboBox<String> columnNameComboBox;
@@ -273,7 +274,6 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 	@Override
 	public void handleEvent(NetworkAddedEvent nae) {
 		final CyNetwork net = nae.getNetwork();
-		System.out.println(" --------------- NAE: for "  + net.getSUID());
 
 		// Remove all local columns copied from original one.
 		final DiffusionTable newTable = this.tableManager.createTable(net);
@@ -289,5 +289,10 @@ public class OutputPanel extends JPanel implements CytoPanelComponent, SetCurren
 		
 		// Disable UI
 		swapPanel(false);
+	}
+
+	@Override
+	public String getIdentifier() {
+		return "diffusion";
 	}
 }

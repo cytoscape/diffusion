@@ -15,6 +15,7 @@ import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
+import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
@@ -89,7 +90,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 
 		// Case 2: Use existing column as-is
 		final String cx = resultParser.encode(network, inputCol);
-		System.out.println("\n\n" + cx);
+//		System.out.println("\n\n" + cx);
 
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
@@ -279,21 +280,51 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 	}
 
 	protected void showResult() {
-		// Show the result in a CytoPanel
 		SwingUtilities.invokeLater(new Runnable() {
+			
 			@Override
 			public void run() {
+				// 1. Dock the EAST Panel
 				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 				panel.setState(CytoPanelState.DOCK);
-
-				final Component panelComponent = panel.getThisComponent();
-				final Dimension defSize = new Dimension(380, 400);
-				panelComponent.setPreferredSize(defSize);
-				panelComponent.setSize(defSize);
-				panelComponent.repaint();
-				((JPanel) panelComponent).updateUI();
+				
+				// 2. Find Diffusion Output Panel
+				final int componentCount = panel.getCytoPanelComponentCount();
+				
+				int targetPanelIdx = 0;
+				
+				for(int i=0; i<componentCount; i++) {
+					final Component panelComponent = panel.getComponentAt(i);
+					if(panelComponent instanceof CytoPanelComponent2) {
+						final CytoPanelComponent2 cp2 = (CytoPanelComponent2) panelComponent;
+						final String panelId = cp2.getIdentifier();
+						System.out.println("============ Updating ========== " + panelId);
+						if(panelId != null && panelId.equals("diffusion")) {
+							// Found target panel.  Force to update
+							final Dimension defSize = new Dimension(300, 400);
+							panelComponent.setPreferredSize(defSize);
+							panelComponent.setSize(defSize);
+							targetPanelIdx = i;
+							break;
+						}
+						
+					}
+					
+				}
+				panel.setSelectedIndex(targetPanelIdx);
+				panel.getThisComponent().repaint();
+//				((JPanel) panelComponent).updateUI();
+//				panelComponent.repaint();
+//				swingApplication.getJFrame().repaint();
+//				swingApplication.getJFrame().getContentPane().repaint();
+//				((JPanel) panelComponent).updateUI();
+//				swingApplication.getJFrame().repaint();
+//				((JPanel) panelComponent).updateUI();
+//				panelComponent.repaint();				
 			}
 		});
+
+
 	}
 
 	protected String createServiceError(String errorMessage) {
