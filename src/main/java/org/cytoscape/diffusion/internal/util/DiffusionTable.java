@@ -42,11 +42,6 @@ public class DiffusionTable {
 	}
 	
 	public void setCurrentDiffusionResult(final String runId) {
-		
-		for(String key: runs.keySet()) {
-			
-			System.out.println("### RUNKEY = "  + key);
-		}
 		final DiffusionResult result = runs.get(runId);
 		if(result == null) {
 			throw new IllegalArgumentException("No result is available for " + runId);

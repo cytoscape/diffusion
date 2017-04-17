@@ -122,7 +122,6 @@ public class SubnetCreatorPanel extends JPanel {
 			}
 		} catch (Exception e) {
 		}
-		System.out.println(((ObservableTask) viewTask).getResults(Collection.class));
 		final Collection<?> result = ((ObservableTask) viewTask).getResults(Collection.class);
 		return ((CyNetworkView) result.iterator().next());
 	}

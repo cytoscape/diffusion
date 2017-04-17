@@ -138,8 +138,6 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 	}
 
 	private void createColumns(String base) {
-		System.out.println(formatColumnName(base, rankSuffix));
-
 		final CyTable table = this.getNodeTable();
 		if (table == null) {
 			return;
@@ -168,7 +166,6 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		}
 				
 		final DiffusionResult result = new DiffusionResult(network, rankColumnName, heatColumnName);
-		System.out.println("Registering new result: " + baseColumnName);
 		diffTable.setDiffusionResult(baseColumnName, result);
 
 		for (final AspectElement attr : nodeAttrs) {
@@ -298,7 +295,6 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 					if(panelComponent instanceof CytoPanelComponent2) {
 						final CytoPanelComponent2 cp2 = (CytoPanelComponent2) panelComponent;
 						final String panelId = cp2.getIdentifier();
-						System.out.println("============ Updating ========== " + panelId);
 						if(panelId != null && panelId.equals("diffusion")) {
 							// Found target panel.  Force to update
 							final Dimension defSize = new Dimension(300, 400);
@@ -307,24 +303,12 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 							targetPanelIdx = i;
 							break;
 						}
-						
 					}
-					
 				}
 				panel.setSelectedIndex(targetPanelIdx);
 				panel.getThisComponent().repaint();
-//				((JPanel) panelComponent).updateUI();
-//				panelComponent.repaint();
-//				swingApplication.getJFrame().repaint();
-//				swingApplication.getJFrame().getContentPane().repaint();
-//				((JPanel) panelComponent).updateUI();
-//				swingApplication.getJFrame().repaint();
-//				((JPanel) panelComponent).updateUI();
-//				panelComponent.repaint();				
 			}
 		});
-
-
 	}
 
 	protected String createServiceError(String errorMessage) {

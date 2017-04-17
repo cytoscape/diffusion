@@ -166,13 +166,11 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 		if (columnName.endsWith("_rank")) {
 			final String base = columnName.replace("_rank", "");
 			
-			System.out.println("Switching to heat for: " + base);
 			diffusionTable.setCurrentDiffusionResult(base);
 			setSelectionPanel(new RankSelectionPanel(diffusionTable, "Rank"));
 		} else if (columnName.endsWith("_heat")) {
 			final String base = columnName.replace("_heat", "");
 			
-			System.out.println("Switching to rank for: " + base);
 			diffusionTable.setCurrentDiffusionResult(base);
 			setSelectionPanel(new HeatSelectionPanel(diffusionTable, "Heat"));
 		} else {

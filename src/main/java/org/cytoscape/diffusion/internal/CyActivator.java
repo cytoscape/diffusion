@@ -51,8 +51,6 @@ public class CyActivator extends AbstractCyActivator {
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
 
 		LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
-		System.out.println(getClass());
-		System.out.println(getClass().getResource("/styles.xml"));
 		Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
 
 		// Create service client instance
