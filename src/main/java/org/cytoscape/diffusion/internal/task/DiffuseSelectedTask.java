@@ -22,12 +22,18 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
+import org.cytoscape.work.json.JSONResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiffuseSelectedTask extends AbstractTask {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+public class DiffuseSelectedTask extends AbstractTask implements ObservableTask{
 	
 	public static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
 	private static final String DIFFUSION_OUTPUT_COL_NAME = "diffusion_output";
@@ -53,8 +59,11 @@ public class DiffuseSelectedTask extends AbstractTask {
 		this.client = client;
 	}
 
+	private boolean successful = false;
+	
 	public void run(TaskMonitor tm) throws Exception {
 		diffuse(null, null);
+		successful = true;
 	}
 	
 	protected void diffuse(final String columnName, final Double time) throws Exception {
@@ -115,5 +124,35 @@ public class DiffuseSelectedTask extends AbstractTask {
 		return String.format("Oops! Could not complete diffusion. The heat diffusion service in the cloud told us something went wrong while processing your request.\n" +
 				"Here is the error message we received from the service, email the service author with this message if you need assistance.\n\n" +
 		        "Error:\n %s", errorMessage);
+	}
+
+	@Override
+	public <R> R getResults(Class<? extends R> type) {
+		if (type.equals(String.class))
+		{
+			return (R)(successful ? "Successful" : "Failed");
+		}
+		else if (type.isAssignableFrom(JSONResult.class)){
+			
+			return (R)new DiffusionJSONResult();
+		}
+		return null;
+	}
+	
+	private class DiffusionJSONResult implements JSONResult{
+
+		@Override
+		public String getJSON() {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode objectNode = mapper.createObjectNode();
+			objectNode.put("successful", successful);
+			try {
+				return mapper.writeValueAsString(objectNode);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
 	}
 }

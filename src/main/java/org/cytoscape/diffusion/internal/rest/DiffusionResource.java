@@ -58,7 +58,8 @@ public class DiffusionResource {
 	private DiffusionResponse buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
 	{
 		DiffusionResponse response = new DiffusionResponse();
-		response.data = new Object();
+		response.data = new StatusMessage();
+		response.data.successful = false;
 		List<CIError> errors = new ArrayList<CIError>();
 		CIError error = new CIError();
 		error.code = cyRESTErrorRoot + resourcePath+ "/"+ code;
@@ -79,7 +80,7 @@ public class DiffusionResource {
 		return response;
 	}
 
-	class DiffusionTaskObserver implements TaskObserver{
+	class DiffusionTaskObserver implements TaskObserver {
 
 		private DiffusionResponse response;
 		private String resourcePath;
@@ -97,7 +98,8 @@ public class DiffusionResource {
 			if (arg0.getType() == FinishStatus.Type.SUCCEEDED || arg0.getType() == FinishStatus.Type.CANCELLED)
 			{
 				response = new DiffusionResponse();
-				response.data = arg0.getType().toString();
+				response.data = new StatusMessage();
+				response.data.successful = true;
 				response.errors = new ArrayList<CIError>();
 			}
 			else
@@ -108,7 +110,7 @@ public class DiffusionResource {
 
 		@Override
 		public void taskFinished(ObservableTask arg0) {
-
+			
 		}
 	}
 

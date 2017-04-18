@@ -140,6 +140,15 @@
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
+		<!-- Note: It is intended that the packages exported by CyREST will be
+		integrated into Cytoscape core API in Cytoscape 3.6.0. For Cytoscape 3.6
+		remove this dependency. -->
+		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>cy-rest</artifactId>
+			<version>[3.4.0-SNAPSHOT,4.0.0]</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- For logging -->
 		<dependency>

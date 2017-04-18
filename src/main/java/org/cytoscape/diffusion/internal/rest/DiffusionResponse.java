@@ -11,6 +11,6 @@ import org.cytoscape.diffusion.internal.client.CIError;
  */
 public class DiffusionResponse {
 
-	public Object data;
+	public StatusMessage data;
 	public List<CIError> errors;
 }
