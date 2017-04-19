@@ -4,17 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 
-import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.model.CyTable;
 
 
 /**
@@ -24,16 +25,19 @@ import org.cytoscape.diffusion.internal.util.DiffusionTable;
 @SuppressWarnings("serial")
 public abstract class AbstractSliderPanel extends JPanel implements PropertyChangeListener {
 
+	// This is the data model for this GUI object
+	protected final DiffusionTable diffusionTable;
+	
+	// GUI components
 	protected final JSlider thresholdSlider;
 	protected final SliderValueSetterPanel valuePanel;
-	protected final DiffusionTable diffusionTable;
-	protected final DiffusionNetworkManager networkManager;
 
-	AbstractSliderPanel(final DiffusionNetworkManager networkManager, final DiffusionTable diffusionTable,
+	
+	AbstractSliderPanel(
+			final DiffusionTable diffusionTable,
 			final String title, final String prefix, final String suffix) {
 
 		this.diffusionTable = diffusionTable;
-		this.networkManager = networkManager;
 
 		// Setup base panel
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -59,6 +63,21 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 		this.add(labelPanel);
 		this.add(thresholdSlider);
 		this.add(valuePanel);
+	}
+	
+	protected void selectNodesOverThreshold(String heatColumn, Double threshold) {
+		final CyNetwork network = this.diffusionTable.getAssociatedNetwork();
+		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
+		
+		for (CyRow row : localTable.getAllRows()) {
+			final Double heatValue = row.get(heatColumn, Double.class);
+			
+			if (heatValue >= threshold) {
+				row.set(CyNetwork.SELECTED, Boolean.TRUE);
+			} else {
+				row.set(CyNetwork.SELECTED, Boolean.FALSE);
+			}
+		}
 	}
 
 	protected abstract JSlider createSlider();

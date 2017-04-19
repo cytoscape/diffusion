@@ -9,7 +9,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
-import org.cytoscape.diffusion.internal.util.DiffusionNetworkManager;
+import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
@@ -37,11 +37,11 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 	@Tunable(description = "Heat Column:")
 	public ListSingleSelection<String> heatColumnName;
 
-	public DiffuseSelectedWithOptionsTask(DiffusionNetworkManager networkManager,
+	public DiffuseSelectedWithOptionsTask(DiffusionTableManager tableManager, CyNetwork network,
 			CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel, CySwingApplication swingApplication,
 			CyApplicationManager appManager, DiffusionServiceClient client, TunableSetter setter) {
 
-		super(networkManager, writerFactory, outputPanel, swingApplication, appManager, client, setter);
+		super(tableManager, network, writerFactory, outputPanel, swingApplication, appManager, client, setter);
 
 		initColumnList();
 	}
@@ -49,7 +49,7 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 	private final void initColumnList() {
 		// Get available columns
 
-		final CyNetwork targetNetwork = diffusionNetworkManager.getNetwork();
+		final CyNetwork targetNetwork = network;
 		final CyTable localTbl = targetNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		final Collection<CyColumn> cols = localTbl.getColumns();
 
@@ -65,6 +65,9 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
+		tm.setTitle("Running Heat Diffusion");
+		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
+		
 		final String selectedColumnName = this.heatColumnName.getSelectedValue();
 
 		// Special case: new heat column
