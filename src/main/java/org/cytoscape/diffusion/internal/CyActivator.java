@@ -7,6 +7,7 @@ import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
 import java.util.Dictionary;
@@ -99,6 +100,7 @@ public class CyActivator extends AbstractCyActivator {
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
+		diffusionTaskFactoryProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion on Selected Nodes");
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -113,6 +115,7 @@ public class CyActivator extends AbstractCyActivator {
 		Properties wOptsProps = new Properties();
 		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
+		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion Layout on Selected Nodes");
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");

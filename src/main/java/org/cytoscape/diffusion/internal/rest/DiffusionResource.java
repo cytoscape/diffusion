@@ -28,10 +28,12 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
+import org.cytoscape.work.util.ListSingleSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -50,11 +52,14 @@ public class DiffusionResource {
 	private DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory;
 	private String logLocation;
 
-	private static final String GENERIC_NOTES = "<p>Diffusion will send the selected network view and its selected nodes to "
+	
+	private static final String GENERIC_NOTES = "Diffusion will send the selected network view and its selected nodes to "
 			+ "a web-based REST service to calculate network propagation. Results are returned and represented by columns "
-			+ "in the node table.</p>"
-			+ "Columns will named according to the following convention:<br>"
-			+" <ul><li><b>_heat</b></li><li>_rank</li></ul>";
+			+ "in the node table.\r\n"
+			+ "Columns are created for each execution of Diffusion (each execution is assigned an integer <b>x</b>) and will named according to the following convention:\r\n"
+			+"* **diffusion\\_output\\_{x}\\_heat** The numerical result of the diffusion process, corresponding to d in the diffusion equation.\r\n"
+			+"* **diffusion\\_output\\_{x}\\_rank** Node ranking according to output heat. This column is recommended for analysis, as it is very robust to parameter choice.\r\n\r\n";
+	
 	
 	public DiffusionResource(SynchronousTaskManager<?> taskManager, CyNetworkManager cyNetworkManager, CyNetworkViewManager cyNetworkViewManager, DiffusionContextMenuTaskFactory diffusionTaskFactory, DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, String logLocation) {
 		this.taskManager = taskManager;
@@ -69,11 +74,10 @@ public class DiffusionResource {
 
 	private final static String cyRESTErrorRoot = "cy://cytoscape-diffusion-app";
 
-	private DiffusionResponse buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
+	private DiffusionResponse<Object> buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
 	{
-		DiffusionResponse response = new DiffusionResponse();
-		response.data = new StatusMessage();
-		response.data.successful = false;
+		DiffusionResponse<Object> response = new DiffusionResponse<Object>();
+		response.data = new Object();
 		List<CIError> errors = new ArrayList<CIError>();
 		CIError error = new CIError();
 		error.code = cyRESTErrorRoot + resourcePath+ "/"+ code;
@@ -96,7 +100,7 @@ public class DiffusionResource {
 
 	class DiffusionTaskObserver implements TaskObserver {
 
-		private DiffusionResponse response;
+		private DiffusionResponse<?> response;
 		private String resourcePath;
 		private String errorCode;
 
@@ -109,15 +113,19 @@ public class DiffusionResource {
 		@Override
 		public void allFinished(FinishStatus arg0) {
 
-			if (arg0.getType() == FinishStatus.Type.SUCCEEDED || arg0.getType() == FinishStatus.Type.CANCELLED)
-			{
-				response = new DiffusionResponse();
-				response.data = new StatusMessage();
-				response.data.successful = true;
+			if (arg0.getType() == FinishStatus.Type.SUCCEEDED || arg0.getType() == FinishStatus.Type.CANCELLED) {
+				response = new DiffusionResponse<DiffusionStatusMessage>();
+				DiffusionStatusMessage diffusionStatusMessage = new DiffusionStatusMessage();
+				if (arg0.getType() == FinishStatus.Type.SUCCEEDED) {
+					diffusionStatusMessage.successful = true;
+				}
+				else {
+					diffusionStatusMessage.successful = false;
+				}
+				((DiffusionResponse<DiffusionStatusMessage>)response).data = diffusionStatusMessage;
 				response.errors = new ArrayList<CIError>();
 			}
-			else
-			{
+			else {
 				response = buildCIErrorResponse(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), resourcePath, errorCode, arg0.getException().getMessage(), arg0.getException());
 			}
 		}
@@ -157,24 +165,37 @@ public class DiffusionResource {
 		
 	}
 	
+	@ApiModel(value="Diffusion Successful Response", description="Diffusion Analysis Results in CI Format", parent=DiffusionResponse.class)
+	public static class SuccessfulDiffusionResponse extends DiffusionResponse<DiffusionStatusMessage>{
+	}
+	
 	@POST
 	@Produces("application/json")
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis with Options",
 	notes = GENERIC_NOTES,
-	response = DiffusionResponse.class)
+	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
 	})
 
-	public Response diffuseWithOptions(@ApiParam(name="Network SUID", value="see GET /v1/networks") @PathParam("networkSUID") long networkSUID, @ApiParam(name="Network View SUID") @PathParam("networkViewSUID") long networkViewSUID, @ApiParam(value = "Options", required = true) DiffusionParameters diffusionParameters) {
+	public Response diffuseWithOptions(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID, @ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters) {
 
 		System.out.println("Accessing Diffusion with options via REST");
 		CyNetworkView cyNetworkView = getCyNetworkView("{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "1", networkSUID, networkViewSUID);
 		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "2");
 		Map<String, Object> tunableMap = new HashMap<String, Object>();
-		tunableMap.put("headColumnName", diffusionParameters.heatColumnName);
+		
+		//This next section is VERY interesting. Since we're accessing DiffusionWithOptionsTaskFactory without the
+		//benefit of interceptors or CommandExecutor, we have the option of literally building tunables from scratch.
+		ListSingleSelection<String> heatColumnName = new ListSingleSelection<String>();
+		List<String> heatColumns = new ArrayList<String>();
+		heatColumns.add(diffusionParameters.heatColumnName);
+		heatColumnName.setPossibleValues(heatColumns);
+		heatColumnName.setSelectedValue(diffusionParameters.heatColumnName);
+		
+		tunableMap.put("heatColumnName", heatColumnName);
 		tunableMap.put("time", diffusionParameters.time);
 		TaskIterator taskIterator = diffusionWithOptionsTaskFactory.createTaskIterator(cyNetworkView);
 		taskManager.setExecutionContext(tunableMap);
@@ -190,14 +211,14 @@ public class DiffusionResource {
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse")
 	@ApiOperation(value = "Execute Diffusion Analysis",
 	notes = GENERIC_NOTES 
-			+ "<br><br>The nodes you would like to use as input heats should be selected. This will be used to "
-			+ " automatically generate the contents of the heat input column.",
-			response = DiffusionResponse.class)
+			+ "The nodes you would like to use as input should be selected. This will be used to "
+			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation.\r\n",
+			response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
 	})
 
-	public Response diffuse(@PathParam("networkSUID") long networkSUID, @PathParam("networkViewSUID") long networkViewSUID) {
+	public Response diffuse(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID) {
 
 		System.out.println("Accessing Diffusion via REST");
 		CyNetworkView cyNetworkView = getCyNetworkView("/diffuse", "1", networkSUID, networkViewSUID);

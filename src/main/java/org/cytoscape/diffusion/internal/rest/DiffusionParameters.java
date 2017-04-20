@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value="Diffusion Parameters", description="Parameters for Diffusion analysis")
 public class DiffusionParameters {
-	@ApiModelProperty(value = "Heat Column Name", example=DiffuseSelectedTask.DIFFUSION_INPUT_COL_NAME)
+	@ApiModelProperty(value = "A node column name intended to override the default table column 'diffusion_input'. This represents the query vector and corresponds to h in the diffusion equation.", example=DiffuseSelectedTask.DIFFUSION_INPUT_COL_NAME)
 	public String heatColumnName;
 	@ApiModelProperty(value = "Time", example="0.1")
 	public Double time;
