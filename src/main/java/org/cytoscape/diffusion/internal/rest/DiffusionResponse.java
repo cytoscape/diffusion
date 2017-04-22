@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value="Diffusion Response", description="Diffusion Analysis Results in CI Format")
 public class DiffusionResponse<T> {
-
+	@ApiModelProperty(value = "Return data produced by processing the Diffusion request", required=true)
 	public T data;
 	@ApiModelProperty(value = "An Array of Errors, if any, produced while processing the Diffusion request", required=true)
 	public List<CIError> errors;

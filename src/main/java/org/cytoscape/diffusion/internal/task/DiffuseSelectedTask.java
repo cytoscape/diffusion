@@ -20,6 +20,7 @@ import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
+import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionResult;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
@@ -81,13 +82,12 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		this.appManager = appManager;
 	}
 
-	private boolean successful = false;
+	private DiffusionResultColumns diffusionResultColumns = null;
 	
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
-		successful = true;
 	}
 
 	protected void diffuse(final String columnName, final Double time) throws Exception {
@@ -126,6 +126,11 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		// Write values to the local table.
 		setResult(outputColumnName, nodeAttributes);
 
+		// This is hacky, like the rest of column naming.
+		diffusionResultColumns = new DiffusionResultColumns();
+		diffusionResultColumns.heatColumn = String.format("%s_heat", outputColumnName);
+		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
+		
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
 
@@ -334,7 +339,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	public <R> R getResults(Class<? extends R> type) {
 		if (type.equals(String.class))
 		{
-			return (R)(successful ? "Successful" : "Failed");
+			return (R)(diffusionResultColumns == null ? "Successful" : "Failed");
 		}
 		else if (type.isAssignableFrom(JSONResult.class)){
 			
@@ -348,14 +353,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		@Override
 		public String getJSON() {
 			ObjectMapper mapper = new ObjectMapper();
-			ObjectNode objectNode = mapper.createObjectNode();
-			objectNode.put("successful", successful);
 			try {
-				return mapper.writeValueAsString(objectNode);
+				return mapper.writeValueAsString(diffusionResultColumns);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 				return null;
 			}
+		
 		}
 		
 	}

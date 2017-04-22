@@ -1,6 +1,7 @@
 package org.cytoscape.diffusion.internal.rest;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,9 +29,14 @@ import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
+import org.cytoscape.work.json.JSONResult;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
@@ -53,13 +59,16 @@ public class DiffusionResource {
 	private String logLocation;
 
 	
-	private static final String GENERIC_NOTES = "Diffusion will send the selected network view and its selected nodes to "
+	private static final String GENERIC_SWAGGER_NOTES = "Diffusion will send the selected network view and its selected nodes to "
 			+ "a web-based REST service to calculate network propagation. Results are returned and represented by columns "
 			+ "in the node table.\r\n"
-			+ "Columns are created for each execution of Diffusion (each execution is assigned an integer <b>x</b>) and will named according to the following convention:\r\n"
-			+"* **diffusion\\_output\\_{x}\\_heat** The numerical result of the diffusion process, corresponding to d in the diffusion equation.\r\n"
-			+"* **diffusion\\_output\\_{x}\\_rank** Node ranking according to output heat. This column is recommended for analysis, as it is very robust to parameter choice.\r\n\r\n";
-	
+			+ "Columns are created for each execution of Diffusion and their names are returned in the response.\r\n\r\n";
+
+	/*
+	 * Replicated from CyREST.
+	 */
+	public final static String NETWORK_GET_LINK = "[/v1/networks](#!/Networks/getNetworksAsSUID)";
+	public final static String NETWORK_VIEWS_LINK = "[/v1/networks/{networkId}/views](#!/Network32Views/getAllNetworkViews)";
 	
 	public DiffusionResource(SynchronousTaskManager<?> taskManager, CyNetworkManager cyNetworkManager, CyNetworkViewManager cyNetworkViewManager, DiffusionContextMenuTaskFactory diffusionTaskFactory, DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, String logLocation) {
 		this.taskManager = taskManager;
@@ -101,6 +110,7 @@ public class DiffusionResource {
 	class DiffusionTaskObserver implements TaskObserver {
 
 		private DiffusionResponse<?> response;
+		DiffusionResultColumns diffusionResultColumns;
 		private String resourcePath;
 		private String errorCode;
 
@@ -114,15 +124,8 @@ public class DiffusionResource {
 		public void allFinished(FinishStatus arg0) {
 
 			if (arg0.getType() == FinishStatus.Type.SUCCEEDED || arg0.getType() == FinishStatus.Type.CANCELLED) {
-				response = new DiffusionResponse<DiffusionStatusMessage>();
-				DiffusionStatusMessage diffusionStatusMessage = new DiffusionStatusMessage();
-				if (arg0.getType() == FinishStatus.Type.SUCCEEDED) {
-					diffusionStatusMessage.successful = true;
-				}
-				else {
-					diffusionStatusMessage.successful = false;
-				}
-				((DiffusionResponse<DiffusionStatusMessage>)response).data = diffusionStatusMessage;
+				response = new DiffusionResponse<DiffusionResultColumns>();
+				((DiffusionResponse<DiffusionResultColumns>)response).data = diffusionResultColumns;
 				response.errors = new ArrayList<CIError>();
 			}
 			else {
@@ -132,7 +135,17 @@ public class DiffusionResource {
 
 		@Override
 		public void taskFinished(ObservableTask arg0) {
-
+			JSONResult jsonResult = arg0.getResults(JSONResult.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			try {
+				diffusionResultColumns = objectMapper.readValue(jsonResult.getJSON(), DiffusionResultColumns.class);	
+			} catch (JsonParseException e) {
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -166,7 +179,7 @@ public class DiffusionResource {
 	}
 	
 	@ApiModel(value="Diffusion Successful Response", description="Diffusion Analysis Results in CI Format", parent=DiffusionResponse.class)
-	public static class SuccessfulDiffusionResponse extends DiffusionResponse<DiffusionStatusMessage>{
+	public static class SuccessfulDiffusionResponse extends DiffusionResponse<DiffusionResultColumns>{
 	}
 	
 	@POST
@@ -174,10 +187,10 @@ public class DiffusionResource {
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis with Options",
-	notes = GENERIC_NOTES,
+	notes = GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
+			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class)
 	})
 
 	public Response diffuseWithOptions(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID, @ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters) {
@@ -210,7 +223,7 @@ public class DiffusionResource {
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse")
 	@ApiOperation(value = "Execute Diffusion Analysis",
-	notes = GENERIC_NOTES 
+	notes = GENERIC_SWAGGER_NOTES 
 			+ "The nodes you would like to use as input should be selected. This will be used to "
 			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation.\r\n",
 			response = SuccessfulDiffusionResponse.class)
