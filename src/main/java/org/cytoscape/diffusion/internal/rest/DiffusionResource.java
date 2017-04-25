@@ -61,8 +61,8 @@ public class DiffusionResource {
 	
 	private static final String GENERIC_SWAGGER_NOTES = "Diffusion will send the selected network view and its selected nodes to "
 			+ "a web-based REST service to calculate network propagation. Results are returned and represented by columns "
-			+ "in the node table.\r\n"
-			+ "Columns are created for each execution of Diffusion and their names are returned in the response.\r\n\r\n";
+			+ "in the node table." + '\n' + '\n'
+			+ "Columns are created for each execution of Diffusion and their names are returned in the response."  + '\n' + '\n';
 
 	/*
 	 * Replicated from CyREST.
@@ -196,8 +196,8 @@ public class DiffusionResource {
 	public Response diffuseWithOptions(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID, @ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters) {
 
 		System.out.println("Accessing Diffusion with options via REST");
-		CyNetworkView cyNetworkView = getCyNetworkView("{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "1", networkSUID, networkViewSUID);
-		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "2");
+		CyNetworkView cyNetworkView = getCyNetworkView("/v1/{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "1", networkSUID, networkViewSUID);
+		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("/v1/{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "2");
 		Map<String, Object> tunableMap = new HashMap<String, Object>();
 		
 		//This next section is VERY interesting. Since we're accessing DiffusionWithOptionsTaskFactory without the
@@ -225,7 +225,7 @@ public class DiffusionResource {
 	@ApiOperation(value = "Execute Diffusion Analysis",
 	notes = GENERIC_SWAGGER_NOTES 
 			+ "The nodes you would like to use as input should be selected. This will be used to "
-			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation.\r\n",
+			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation."  + '\n' + '\n',
 			response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
@@ -234,8 +234,8 @@ public class DiffusionResource {
 	public Response diffuse(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID) {
 
 		System.out.println("Accessing Diffusion via REST");
-		CyNetworkView cyNetworkView = getCyNetworkView("/diffuse", "1", networkSUID, networkViewSUID);
-		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("/diffuse", "1");
+		CyNetworkView cyNetworkView = getCyNetworkView("/v1/{networkSUID}/views/{networkViewSUID}/diffuse", "1", networkSUID, networkViewSUID);
+		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("/v1/{networkSUID}/views/{networkViewSUID}/diffuse", "1");
 		TaskIterator taskIterator = diffusionTaskFactory.createTaskIterator(cyNetworkView);
 		taskManager.execute(taskIterator, taskObserver);
 		return Response.status(taskObserver.response.errors.size() == 0 ? Response.Status.OK : Response.Status.INTERNAL_SERVER_ERROR)

@@ -88,6 +88,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
+		
 	}
 
 	protected void diffuse(final String columnName, final Double time) throws Exception {

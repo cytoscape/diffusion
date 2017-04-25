@@ -115,7 +115,7 @@ public class CyActivator extends AbstractCyActivator {
 		Properties wOptsProps = new Properties();
 		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
-		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion Layout on Selected Nodes");
+		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion with Options");
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");

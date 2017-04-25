@@ -14,6 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class DiffusionParameters {
 	@ApiModelProperty(value = "A node column name intended to override the default table column 'diffusion_input'. This represents the query vector and corresponds to h in the diffusion equation.", example=DiffuseSelectedTask.DIFFUSION_INPUT_COL_NAME)
 	public String heatColumnName;
-	@ApiModelProperty(value = "Time", example="0.1")
+	@ApiModelProperty(value = "The extent of spread over the network. This corresponds to t in the diffusion equation.", example="0.1")
 	public Double time;
 }
