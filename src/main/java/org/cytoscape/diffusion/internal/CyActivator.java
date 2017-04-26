@@ -64,7 +64,7 @@ public class CyActivator extends AbstractCyActivator {
 				NewNetworkSelectedNodesOnlyTaskFactory.class);
 
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
-
+		
 		SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyNetworkViewManager cyNetworkViewManager = getService(context, CyNetworkViewManager.class);
@@ -141,7 +141,7 @@ public class CyActivator extends AbstractCyActivator {
 			logLocation = null;
 		}
 
-		DiffusionResource diffusionResource = new DiffusionResource(synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, logLocation);
+		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, logLocation);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);

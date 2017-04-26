@@ -340,7 +340,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	public <R> R getResults(Class<? extends R> type) {
 		if (type.equals(String.class))
 		{
-			return (R)(diffusionResultColumns == null ? "Successful" : "Failed");
+			return (R)(diffusionResultColumns != null ? "Created result columns: ("+diffusionResultColumns.heatColumn+"),("+diffusionResultColumns.rankColumn+")" : "No result columns available");
 		}
 		else if (type.isAssignableFrom(JSONResult.class)){
 			

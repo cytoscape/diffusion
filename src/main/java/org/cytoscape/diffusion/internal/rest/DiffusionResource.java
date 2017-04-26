@@ -18,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.diffusion.internal.client.CIError;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.model.CyNetwork;
@@ -49,14 +50,15 @@ import io.swagger.annotations.ApiResponses;
 @Path("/diffusion/v1/")
 public class DiffusionResource {
 
-	private SynchronousTaskManager<?> taskManager;
+	private final CyApplicationManager cyApplicationManager;
+	private final SynchronousTaskManager<?> taskManager;
 	
-	private CyNetworkManager cyNetworkManager;
-	private CyNetworkViewManager cyNetworkViewManager;
+	private final CyNetworkManager cyNetworkManager;
+	private final CyNetworkViewManager cyNetworkViewManager;
 	
-	private DiffusionContextMenuTaskFactory diffusionTaskFactory;
-	private DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory;
-	private String logLocation;
+	private final DiffusionContextMenuTaskFactory diffusionTaskFactory;
+	private final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory;
+	private final String logLocation;
 
 	
 	private static final String GENERIC_SWAGGER_NOTES = "Diffusion will send the selected network view and its selected nodes to "
@@ -70,7 +72,8 @@ public class DiffusionResource {
 	public final static String NETWORK_GET_LINK = "[/v1/networks](#!/Networks/getNetworksAsSUID)";
 	public final static String NETWORK_VIEWS_LINK = "[/v1/networks/{networkId}/views](#!/Network32Views/getAllNetworkViews)";
 	
-	public DiffusionResource(SynchronousTaskManager<?> taskManager, CyNetworkManager cyNetworkManager, CyNetworkViewManager cyNetworkViewManager, DiffusionContextMenuTaskFactory diffusionTaskFactory, DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, String logLocation) {
+	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<?> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final String logLocation) {
+		this.cyApplicationManager = cyApplicationManager;
 		this.taskManager = taskManager;
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyNetworkViewManager = cyNetworkViewManager;
@@ -185,8 +188,26 @@ public class DiffusionResource {
 	@POST
 	@Produces("application/json")
 	@Consumes("application/json")
+	@Path("currentView/diffuse_with_options")
+	@ApiOperation(value = "Execute Diffusion Analysis on Current View with Options",
+	notes = GENERIC_SWAGGER_NOTES,
+	response = SuccessfulDiffusionResponse.class)
+	@ApiResponses(value = { 
+			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = DiffusionResponse.class)
+	})
+	public Response diffuseWithOptions(@ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters)
+	{
+		CyNetwork cyNetwork = cyApplicationManager.getCurrentNetwork();
+		CyNetworkView cyNetworkView = cyApplicationManager.getCurrentNetworkView();
+	
+		return diffuseWithOptions(cyNetwork.getSUID(), cyNetworkView.getSUID(), diffusionParameters);
+	}
+	
+	@POST
+	@Produces("application/json")
+	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse_with_options")
-	@ApiOperation(value = "Execute Diffusion Analysis with Options",
+	@ApiOperation(value = "Execute Diffusion Analysis on a Specific Network View with Options",
 	notes = GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
@@ -218,11 +239,31 @@ public class DiffusionResource {
 				.entity(taskObserver.response).build();
 	}
 
+
+	@POST
+	@Produces("application/json")
+	@Consumes("application/json")
+	@Path("currentView/diffuse")
+	@ApiOperation(value = "Execute Diffusion Analysis on Current View with Options",
+	notes = GENERIC_SWAGGER_NOTES,
+	response = SuccessfulDiffusionResponse.class)
+	@ApiResponses(value = { 
+			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = DiffusionResponse.class)
+	})
+	public Response diffuse()
+	{
+		CyNetwork cyNetwork = cyApplicationManager.getCurrentNetwork();
+		CyNetworkView cyNetworkView = cyApplicationManager.getCurrentNetworkView();
+	
+		return diffuse(cyNetwork.getSUID(), cyNetworkView.getSUID());
+	}
+	
+	
 	@POST
 	@Produces("application/json")
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse")
-	@ApiOperation(value = "Execute Diffusion Analysis",
+	@ApiOperation(value = "Execute Diffusion Analysis on a Specific Network View",
 	notes = GENERIC_SWAGGER_NOTES 
 			+ "The nodes you would like to use as input should be selected. This will be used to "
 			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation."  + '\n' + '\n',
