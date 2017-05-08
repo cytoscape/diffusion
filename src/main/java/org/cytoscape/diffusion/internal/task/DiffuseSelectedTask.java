@@ -39,7 +39,7 @@ import org.cytoscape.task.AbstractNetworkTask;
 
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
-import org.cytoscape.work.json.JSONResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,27 +342,12 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		{
 			return (R)(diffusionResultColumns != null ? "Created result columns: ("+diffusionResultColumns.heatColumn+"),("+diffusionResultColumns.rankColumn+")" : "No result columns available");
 		}
-		else if (type.isAssignableFrom(JSONResult.class)){
-			
-			return (R)new DiffusionJSONResult();
+		else if (type.isAssignableFrom(DiffusionResultColumns.class)){
+			return (R) diffusionResultColumns;
 		}
 		return null;
 	}
 	
-	private class DiffusionJSONResult implements JSONResult{
-
-		@Override
-		public String getJSON() {
-			ObjectMapper mapper = new ObjectMapper();
-			try {
-				return mapper.writeValueAsString(diffusionResultColumns);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-				return null;
-			}
-		
-		}
-		
-	}
+	
 }
 

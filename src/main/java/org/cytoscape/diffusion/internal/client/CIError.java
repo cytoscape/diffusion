@@ -4,7 +4,7 @@ import java.net.URI;
 
 public class CIError {
 
-	public String code;
+	public String type;
 	public Integer status;
 	public String message;
 	public URI link;

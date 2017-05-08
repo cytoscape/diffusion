@@ -9,7 +9,7 @@
 
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.4.0</cytoscape.api.version>
+		<cytoscape.api.version>[3.5.0,3.5.1]</cytoscape.api.version>
 
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
@@ -139,15 +139,6 @@
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
-		</dependency>
-		<!-- Note: It is intended that the packages exported by CyREST will be
-		integrated into Cytoscape core API in Cytoscape 3.6.0. For Cytoscape 3.6
-		remove this dependency. -->
-		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>cy-rest</artifactId>
-			<version>[3.5.0-SNAPSHOT,4.0.0]</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- For logging -->

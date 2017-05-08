@@ -4,16 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.util.CxioUtil;
+
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
@@ -98,7 +96,7 @@ public class DiffusionResultParser {
 	public Map<String, List<AspectElement>> decode(String response) throws IOException {
 		
 		ObjectMapper objectMapper = new ObjectMapper();
-		CIResponse res = objectMapper.readValue(response, CIResponse.class);
+		CIResponse<?> res = objectMapper.readValue(response, CIResponse.class);
 		
 		if(res.errors.size()!= 0) {
 			throw new IOException(res.errors.toString());
