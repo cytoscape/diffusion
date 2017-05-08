@@ -9,7 +9,7 @@
 
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.4.0</cytoscape.api.version>
+		<cytoscape.api.version>[3.5.0,3.5.1]</cytoscape.api.version>
 
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
@@ -53,7 +53,7 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
-						<Cytoscape-App-Dependencies>CX Support;2.1.0,cyREST;3.4.0</Cytoscape-App-Dependencies>
+						<Cytoscape-App-Dependencies>CX Support;2.1.0,cyREST;3.5.0</Cytoscape-App-Dependencies>
 						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -140,14 +140,21 @@
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
+		
 		<!-- Note: It is intended that the packages exported by CyREST will be
-		integrated into Cytoscape core API in Cytoscape 3.6.0. For Cytoscape 3.6
-		remove this dependency. -->
+		integrated into Cytoscape core API in Cytoscape 3.6.0. For Cytoscape 3.6,
+		remove these two dependencies -->
 		<dependency>
-			<groupId>org.cytoscape</groupId>
-			<artifactId>cy-rest</artifactId>
-			<version>[3.5.0-SNAPSHOT,4.0.0]</version>
-			<scope>provided</scope>
+		 	 <groupId>org.cytoscape</groupId>
+  			<artifactId>work-json-api</artifactId>
+  			<version>0.1.0-SNAPSHOT</version>
+  			<scope>provided</scope>
+		</dependency>
+		<dependency>
+		 	 <groupId>org.cytoscape</groupId>
+  			<artifactId>ci-api</artifactId>
+  			<version>0.1.0-SNAPSHOT</version>
+  			<scope>provided</scope>
 		</dependency>
 
 		<!-- For logging -->

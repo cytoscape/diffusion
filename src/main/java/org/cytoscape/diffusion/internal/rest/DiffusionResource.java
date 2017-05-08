@@ -19,7 +19,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.diffusion.internal.client.CIError;
+import org.cytoscape.ci.model.CIError;
+import org.cytoscape.ci.model.CIResponse;
+
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
@@ -84,15 +86,15 @@ public class DiffusionResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffusionResource.class);
 
-	private final static String cyRESTErrorRoot = "cy://cytoscape-diffusion-app";
+	private final static String cyRESTErrorRoot = "urn:cytoscape:ci:diffusion-app";
 
-	private DiffusionResponse<Object> buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
+	private CIResponse<Object> buildCIErrorResponse(int status, String resourcePath, String type, String message, Exception e)
 	{
-		DiffusionResponse<Object> response = new DiffusionResponse<Object>();
+		CIResponse<Object> response = new CIResponse<Object>();
 		response.data = new Object();
 		List<CIError> errors = new ArrayList<CIError>();
 		CIError error = new CIError();
-		error.code = cyRESTErrorRoot + resourcePath+ "/"+ code;
+		error.type = cyRESTErrorRoot + resourcePath+ "/"+ type;
 		if (e != null)
 		{
 			logger.error(message, e);
@@ -112,27 +114,27 @@ public class DiffusionResource {
 
 	class DiffusionTaskObserver implements TaskObserver {
 
-		private DiffusionResponse<?> response;
+		private CIResponse<?> response;
 		DiffusionResultColumns diffusionResultColumns;
 		private String resourcePath;
-		private String errorCode;
+		private String errorType;
 
-		public DiffusionTaskObserver(String resourcePath, String errorCode){
+		public DiffusionTaskObserver(String resourcePath, String errorType){
 			response = null;
 			this.resourcePath = resourcePath;
-			this.errorCode = errorCode;
+			this.errorType = errorType;
 		}
 
 		@Override
 		public void allFinished(FinishStatus arg0) {
 
 			if (arg0.getType() == FinishStatus.Type.SUCCEEDED || arg0.getType() == FinishStatus.Type.CANCELLED) {
-				response = new DiffusionResponse<DiffusionResultColumns>();
-				((DiffusionResponse<DiffusionResultColumns>)response).data = diffusionResultColumns;
+				response = new CIResponse<DiffusionResultColumns>();
+				((CIResponse<DiffusionResultColumns>)response).data = diffusionResultColumns;
 				response.errors = new ArrayList<CIError>();
 			}
 			else {
-				response = buildCIErrorResponse(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), resourcePath, errorCode, arg0.getException().getMessage(), arg0.getException());
+				response = buildCIErrorResponse(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), resourcePath, errorType, arg0.getException().getMessage(), arg0.getException());
 			}
 		}
 
@@ -152,21 +154,21 @@ public class DiffusionResource {
 		}
 	}
 
-	public CyNetworkView getCyNetworkView(String resourcePath, String errorCode, long networkSUID, long networkViewSUID)
+	public CyNetworkView getCyNetworkView(String resourcePath, String errorType, long networkSUID, long networkViewSUID)
 	{
 		final CyNetwork network = cyNetworkManager.getNetwork(networkSUID);
 		if (network == null) {
 			String messageString = "Could not find network with SUID: " + networkSUID;
 			throw new NotFoundException(messageString, Response.status(Response.Status.NOT_FOUND)
 					.type(MediaType.APPLICATION_JSON)
-					.entity(buildCIErrorResponse(404, resourcePath, errorCode, messageString, null)).build());
+					.entity(buildCIErrorResponse(404, resourcePath, errorType, messageString, null)).build());
 		}
 		final Collection<CyNetworkView> views = cyNetworkViewManager.getNetworkViews(network);
 		if (views.isEmpty()) {
 			String messageString = "No views are available for network with SUID: " + networkSUID;
 			throw new NotFoundException(messageString, Response.status(Response.Status.NOT_FOUND)
 					.type(MediaType.APPLICATION_JSON)
-					.entity(buildCIErrorResponse(404, resourcePath, errorCode, messageString, null)).build());
+					.entity(buildCIErrorResponse(404, resourcePath, errorType, messageString, null)).build());
 		}
 		for (final CyNetworkView view : views) {
 			final Long vid = view.getSUID();
@@ -177,12 +179,12 @@ public class DiffusionResource {
 		String messageString = "Could not find network view with SUID: " + networkViewSUID + " for network with SUID: " + networkSUID;
 		throw new NotFoundException(messageString, Response.status(Response.Status.NOT_FOUND)
 					.type(MediaType.APPLICATION_JSON)
-					.entity(buildCIErrorResponse(404, resourcePath, errorCode, messageString, null)).build());
+					.entity(buildCIErrorResponse(404, resourcePath, errorType, messageString, null)).build());
 		
 	}
 	
-	@ApiModel(value="Diffusion Successful Response", description="Diffusion Analysis Results in CI Format", parent=DiffusionResponse.class)
-	public static class SuccessfulDiffusionResponse extends DiffusionResponse<DiffusionResultColumns>{
+	@ApiModel(value="Diffusion Successful Response", description="Diffusion Analysis Results in CI Format", parent=CIResponse.class)
+	public static class SuccessfulDiffusionResponse extends CIResponse<DiffusionResultColumns>{
 	}
 	
 	@POST
@@ -193,7 +195,7 @@ public class DiffusionResource {
 	notes = GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = DiffusionResponse.class)
+			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
 	})
 	public Response diffuseWithOptions(@ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters)
 	{
@@ -211,14 +213,14 @@ public class DiffusionResource {
 	notes = GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class)
+			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class)
 	})
 
 	public Response diffuseWithOptions(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID, @ApiParam(value = "Diffusion Parameters", required = true) DiffusionParameters diffusionParameters) {
 
 		System.out.println("Accessing Diffusion with options via REST");
-		CyNetworkView cyNetworkView = getCyNetworkView("/v1/{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "1", networkSUID, networkViewSUID);
-		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("/v1/{networkSUID}/views/{networkViewSUID}/diffuse_with_options", "2");
+		CyNetworkView cyNetworkView = getCyNetworkView("diffuse_with_options", "1", networkSUID, networkViewSUID);
+		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("diffuse_with_options", "2");
 		Map<String, Object> tunableMap = new HashMap<String, Object>();
 		
 		//This next section is VERY interesting. Since we're accessing DiffusionWithOptionsTaskFactory without the
@@ -248,7 +250,7 @@ public class DiffusionResource {
 	notes = GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = DiffusionResponse.class)
+			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
 	})
 	public Response diffuse()
 	{
@@ -269,14 +271,14 @@ public class DiffusionResource {
 			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation."  + '\n' + '\n',
 			response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
+			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class),
 	})
 
 	public Response diffuse(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID) {
 
 		System.out.println("Accessing Diffusion via REST");
-		CyNetworkView cyNetworkView = getCyNetworkView("/v1/{networkSUID}/views/{networkViewSUID}/diffuse", "1", networkSUID, networkViewSUID);
-		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("/v1/{networkSUID}/views/{networkViewSUID}/diffuse", "1");
+		CyNetworkView cyNetworkView = getCyNetworkView("diffuse", "1", networkSUID, networkViewSUID);
+		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver("diffuse", "1");
 		TaskIterator taskIterator = diffusionTaskFactory.createTaskIterator(cyNetworkView);
 		taskManager.execute(taskIterator, taskObserver);
 		return Response.status(taskObserver.response.errors.size() == 0 ? Response.Status.OK : Response.Status.INTERNAL_SERVER_ERROR)
