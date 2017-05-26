@@ -7,6 +7,7 @@ import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
@@ -24,10 +25,8 @@ import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
-import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -35,10 +34,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
 import org.cytoscape.work.SynchronousTaskManager;
-import org.cytoscape.work.TaskFactory;
-
 import org.cytoscape.work.TunableSetter;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -101,6 +97,7 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
 		diffusionTaskFactoryProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion on Selected Nodes");
+		diffusionTaskFactoryProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES + DiffusionDocumentation.ADDITIONAL_SELECTION_SWAGGER_NOTES);
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -116,6 +113,7 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
 		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion with Options");
+		wOptsProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES);
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");

@@ -22,6 +22,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.ci.model.CIError;
 import org.cytoscape.ci.model.CIResponse;
 
+import org.cytoscape.diffusion.internal.DiffusionDocumentation;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
@@ -63,10 +64,6 @@ public class DiffusionResource {
 	private final String logLocation;
 
 	
-	private static final String GENERIC_SWAGGER_NOTES = "Diffusion will send the selected network view and its selected nodes to "
-			+ "a web-based REST service to calculate network propagation. Results are returned and represented by columns "
-			+ "in the node table." + '\n' + '\n'
-			+ "Columns are created for each execution of Diffusion and their names are returned in the response."  + '\n' + '\n';
 
 	/*
 	 * Replicated from CyREST.
@@ -192,7 +189,7 @@ public class DiffusionResource {
 	@Consumes("application/json")
 	@Path("currentView/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis on Current View with Options",
-	notes = GENERIC_SWAGGER_NOTES,
+	notes = DiffusionDocumentation.GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
@@ -210,7 +207,7 @@ public class DiffusionResource {
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis on a Specific Network View with Options",
-	notes = GENERIC_SWAGGER_NOTES,
+	notes = DiffusionDocumentation.GENERIC_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class)
@@ -246,8 +243,8 @@ public class DiffusionResource {
 	@Produces("application/json")
 	@Consumes("application/json")
 	@Path("currentView/diffuse")
-	@ApiOperation(value = "Execute Diffusion Analysis on Current View with Options",
-	notes = GENERIC_SWAGGER_NOTES,
+	@ApiOperation(value = "Execute Diffusion Analysis on Current View",
+	notes = DiffusionDocumentation.GENERIC_SWAGGER_NOTES + DiffusionDocumentation.ADDITIONAL_SELECTION_SWAGGER_NOTES,
 	response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
@@ -266,9 +263,7 @@ public class DiffusionResource {
 	@Consumes("application/json")
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse")
 	@ApiOperation(value = "Execute Diffusion Analysis on a Specific Network View",
-	notes = GENERIC_SWAGGER_NOTES 
-			+ "The nodes you would like to use as input should be selected. This will be used to "
-			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation."  + '\n' + '\n',
+	notes = DiffusionDocumentation.GENERIC_SWAGGER_NOTES + DiffusionDocumentation.ADDITIONAL_SELECTION_SWAGGER_NOTES,
 			response = SuccessfulDiffusionResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class),

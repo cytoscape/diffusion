@@ -3,6 +3,7 @@ package org.cytoscape.diffusion.internal.task;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 
 import org.cytoscape.work.ObservableTask;
-
+import org.cytoscape.work.ResultDescriptor;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DiffuseSelectedTask extends AbstractNetworkTask implements ObservableTask{
+public class DiffuseSelectedTask extends AbstractNetworkTask implements ObservableTask {
 
 	private static final String heatSuffix = "_heat";
 	private static final String rankSuffix = "_rank";
@@ -71,7 +72,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 			final CySwingApplication swingApplication, final CyApplicationManager appManager,
 			final DiffusionServiceClient client, final TunableSetter setter) {
 		super(network);
-		
+
 		this.tableManager = tableManager;
 
 		this.resultParser = new DiffusionResultParser(writerFactory, setter);
@@ -82,12 +83,12 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	}
 
 	private DiffusionResultColumns diffusionResultColumns = null;
-	
+
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
-		
+
 	}
 
 	protected void diffuse(final String columnName, final Double time) throws Exception {
@@ -102,14 +103,14 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 		// Case 2: Use existing column as-is
 		final String cx = resultParser.encode(network, inputCol);
-//		System.out.println("\n\n" + cx);
+		//		System.out.println("\n\n" + cx);
 
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
 
-//		System.out.println("\n\n" + responseJSONString);
-		
-		
+		//		System.out.println("\n\n" + responseJSONString);
+
+
 		// Parse the result
 		Map<String, List<AspectElement>> response = null;
 
@@ -130,7 +131,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		diffusionResultColumns = new DiffusionResultColumns();
 		diffusionResultColumns.heatColumn = String.format("%s_heat", outputColumnName);
 		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
-		
+
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
 
@@ -175,13 +176,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 		final String rankColumnName = formatColumnName(baseColumnName, rankSuffix);
 		final String heatColumnName = formatColumnName(baseColumnName, heatSuffix);
-		
+
 		// Create result object
 		DiffusionTable diffTable = tableManager.getTable(network.getSUID());
 		if(diffTable == null) {
 			diffTable = tableManager.createTable(network);
 		}
-				
+
 		final DiffusionResult result = new DiffusionResult(network, rankColumnName, heatColumnName);
 		diffTable.setDiffusionResult(baseColumnName, result);
 
@@ -261,7 +262,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	// Generate an available base name for diffusion output
 	public String getNextAvailableColumnName(final String baseName) {
-		
+
 		String desiredName = baseName;
 		for (int index = 1; columnsExist(desiredName); index++) {
 			desiredName = formatColumnName(baseName, index);
@@ -295,18 +296,18 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	protected void showResult() {
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// 1. Dock the EAST Panel
 				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 				panel.setState(CytoPanelState.DOCK);
-				
+
 				// 2. Find Diffusion Output Panel
 				final int componentCount = panel.getCytoPanelComponentCount();
-				
+
 				int targetPanelIdx = 0;
-				
+
 				for(int i=0; i<componentCount; i++) {
 					final Component panelComponent = panel.getComponentAt(i);
 					if(panelComponent instanceof CytoPanelComponent2) {
@@ -335,19 +336,30 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 						+ "Error:\n %s", errorMessage);
 	}
 
+	private static final String getResultString(DiffusionResultColumns diffusionResultColumns) {
+		return (diffusionResultColumns != null ? "Created result columns: ("+diffusionResultColumns.heatColumn+"),("+diffusionResultColumns.rankColumn+")" : "No result columns available");
+	}
+
 	@Override
 	public <R> R getResults(Class<? extends R> type) {
-		if (type.equals(String.class))
-		{
-			return (R)(diffusionResultColumns != null ? "Created result columns: ("+diffusionResultColumns.heatColumn+"),("+diffusionResultColumns.rankColumn+")" : "No result columns available");
+		if (type.equals(String.class)){
+			return (R) getResultString(diffusionResultColumns);
 		}
-		else if (type.isAssignableFrom(JSONResult.class)){
-			
-			return (R)new DiffusionJSONResult();
+		else if (type.isAssignableFrom(DiffusionResultColumns.class)){
+			return (R) diffusionResultColumns;
+		} else if (type.isAssignableFrom(JSONResult.class)) {
+			ObjectMapper objectMapper = new ObjectMapper();
+			String json;
+			try {
+				json = objectMapper.writeValueAsString(diffusionResultColumns);
+			} catch (JsonProcessingException e) {
+				json = null;
+			}
+			return (R) new ImmutableJSONResult(json);
 		}
 		return null;
 	}
-	
+
 	private class DiffusionJSONResult implements JSONResult{
 
 		@Override
@@ -359,9 +371,64 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 				e.printStackTrace();
 				return null;
 			}
-		
+
 		}
-		
+	}
+
+	static final class ImmutableJSONResult implements JSONResult {
+
+		private final String json;
+
+		public ImmutableJSONResult(String json) {
+			this.json = json;
+		}
+
+		@Override
+		public String getJSON() {
+			return json;
+		}		
+	}
+
+	@Override
+	public ResultDescriptor getResultDescriptor() {
+		return new DiffusionResultDescriptor();
+	}
+
+	private static class DiffusionResultDescriptor implements ResultDescriptor {
+		@Override
+		public Iterator<Class<?>> getResultTypes() {
+			List<Class<?>> resultTypes = new ArrayList<Class<?>>();
+			resultTypes.add(String.class);
+			resultTypes.add(DiffusionResultColumns.class);
+			resultTypes.add(JSONResult.class);
+			return resultTypes.iterator();
+		}
+
+		@Override
+		public <K> K getResultExample(Class<K> type) {
+			DiffusionResultColumns diffusionResultColumns = new DiffusionResultColumns();
+			diffusionResultColumns.heatColumn="diffusion_output_heat";
+			diffusionResultColumns.rankColumn="diffusion_output_rank";
+
+			if (type.equals(String.class)){
+				return (K) getResultString(diffusionResultColumns);
+			}
+			else if (type.isAssignableFrom(DiffusionResultColumns.class)){
+				return (K) diffusionResultColumns;
+			} else if (type.isAssignableFrom(JSONResult.class)) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				String json;
+				try {
+					json = objectMapper.writeValueAsString(diffusionResultColumns);
+				} catch (JsonProcessingException e) {
+					json = null;
+				}
+				return (K) new ImmutableJSONResult(json);
+			}
+			return null;
+		}
+
+
 	}
 }
 

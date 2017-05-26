@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.diffusion.internal.DiffusionDocumentation;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
@@ -31,10 +32,10 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 
 	public static final Double DEFAULT_TIME = 0.1;
 	
-	@Tunable(description = "Time:")
+	@Tunable(description = "Time:", longDescription=DiffusionDocumentation.TIME_LONG_DESCRIPTION, defaultStringValue="0.1")
 	public Double time = DEFAULT_TIME;
 
-	@Tunable(description = "Heat Column:")
+	@Tunable(description = "Heat Column:", longDescription=DiffusionDocumentation.HEAT_COLUMN_NAME_LONG_DESCRIPTION, defaultStringValue=DIFFUSION_INPUT_COL_NAME)
 	public ListSingleSelection<String> heatColumnName;
 
 	public DiffuseSelectedWithOptionsTask(DiffusionTableManager tableManager, CyNetwork network,
