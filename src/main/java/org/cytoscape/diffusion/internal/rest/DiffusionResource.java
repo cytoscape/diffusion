@@ -192,9 +192,11 @@ public class DiffusionResource {
 		
 	}
 	
-	@ApiModel(value="Diffusion Successful Response", description="Diffusion Analysis Results in CI Format", parent=CIResponse.class)
-	public static class SuccessfulDiffusionResponse extends CIResponse<DiffusionResultColumns>{
+	@ApiModel(value="Diffusion App Response", description="Diffusion Analysis Results in CI Format", parent=CIResponse.class)
+	public static class DiffusionAppResponse extends CIResponse<DiffusionResultColumns>{
 	}
+	
+	
 	
 	@POST
 	@Produces("application/json")
@@ -202,7 +204,7 @@ public class DiffusionResource {
 	@Path("currentView/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis on Current View with Options",
 	notes = GENERIC_SWAGGER_NOTES,
-	response = SuccessfulDiffusionResponse.class)
+	response = DiffusionAppResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
 	})
@@ -220,7 +222,7 @@ public class DiffusionResource {
 	@Path("{networkSUID}/views/{networkViewSUID}/diffuse_with_options")
 	@ApiOperation(value = "Execute Diffusion Analysis on a Specific Network View with Options",
 	notes = GENERIC_SWAGGER_NOTES,
-	response = SuccessfulDiffusionResponse.class)
+	response = DiffusionAppResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class)
 	})
@@ -257,7 +259,7 @@ public class DiffusionResource {
 	@Path("currentView/diffuse")
 	@ApiOperation(value = "Execute Diffusion Analysis on Current View",
 	notes = GENERIC_SWAGGER_NOTES,
-	response = SuccessfulDiffusionResponse.class)
+	response = DiffusionAppResponse.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 404, message = "Network or Network View does not exist", response = CIResponse.class)
 	})
@@ -278,9 +280,9 @@ public class DiffusionResource {
 	notes = GENERIC_SWAGGER_NOTES 
 			+ "The nodes you would like to use as input should be selected. This will be used to "
 			+ "generate the contents of the **diffusion\\_input** column, which represents the query vector and corresponds to h in the diffusion equation."  + '\n' + '\n',
-			response = SuccessfulDiffusionResponse.class)
+			response = DiffusionAppResponse.class)
 	@ApiResponses(value = { 
-			@ApiResponse(code = 404, message = "Network does not exist", response = DiffusionResponse.class),
+			@ApiResponse(code = 404, message = "Network does not exist", response = CIResponse.class),
 	})
 
 	public Response diffuse(@ApiParam(value="Network SUID (see GET /v1/networks)") @PathParam("networkSUID") long networkSUID, @ApiParam(value="Network View SUID (see GET /v1/networks/{networkId}/views)") @PathParam("networkViewSUID") long networkViewSUID) {
