@@ -24,7 +24,8 @@ public class DiffusionServiceClient {
 	private static final String BASE_URL = "http://v2.heat-diffusion.cytoscape.io/";
 //	private static final String BASE_URL = "http://diffuse.cytoscape.io";
 	
-	private static final String HEAT_COLUMN = "heat_attribute";
+	private static final String HEAT_COLUMN_PARAM = "input_attribute_name";
+	private static final String TIME_PARAM = "time";
 
 	private final String url;
 	final HttpClient client;
@@ -41,9 +42,7 @@ public class DiffusionServiceClient {
 
 	public String diffuse(final String cx, final String inputHeatCol, final Double time) throws IOException {
 		try {
-			
 			final URI uri = getReqeuestURI(inputHeatCol, time);
-			
 			final HttpPost post = new HttpPost(uri.toString());
 			
 			final StringEntity cxEntity = new StringEntity(cx);
@@ -51,7 +50,11 @@ public class DiffusionServiceClient {
 			post.setHeader("Content-type", "application/json");
 			final HttpResponse response = client.execute(post);
 			final HttpEntity entity = response.getEntity();
-			return entity != null ? EntityUtils.toString(entity) : null;
+			if(entity == null) {
+				throw new IOException(createConnectionError("Response from diffusion service is null."));
+			}
+			final String result = EntityUtils.toString(entity);
+			return result;
 		} catch (Exception e) {
 			logger.error("Connection error contacting the heat diffusions service");
 			logger.error(createConnectionError(e.toString()), new IOException());
@@ -62,13 +65,15 @@ public class DiffusionServiceClient {
 	private URI getReqeuestURI(final String inputHeatCol, final Object time) throws URISyntaxException {
 		final List<NameValuePair> postParams = new ArrayList<>();
 		
-//		if(time != null) {
-//			postParams.add(new BasicNameValuePair("time", time.toString()));
-//		}
+		if(time != null) {
+			postParams.add(new BasicNameValuePair(TIME_PARAM, time.toString()));
+		}
 		
 		if(inputHeatCol != null) {
-			postParams.add(new BasicNameValuePair(HEAT_COLUMN, inputHeatCol));
+			postParams.add(new BasicNameValuePair(HEAT_COLUMN_PARAM, inputHeatCol));
 		}
+		
+		postParams.add(new BasicNameValuePair("threshold", "-1"));
 		
 		URIBuilder uriBuilder = new URIBuilder(this.url);
 		uriBuilder.addParameters(postParams);

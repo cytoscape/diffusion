@@ -10,14 +10,15 @@
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
 		<cytoscape.api.version>3.6.0-SNAPSHOT</cytoscape.api.version>
-
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
+
 	<version>1.3.0-SNAPSHOT</version>
+
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
 
@@ -140,20 +141,11 @@
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
-		
-		<!-- Note: It is intended that the packages exported by CyREST will be
-		integrated into Cytoscape core API in Cytoscape 3.6.0. For Cytoscape 3.6,
-		remove these two dependencies -->
-		<dependency>
-		 	 <groupId>org.cytoscape</groupId>
-  			<artifactId>work-json-api</artifactId>
-  			<version>0.1.0-SNAPSHOT</version>
-  			<scope>provided</scope>
-		</dependency>
+
 		<dependency>
 		 	 <groupId>org.cytoscape</groupId>
   			<artifactId>ci-api</artifactId>
-  			<version>0.1.0-SNAPSHOT</version>
+  			<version>${cytoscape.api.version}</version>
   			<scope>provided</scope>
 		</dependency>
 
