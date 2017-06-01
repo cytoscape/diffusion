@@ -19,6 +19,7 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
@@ -117,8 +118,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		// Parse the result and catch exeption if there is an error in it.
 		try {
 			response = resultParser.decode(responseJSONString);
-		} catch (Exception e) {
-			throw new IllegalStateException("Error occured when parsing result.", e);
+		} catch (DiffusionServiceException e) {
+			//If the DiffusionServiceException is thrown, the service returned some errors.
+			throw e;
+		}
+		catch (Exception e) {
+			logger.error("Could not parse the following Diffusion service response: " + responseJSONString);
+			throw new IllegalStateException("Could not parse the Diffusion service response", e);
 		}
 
 		final String outputColumnName = getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
