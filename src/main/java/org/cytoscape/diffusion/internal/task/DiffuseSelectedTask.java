@@ -3,7 +3,8 @@ package org.cytoscape.diffusion.internal.task;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
 import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
@@ -117,8 +119,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		// Parse the result and catch exeption if there is an error in it.
 		try {
 			response = resultParser.decode(responseJSONString);
-		} catch (Exception e) {
-			throw new IllegalStateException("Error occured when parsing result.", e);
+		} catch (DiffusionServiceException e) {
+			//If the DiffusionServiceException is thrown, the service returned some errors.
+			throw e;
+		}
+		catch (Exception e) {
+			logger.error("Could not parse the following Diffusion service response: " + responseJSONString);
+			throw new IllegalStateException("Could not parse the Diffusion service response", e);
 		}
 
 		final String outputColumnName = getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
@@ -396,12 +403,8 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	private static class DiffusionResultDescriptor implements ResultDescriptor {
 		@Override
-		public Iterator<Class<?>> getResultTypes() {
-			List<Class<?>> resultTypes = new ArrayList<Class<?>>();
-			resultTypes.add(String.class);
-			resultTypes.add(DiffusionResultColumns.class);
-			resultTypes.add(JSONResult.class);
-			return resultTypes.iterator();
+		public List<Class<?>> getResultTypes() {
+			return Collections.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, JSONResult.class));
 		}
 
 		@Override

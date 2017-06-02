@@ -94,13 +94,13 @@ public class DiffusionResultParser {
 		return jsonString;
 	}
 
-	public Map<String, List<AspectElement>> decode(String response) throws IOException {
+	public Map<String, List<AspectElement>> decode(String response) throws IOException, DiffusionServiceException {
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		CIResponse<?> res = objectMapper.readValue(response, CIResponse.class);
 		
 		if(res.errors.size()!= 0) {
-			throw new IOException(res.errors.toString());
+			throw new DiffusionServiceException("Diffusion Service returned errors", res.errors);
 		}
 		
 		final CxReader reader = CxReader.createInstance(objectMapper.writeValueAsString(res.data), CxioUtil.getAllAvailableAspectFragmentReaders());
