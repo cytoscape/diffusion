@@ -126,7 +126,7 @@ public class CyActivator extends AbstractCyActivator {
 		CIExceptionFactory ciExceptionFactory = CIProvider.getCIExceptionFactory();
 		CIErrorFactory ciErrorFactory = CIProvider.getCIErrorFactory(context);
 		
-		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciErrorFactory);
+		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciExceptionFactory, ciErrorFactory);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);

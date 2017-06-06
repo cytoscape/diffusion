@@ -17,6 +17,7 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
 import org.cytoscape.ci.CIErrorFactory;
+import org.cytoscape.ci.CIExceptionFactory;
 import org.cytoscape.ci.model.CIError;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
@@ -165,6 +166,9 @@ public class DiffusionResourceTest {
 		ObservableTask dummyJsonTask = mock(ObservableTask.class);
 		when(dummyJsonTask.getResults(any(Class.class))).thenReturn(null);
 		
+		CIExceptionFactory ciExceptionFactory = mock(CIExceptionFactory.class);
+		
+		
 		CIErrorFactory ciErrorFactory = mock(CIErrorFactory.class);
 		
 		doAnswer(new Answer<CIError>() {
@@ -199,7 +203,8 @@ public class DiffusionResourceTest {
 				cyNetworkManager, 
 				cyNetworkViewManager, 
 				diffusionContextMenuTaskFactory, 
-				null, 
+				null,
+				ciExceptionFactory, 
 				ciErrorFactory);
 
 		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver(diffusionResource, "dummy_urn", "dummy_error_code");
