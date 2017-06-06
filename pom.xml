@@ -94,11 +94,6 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>${osgi.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -143,7 +138,7 @@
 		</dependency>
 
 		<dependency>
-		 	 <groupId>org.cytoscape</groupId>
+		 	<groupId>org.cytoscape</groupId>
   			<artifactId>ci-api</artifactId>
   			<version>${cytoscape.api.version}</version>
   			<scope>provided</scope>

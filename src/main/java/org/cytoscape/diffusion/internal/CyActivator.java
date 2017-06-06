@@ -11,12 +11,14 @@ import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
-import java.util.Dictionary;
 import java.util.Properties;
 import java.util.Set;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.ci.CIErrorFactory;
+import org.cytoscape.ci.CIExceptionFactory;
+import org.cytoscape.ci.CIResponseFactory;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
@@ -36,8 +38,6 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TunableSetter;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -119,27 +119,11 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
 
-		final String logLocation;
-
-		// Extract Karaf's log file location for DiffusionResource's error reporting.
-		ConfigurationAdmin configurationAdmin = getService(context, ConfigurationAdmin.class);
-		if (configurationAdmin != null) {
-			Configuration config = configurationAdmin.getConfiguration("org.ops4j.pax.logging");
-
-			Dictionary<?,?> dictionary = config.getProperties();
-			Object logObject = dictionary.get("log4j.appender.file.File");
-			if (logObject != null && logObject instanceof String) {
-				logLocation = (String) logObject;
-			}
-			else {
-				logLocation = null;
-			}
-		}
-		else {
-			logLocation = null;
-		}
-
-		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, logLocation);
+		CIResponseFactory ciResponseFactory = this.getService(context, CIResponseFactory.class);
+		CIExceptionFactory ciExceptionFactory = this.getService(context, CIExceptionFactory.class);
+		CIErrorFactory ciErrorFactory = this.getService(context, CIErrorFactory.class);
+		
+		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciResponseFactory, ciExceptionFactory, ciErrorFactory);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
