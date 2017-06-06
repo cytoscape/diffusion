@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 
-import org.cytoscape.diffusion.internal.client.CIError;
-import org.cytoscape.diffusion.internal.client.CIResponse;
+import org.cytoscape.ci.model.CIError;
+import org.cytoscape.ci.model.CIResponse;
 import org.cytoscape.work.FinishStatus;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.TaskObserver;

@@ -2,7 +2,6 @@ package org.cytoscape.diffusion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -17,7 +16,8 @@ import java.util.List;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
-import org.cytoscape.diffusion.internal.client.CIError;
+import org.cytoscape.ci.CIErrorFactory;
+import org.cytoscape.ci.model.CIError;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
@@ -165,6 +165,20 @@ public class DiffusionResourceTest {
 		ObservableTask dummyJsonTask = mock(ObservableTask.class);
 		when(dummyJsonTask.getResults(any(Class.class))).thenReturn(null);
 		
+		CIErrorFactory ciErrorFactory = mock(CIErrorFactory.class);
+		
+		doAnswer(new Answer<CIError>() {
+			public CIError answer(InvocationOnMock invocation) {
+				Object[] args = invocation.getArguments();
+				CIError ciError = new CIError();
+					ciError.status = (Integer) args[0];
+					ciError.type = (String) args[1];
+					ciError.message = (String) args[2];
+					
+				return ciError;
+			}
+		}).when(ciErrorFactory).getCIError(any(Integer.class), any(String.class), any(String.class));
+		
 		doAnswer(new Answer<Void>() {
 			public Void answer(InvocationOnMock invocation) {
 				Object[] args = invocation.getArguments();
@@ -186,7 +200,7 @@ public class DiffusionResourceTest {
 				cyNetworkViewManager, 
 				diffusionContextMenuTaskFactory, 
 				null, 
-				"dummyloglocation");
+				ciErrorFactory);
 
 		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver(diffusionResource, "dummy_urn", "dummy_error_code");
 	

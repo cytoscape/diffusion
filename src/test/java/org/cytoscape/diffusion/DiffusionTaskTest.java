@@ -2,7 +2,7 @@ package org.cytoscape.diffusion;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.diffusion.internal.client.CIError;
+import org.cytoscape.ci.model.CIError;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.task.DiffuseSelectedTask;

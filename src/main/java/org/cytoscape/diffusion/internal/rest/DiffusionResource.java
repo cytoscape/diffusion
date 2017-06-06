@@ -18,9 +18,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.diffusion.internal.client.CIError;
-
-import org.cytoscape.diffusion.internal.client.CIResponse;
+import org.cytoscape.ci.CIErrorFactory;
+import org.cytoscape.ci.model.CIError;
+import org.cytoscape.ci.model.CIResponse;
+import org.cytoscape.ci_bridge_impl.CIProvider;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.model.CyNetwork;
@@ -54,7 +55,8 @@ public class DiffusionResource {
 	
 	private final DiffusionContextMenuTaskFactory diffusionTaskFactory;
 	private final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory;
-	private final String logLocation;
+	
+	private final CIErrorFactory ciErrorFactory;
 
 	public static final String CY_NETWORK_NOT_FOUND_CODE = "1";
 	public static final String CY_NETWORK_VIEW_NOT_FOUND_CODE = "2";
@@ -67,14 +69,14 @@ public class DiffusionResource {
 			+ "Columns are created for each execution of Diffusion and their names are returned in the response."  + '\n' + '\n';
 
 
-	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<?> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final String logLocation) {
+	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<?> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final CIErrorFactory ciErrorFactory) {
 		this.cyApplicationManager = cyApplicationManager;
 		this.taskManager = taskManager;
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyNetworkViewManager = cyNetworkViewManager;
 		this.diffusionTaskFactory = diffusionTaskFactory;
 		this.diffusionWithOptionsTaskFactory = diffusionWithOptionsTaskFactory;
-		this.logLocation = logLocation;
+		this.ciErrorFactory = ciErrorFactory;
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffusionResource.class);
@@ -84,30 +86,22 @@ public class DiffusionResource {
 
 	CIResponse<Object> buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
 	{
-		CIResponse<Object> response = new CIResponse<Object>();
-		response.data = new Object();
-		List<CIError> errors = new ArrayList<CIError>();
-		CIError error = new CIError();
-
-		error.type = cyRESTErrorRoot + ":" + resourcePath+ ":"+ code;
-
+		CIResponse<Object> response = CIProvider.getWrappedResponse(new Object());
+	
+		CIError error = ciErrorFactory.getCIError(status, cyRESTErrorRoot + ":" + resourcePath+ ":"+ code, message);
 		if (e != null)
 		{
 			logger.error(message, e);
 			if (e instanceof DiffusionServiceException) {
-				errors.addAll(((DiffusionServiceException)e).getCIErrors());
+				response.errors.addAll(((DiffusionServiceException)e).getCIErrors());
 			}
 		}
 		else
 		{
 			logger.error(message);
 		}
-		URI link = (new File(logLocation)).toURI();
-		error.link = link;
-		error.status = status;
-		error.message = message;
-		errors.add(error);
-		response.errors = errors;
+	
+		response.errors.add(error);
 		return response;
 	}
 
@@ -160,15 +154,12 @@ public class DiffusionResource {
 		String messageString = "Could not find network view with SUID: " + networkViewSUID + " for network with SUID: " + networkSUID;
 		throw new NotFoundException(messageString, Response.status(Response.Status.NOT_FOUND)
 					.type(MediaType.APPLICATION_JSON)
-					.entity(buildCIErrorResponse(404, resourcePath, errorType, messageString, null)).build());
-		
+					.entity(buildCIErrorResponse(404, resourcePath, errorType, messageString, null)).build());	
 	}
 	
 	@ApiModel(value="Diffusion App Response", description="Diffusion Analysis Results in CI Format", parent=CIResponse.class)
 	public static class DiffusionAppResponse extends CIResponse<DiffusionResultColumns>{
 	}
-	
-	
 	
 	@POST
 	@Produces("application/json")
