@@ -1,7 +1,5 @@
 package org.cytoscape.diffusion.internal.rest;
 
-import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -44,7 +41,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(tags = {"Apps", "Diffusion"})
+@Api(tags = {"Apps: Diffusion"})
 @Path("/diffusion/v1/")
 public class DiffusionResource {
 
