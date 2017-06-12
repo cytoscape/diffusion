@@ -29,8 +29,10 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 
 	private static final String FROM_SELECTION_MENU = "(Use selected nodes)";
 
+	public static final Double DEFAULT_TIME = 0.1;
+	
 	@Tunable(description = "Time:")
-	public Double time = 0.1;
+	public Double time = DEFAULT_TIME;
 
 	@Tunable(description = "Heat Column:")
 	public ListSingleSelection<String> heatColumnName;

@@ -6,27 +6,36 @@ import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
 import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
+import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
+import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 
 import java.util.Properties;
 import java.util.Set;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.ci.CIErrorFactory;
+import org.cytoscape.ci.CIExceptionFactory;
+import org.cytoscape.ci_bridge_impl.CIProvider;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.rest.DiffusionResource;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.EdgeContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
-import org.cytoscape.task.create.NewNetworkSelectedNodesAndEdgesTaskFactory;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
+
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TunableSetter;
-import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
@@ -42,6 +51,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(context, viewWriterManager, "addFactory", "removeFactory",
 				CyNetworkViewWriterFactory.class);
 
+
 		final TunableSetter tunableSetterServiceRef = getService(context, TunableSetter.class);
 
 		VisualMappingManager vmm = getService(context, VisualMappingManager.class);
@@ -49,7 +59,11 @@ public class CyActivator extends AbstractCyActivator {
 				NewNetworkSelectedNodesOnlyTaskFactory.class);
 
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
-
+		
+		SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
+		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
+		final CyNetworkViewManager cyNetworkViewManager = getService(context, CyNetworkViewManager.class);
+		
 		LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
 		Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
 
@@ -57,7 +71,6 @@ public class CyActivator extends AbstractCyActivator {
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
 
-		
 		// Table Manager
 		final DiffusionTableManager tableManager = new DiffusionTableManager();
 		registerAllServices(context, tableManager, new Properties());
@@ -74,25 +87,48 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(context, outputPanel, new Properties());
 
 		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
-
+		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService,
 				client, tunableSetterServiceRef);
+
 		Properties diffusionTaskFactoryProps = new Properties();
+		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
+		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
+		diffusionTaskFactoryProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion on Selected Nodes");
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
 		diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
+
 		diffusionTaskFactoryProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
 
 		final DiffusionContextMenuTaskFactory withOptionsTaskFactory = new DiffusionContextMenuTaskFactory(
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService,
 				client, tunableSetterServiceRef, true);
+
 		Properties wOptsProps = new Properties();
+		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
+		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
+		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion with Options");
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
+
+	
+
+		//CI Error handlers
+		//CIExceptionFactory ciExceptionFactory = this.getService(bc, CIExceptionFactory.class);
+		//CIErrorFactory ciErrorFactory = this.getService(bc, CIErrorFactory.class);
+		
+		//
+		CIExceptionFactory ciExceptionFactory = CIProvider.getCIExceptionFactory();
+		CIErrorFactory ciErrorFactory = CIProvider.getCIErrorFactory(context);
+		
+		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciExceptionFactory, ciErrorFactory);
+		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
+
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
 
 		EdgeContextMenuTaskFactory edgeContextMenuTaskFactory = new EdgeContextMenuTaskFactory(
@@ -116,6 +152,7 @@ public class CyActivator extends AbstractCyActivator {
 		edgePropsOpt.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
 
 		/////////////////////// For TOOLS menu//////////////////////////////
+
 
 		final DiffusionContextMenuTaskFactory noOptionsTaskFactoryTool = new DiffusionContextMenuTaskFactory(
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService,

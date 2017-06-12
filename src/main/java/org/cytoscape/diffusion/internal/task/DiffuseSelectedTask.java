@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
@@ -20,7 +19,9 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.client.DiffusionResultParser;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
+import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.client.NodeAttributes;
+import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionResult;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
@@ -28,17 +29,26 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
+
+import org.cytoscape.work.ObservableTask;
+
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.task.AbstractNetworkTask;
+
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiffuseSelectedTask extends AbstractNetworkTask {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+public class DiffuseSelectedTask extends AbstractNetworkTask implements ObservableTask{
 
 	private static final String heatSuffix = "_heat";
 	private static final String rankSuffix = "_rank";
@@ -46,7 +56,8 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 	private static final String ORIGINAL_HEAT_ATTR_NAME = "diffusion_output_heat";
 	private static final String ORIGINAL_RANK_ATTR_NAME = "diffusion_output_rank";
 
-	private static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
+	public static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
+
 	private static final String DIFFUSION_OUTPUT_COL_NAME = "diffusion_output";
 
 	protected DiffusionResultParser resultParser;
@@ -72,10 +83,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		this.appManager = appManager;
 	}
 
+	private DiffusionResultColumns diffusionResultColumns = null;
+	
 	public void run(TaskMonitor tm) throws Exception {
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
+		
 	}
 
 	protected void diffuse(final String columnName, final Double time) throws Exception {
@@ -104,8 +118,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		// Parse the result and catch exeption if there is an error in it.
 		try {
 			response = resultParser.decode(responseJSONString);
-		} catch (Exception e) {
-			throw new IllegalStateException("Error occured when parsing result.", e);
+		} catch (DiffusionServiceException e) {
+			//If the DiffusionServiceException is thrown, the service returned some errors.
+			throw e;
+		}
+		catch (Exception e) {
+			logger.error("Could not parse the following Diffusion service response: " + responseJSONString);
+			throw new IllegalStateException("Could not parse the Diffusion service response", e);
 		}
 
 		final String outputColumnName = getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
@@ -114,9 +133,14 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 		// Write values to the local table.
 		setResult(outputColumnName, nodeAttributes);
 
+		// This is hacky, like the rest of column naming.
+		diffusionResultColumns = new DiffusionResultColumns();
+		diffusionResultColumns.heatColumn = String.format("%s_heat", outputColumnName);
+		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
+		
+		appManager.setCurrentNetwork(network);
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
-
 		showResult();
 	}
 
@@ -317,4 +341,19 @@ public class DiffuseSelectedTask extends AbstractNetworkTask {
 						+ "Here is the error message we received from the service, email the service author with this message if you need assistance.\n\n"
 						+ "Error:\n %s", errorMessage);
 	}
+
+	@Override
+	public <R> R getResults(Class<? extends R> type) {
+		if (type.equals(String.class))
+		{
+			return (R)(diffusionResultColumns != null ? "Created result columns: ("+diffusionResultColumns.heatColumn+"),("+diffusionResultColumns.rankColumn+")" : "No result columns available");
+		}
+		else if (type.isAssignableFrom(DiffusionResultColumns.class)){
+			return (R) diffusionResultColumns;
+		}
+		return null;
+	}
+	
+	
 }
+

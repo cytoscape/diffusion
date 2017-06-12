@@ -9,7 +9,7 @@
 
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.4.0</cytoscape.api.version>
+		<cytoscape.api.version>[3.5.0,3.5.1]</cytoscape.api.version>
 
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
@@ -17,7 +17,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
-	<version>1.2.6</version>
+
+	<version>1.3.0</version>
+
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
 
@@ -53,8 +55,8 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
-						<Cytoscape-App-Dependencies>CX Support;2.1.0</Cytoscape-App-Dependencies>
-						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
+						<Cytoscape-App-Dependencies>CX Support;2.1.0,cyREST;3.4.0</Cytoscape-App-Dependencies>
+						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape;ci-bridge-impl</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>
@@ -93,6 +95,20 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.5.7</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Cytoscape API dependencies -->
@@ -122,6 +138,12 @@
 			<version>${cytoscape.api.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.cytoscape-ci</groupId>
+			<artifactId>ci-bridge-impl</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<!-- For logging -->
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
@@ -147,7 +169,7 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.5.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.cxio</groupId>
 			<artifactId>cxio</artifactId>
@@ -160,6 +182,15 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
+			<scope>test</scope>
 		</dependency>
+		
+			<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 </project>
