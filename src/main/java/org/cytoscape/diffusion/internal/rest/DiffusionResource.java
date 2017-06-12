@@ -82,12 +82,11 @@ public class DiffusionResource {
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffusionResource.class);
-
-
-	private final static String cyRESTErrorRoot = "urn:cytoscape:ci:diffusion-app:v1";
+	
+	private final static String resourceErrorRoot = "urn:cytoscape:ci:diffusion-app:v1";
 
 	private CIError buildCIError(int status, String resourcePath, String code, String message, Exception e) {
-		return ciErrorFactory.getCIError(status, cyRESTErrorRoot + ":" + resourcePath+ ":"+ code, message);
+		return ciErrorFactory.getCIError(status, resourceErrorRoot + ":" + resourcePath+ ":"+ code, message);
 	}
 	
 	CIResponse<Object> buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
