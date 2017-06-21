@@ -138,10 +138,11 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		diffusionResultColumns = new DiffusionResultColumns();
 		diffusionResultColumns.heatColumn = String.format("%s_heat", outputColumnName);
 		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
+		
+		appManager.setCurrentNetwork(network);
 
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
-
 		showResult();
 	}
 
