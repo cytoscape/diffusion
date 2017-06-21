@@ -3,3 +3,5 @@ target
 .DS_Store
 .classpath
 .settings
+/python_tests/.idea/
+/python_tests/__pycache__
