@@ -33,7 +33,6 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 
 import org.cytoscape.work.ObservableTask;
-import org.cytoscape.work.ResultDescriptor;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
@@ -42,6 +41,7 @@ import org.cytoscape.task.AbstractNetworkTask;
 
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
+import org.cytoscape.work.json.ExampleJSONString;
 import org.cytoscape.work.json.JSONResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -355,22 +355,24 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		}
 		else if (type.isAssignableFrom(DiffusionResultColumns.class)){
 			return (R) diffusionResultColumns;
-		} else if (type.isAssignableFrom(JSONResult.class)) {
-			ObjectMapper objectMapper = new ObjectMapper();
-			String json;
-			try {
-				json = objectMapper.writeValueAsString(diffusionResultColumns);
-			} catch (JsonProcessingException e) {
-				json = null;
-			}
-			return (R) new ImmutableJSONResult(json);
+		} else if (type.isAssignableFrom(DiffusionJSONResult.class)) {
+			return (R) new DiffusionJSONResult(diffusionResultColumns);
 		}
 		return null;
 	}
 
-	private class DiffusionJSONResult implements JSONResult{
-
+	public final class DiffusionJSONResult implements JSONResult{
+		private final DiffusionResultColumns diffusionResultColumns;
+		
+		public DiffusionJSONResult(DiffusionResultColumns diffusionResultColumns) {
+			this.diffusionResultColumns = diffusionResultColumns;
+		}
+		
 		@Override
+		@ExampleJSONString(value="{"
+				 +  "\"heatColumn\": \"diffusion_output_heat\","
+				 + " \"rankColumn\": \"diffusion_output_rank\""
+				 +" }")
 		public String getJSON() {
 			ObjectMapper mapper = new ObjectMapper();
 			try {
@@ -379,60 +381,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 				e.printStackTrace();
 				return null;
 			}
-
 		}
 	}
-
-	static final class ImmutableJSONResult implements JSONResult {
-
-		private final String json;
-
-		public ImmutableJSONResult(String json) {
-			this.json = json;
-		}
-
-		@Override
-		public String getJSON() {
-			return json;
-		}		
-	}
-
+	
 	@Override
-	public ResultDescriptor getResultDescriptor() {
-		return new DiffusionResultDescriptor();
+	public List<Class<?>> getResultClasses() {
+		return Collections.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, DiffusionJSONResult.class));
 	}
 
-	private static class DiffusionResultDescriptor implements ResultDescriptor {
-		@Override
-		public List<Class<?>> getResultTypes() {
-			return Collections.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, JSONResult.class));
-		}
-
-		@Override
-		public <K> K getResultExample(Class<K> type) {
-			DiffusionResultColumns diffusionResultColumns = new DiffusionResultColumns();
-			diffusionResultColumns.heatColumn="diffusion_output_heat";
-			diffusionResultColumns.rankColumn="diffusion_output_rank";
-
-			if (type.equals(String.class)){
-				return (K) getResultString(diffusionResultColumns);
-			}
-			else if (type.isAssignableFrom(DiffusionResultColumns.class)){
-				return (K) diffusionResultColumns;
-			} else if (type.isAssignableFrom(JSONResult.class)) {
-				ObjectMapper objectMapper = new ObjectMapper();
-				String json;
-				try {
-					json = objectMapper.writeValueAsString(diffusionResultColumns);
-				} catch (JsonProcessingException e) {
-					json = null;
-				}
-				return (K) new ImmutableJSONResult(json);
-			}
-			return null;
-		}
-
-
-	}
 }
 
