@@ -353,9 +353,9 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		if (type.equals(String.class)){
 			return (R) getResultString(diffusionResultColumns);
 		}
-		else if (type.isAssignableFrom(DiffusionResultColumns.class)){
+		else if (type.equals(DiffusionResultColumns.class)){
 			return (R) diffusionResultColumns;
-		} else if (type.isAssignableFrom(DiffusionJSONResult.class)) {
+		} else if (type.equals(DiffusionJSONResult.class)) {
 			return (R) new DiffusionJSONResult(diffusionResultColumns);
 		}
 		return null;
