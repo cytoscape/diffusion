@@ -99,7 +99,7 @@ public class DiffusionResultParser {
 		CIResponse<?> res = objectMapper.readValue(response, CIResponse.class);
 		
 		if(res.errors.size()!= 0) {
-			String errStrings ="";
+			String errStrings = "";
 			for (CIError err : res.errors){
 				errStrings += err.type + ":\n  " + err.message;
 			}
