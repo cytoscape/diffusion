@@ -67,6 +67,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	protected final DiffusionServiceClient client;
 	protected final CyApplicationManager appManager;
 	protected final DiffusionTableManager tableManager;
+	protected TaskMonitor tm;
 
 	private final static Logger logger = LoggerFactory.getLogger(DiffuseSelectedTask.class);
 
@@ -87,6 +88,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	private DiffusionResultColumns diffusionResultColumns = null;
 
 	public void run(TaskMonitor tm) throws Exception {
+		this.tm = tm;
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		diffuse(null, null);
@@ -95,24 +97,26 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	protected void diffuse(final String columnName, final Double time) throws Exception {
 
-		String inputCol = columnName;
-
+		String inputCol = columnName;		
+		tm.setStatusMessage("Creating heat columns");
 		// Case 1: create new input heat column with default values
 		if (columnName == null) {
 			inputCol = DIFFUSION_INPUT_COL_NAME;
 			setInputHeatValues(inputCol);
 		}
-
+		
 		// Case 2: Use existing column as-is
 		final String cx = resultParser.encode(network, inputCol);
-		//		System.out.println("\n\n" + cx);
 
+//		System.out.println("\n\n" + cx);
+		tm.setStatusMessage("Running diffusion");
+		
 		// Call the service
 		final String responseJSONString = client.diffuse(cx, columnName, time);
-
-		//		System.out.println("\n\n" + responseJSONString);
-
-
+		
+		tm.setStatusMessage("Decoding response");
+//		System.out.println("\n\n" + responseJSONString);
+		
 		// Parse the result
 		Map<String, List<AspectElement>> response = null;
 
@@ -124,16 +128,18 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 			throw e;
 		}
 		catch (Exception e) {
+			
 			logger.error("Could not parse the following Diffusion service response: " + responseJSONString);
 			throw new IllegalStateException("Could not parse the Diffusion service response", e);
 		}
-
+		tm.setStatusMessage("Loading Result");
+		
 		final String outputColumnName = getNextAvailableColumnName(DIFFUSION_OUTPUT_COL_NAME);
 		final List<AspectElement> nodeAttributes = response.get(NodeAttributesElement.ASPECT_NAME);
 
 		// Write values to the local table.
 		setResult(outputColumnName, nodeAttributes);
-
+		
 		// This is hacky, like the rest of column naming.
 		diffusionResultColumns = new DiffusionResultColumns();
 		diffusionResultColumns.heatColumn = String.format("%s_heat", outputColumnName);
@@ -144,6 +150,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
 		showResult();
+		tm.setStatusMessage("Cleaning up");
 	}
 
 	private final void setInputHeatValues(final String columnName) {

@@ -11,6 +11,7 @@ import java.util.Map;
 import org.cxio.core.CxReader;
 import org.cxio.core.interfaces.AspectElement;
 import org.cxio.util.CxioUtil;
+import org.cytoscape.ci.model.CIError;
 import org.cytoscape.ci.model.CIResponse;
 
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
@@ -90,7 +91,6 @@ public class DiffusionResultParser {
 		} catch (Exception e) {
 			throw new IOException();
 		}
-
 		return jsonString;
 	}
 
@@ -100,7 +100,11 @@ public class DiffusionResultParser {
 		CIResponse<?> res = objectMapper.readValue(response, CIResponse.class);
 		
 		if(res.errors.size()!= 0) {
-			throw new DiffusionServiceException("Diffusion Service returned errors", res.errors);
+			String errStrings = "";
+			for (CIError err : res.errors){
+				errStrings += err.type + ":\n  " + err.message;
+			}
+			throw new DiffusionServiceException("Diffusion Service returned errors:\n" + errStrings + "\n", res.errors);
 		}
 		
 		final CxReader reader = CxReader.createInstance(objectMapper.writeValueAsString(res.data), CxioUtil.getAllAvailableAspectFragmentReaders());
