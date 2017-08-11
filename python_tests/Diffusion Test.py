@@ -17,7 +17,7 @@ _core = Core(CyRESTInstance(base_url=BASE_URL))  # assumes Cytoscape answers at 
 
 
 class DiffusionTestCase(unittest.TestCase):
-    _SESSION_FILE = "/git/cytoscape/cytoscape/gui-distribution/assembly/target/cytoscape/sampleData/galFiltered.cys"
+    _SESSION_FILE = "/git/cytoscape/cytoscape/gui-distribution/assembly/target/cytoscape/sampleData/galFiltered.cys" # this must be modified if your local galFiltered.cys is not in this location.
 
     def setUp(self):
         result = _core.read_session_file(self._SESSION_FILE)

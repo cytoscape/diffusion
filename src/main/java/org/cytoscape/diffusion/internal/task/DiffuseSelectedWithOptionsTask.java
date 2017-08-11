@@ -66,6 +66,7 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
+		this.tm = tm;
 		tm.setTitle("Running Heat Diffusion");
 		tm.setStatusMessage("Running heat diffusion service.  Please wait...");
 		
