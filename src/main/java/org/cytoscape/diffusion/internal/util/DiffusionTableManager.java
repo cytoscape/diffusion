@@ -64,7 +64,8 @@ public class DiffusionTableManager implements SetCurrentNetworkListener {
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent cne) {
 		final CyNetwork currentNetwork = cne.getNetwork();
-		
+		if (currentNetwork == null)
+			return;
 		if(this.tables.get(currentNetwork.getSUID()) != null) {
 			this.currentTable = tables.get(currentNetwork.getSUID());
 		}
