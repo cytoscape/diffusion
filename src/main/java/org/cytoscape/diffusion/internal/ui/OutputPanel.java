@@ -253,7 +253,8 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 
 	@Override
 	public void handleEvent(ColumnCreatedEvent evt) {
-		
+		if (this.appManager.getCurrentNetwork() == null)
+			return;
 		final CyTable sourceTable = evt.getSource();
 		final String columnName = evt.getColumnName();
 		
