@@ -10,6 +10,8 @@ import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
+import static org.cytoscape.work.ServiceProperties.COMMAND_SUPPORTS_JSON;
+import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
 
 import java.util.Properties;
 import java.util.Set;
@@ -21,6 +23,8 @@ import org.cytoscape.ci.CIExceptionFactory;
 import org.cytoscape.ci.CIResponseFactory;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
+import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
+import org.cytoscape.diffusion.internal.task.DiffuseSelectedTask;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.EdgeContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
@@ -93,11 +97,17 @@ public class CyActivator extends AbstractCyActivator {
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService,
 				client, tunableSetterServiceRef);
 
+		String exampleJson = DiffuseSelectedTask.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
+		
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
 		diffusionTaskFactoryProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion on Selected Nodes");
 		diffusionTaskFactoryProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES + DiffusionDocumentation.ADDITIONAL_SELECTION_SWAGGER_NOTES);
+		diffusionTaskFactoryProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
+		diffusionTaskFactoryProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
+		
+		
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -114,6 +124,9 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
 		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion with Options");
 		wOptsProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES);
+		wOptsProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
+		wOptsProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
+
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");

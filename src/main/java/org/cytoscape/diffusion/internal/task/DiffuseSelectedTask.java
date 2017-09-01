@@ -41,7 +41,6 @@ import org.cytoscape.task.AbstractNetworkTask;
 
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
-import org.cytoscape.work.json.ExampleJSONString;
 import org.cytoscape.work.json.JSONResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,38 +361,27 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		}
 		else if (type.equals(DiffusionResultColumns.class)){
 			return (R) diffusionResultColumns;
-		} else if (type.equals(DiffusionJSONResult.class)) {
-			return (R) new DiffusionJSONResult(diffusionResultColumns);
+		} else if (type.equals(JSONResult.class)) {
+			JSONResult res = () -> { return getJson(diffusionResultColumns);};
+			return (R)(res);
+			
 		}
 		return null;
 	}
 
-	public final class DiffusionJSONResult implements JSONResult{
-		private final DiffusionResultColumns diffusionResultColumns;
-		
-		public DiffusionJSONResult(DiffusionResultColumns diffusionResultColumns) {
-			this.diffusionResultColumns = diffusionResultColumns;
-		}
-		
-		@Override
-		@ExampleJSONString(value="{"
-				 +  "\"heatColumn\": \"diffusion_output_heat\","
-				 + " \"rankColumn\": \"diffusion_output_rank\""
-				 +" }")
-		public String getJSON() {
-			ObjectMapper mapper = new ObjectMapper();
-			try {
-				return mapper.writeValueAsString(diffusionResultColumns);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-				return null;
-			}
+	public final static String getJson(DiffusionResultColumns diffusionResultColumns) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writeValueAsString(diffusionResultColumns);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	
 	@Override
 	public List<Class<?>> getResultClasses() {
-		return Collections.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, DiffusionJSONResult.class));
+		return Collections.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, JSONResult.class));
 	}
 
 }
