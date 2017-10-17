@@ -21,6 +21,7 @@ import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ci.CIErrorFactory;
 import org.cytoscape.ci.CIExceptionFactory;
 import org.cytoscape.ci.CIResponseFactory;
+import org.cytoscape.diffusion.internal.rest.RemoteLogger;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
 import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
@@ -75,6 +76,8 @@ public class CyActivator extends AbstractCyActivator {
 		// Create service client instance
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
+
+		RemoteLogger.configureFromCyProperties(props);
 
 		// Table Manager
 		final DiffusionTableManager tableManager = new DiffusionTableManager();
