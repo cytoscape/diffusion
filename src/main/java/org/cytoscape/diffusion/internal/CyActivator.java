@@ -75,13 +75,7 @@ public class CyActivator extends AbstractCyActivator {
 		final DiffusionTableManager tableManager = new DiffusionTableManager();
 		registerAllServices(context, tableManager, new Properties());
 		
-		final DiffusionServiceClient client;
-		final Object serviceUrlProp = props.getProperties().get("diffusion.url");
-		if (serviceUrlProp != null) {
-			client = new DiffusionServiceClient(serviceUrlProp.toString());
-		} else {
-			client = new DiffusionServiceClient();
-		}
+		final DiffusionServiceClient client = new DiffusionServiceClient(props);
 
 		OutputPanel outputPanel = new OutputPanel(tableManager, styles, cyApplicationManagerService, vmm, createSubnetworkFactory);
 		registerAllServices(context, outputPanel, new Properties());
