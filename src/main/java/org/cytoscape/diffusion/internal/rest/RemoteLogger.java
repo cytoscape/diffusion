@@ -269,7 +269,7 @@ public class RemoteLogger {
 			SyslogMessage message = getBaseMessage()
 					.withSDElement(
 							new SDElement(
-									"cyndex@cytoscape", 
+									"diffusion@cytoscape", 
 									newParams));
 			messageSender.sendMessage(message);
 		}

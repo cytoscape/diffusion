@@ -135,7 +135,7 @@ public class LoggingTests {
 		Set<SDElement> elements = lastSyslogMessage.getSDElements();
 		assertEquals(1, elements.size());
 		SDElement element = elements.iterator().next();
-		assertEquals("cyndex@cytoscape", element.getSdID());
+		assertEquals("diffusion@cytoscape", element.getSdID());
 		List<SDParam> params = element.getSdParams();
 		assertEquals(5, params.size());
 		for (SDParam sdParam : params) {
@@ -165,7 +165,7 @@ public class LoggingTests {
 		Set<SDElement> elements = lastSyslogMessage.getSDElements();
 		assertEquals(1, elements.size());
 		SDElement element = elements.iterator().next();
-		assertEquals("cyndex@cytoscape", element.getSdID());
+		assertEquals("diffusion@cytoscape", element.getSdID());
 		List<SDParam> params = element.getSdParams();
 		assertEquals(6, params.size());
 		for (SDParam sdParam : params) {
@@ -203,7 +203,7 @@ public class LoggingTests {
 			Set<SDElement> elements = lastSyslogMessage.getSDElements();
 			assertEquals(1, elements.size());
 			SDElement element = elements.iterator().next();
-			assertEquals("cyndex@cytoscape", element.getSdID());
+			assertEquals("diffusion@cytoscape", element.getSdID());
 			List<SDParam> params = element.getSdParams();
 			assertEquals(6, params.size());
 			for (SDParam sdParam : params) {
