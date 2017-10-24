@@ -1,7 +1,12 @@
 package org.cytoscape.diffusion.internal.rest;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
@@ -16,6 +21,8 @@ import com.cloudbees.syslog.SDParam;
 import com.cloudbees.syslog.Severity;
 import com.cloudbees.syslog.SyslogMessage;
 import com.cloudbees.syslog.sender.UdpSyslogMessageSender;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This is a temporary implementation of remote logging, intended to be taken over by CyREST endpoint logging.
@@ -33,6 +40,8 @@ public class RemoteLogger {
 
 	public static final String CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT = "cytoscape.remotelogging.syslogserverport";
 
+	public static final String CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME = "cytoscape.remotelogging.senderaddressservicehostname";
+	
 	private static final Logger logger = LoggerFactory.getLogger(RemoteLogger.class);
 
 	static RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
@@ -50,6 +59,7 @@ public class RemoteLogger {
 			if (shareStatistics != null && shareStatistics.equalsIgnoreCase("true")) {
 				RemoteLogger.setEnabled(true);
 			}
+			
 			String syslogServerport = cyProps.getProperties().getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT);
 			if (syslogServerport != null) {
 				try {
@@ -60,6 +70,7 @@ public class RemoteLogger {
 					throw e;
 				}
 			}
+			
 			String syslogServer = cyProps.getProperties().getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER);
 			if (syslogServer != null) {
 				try {
@@ -69,13 +80,26 @@ public class RemoteLogger {
 					throw e;
 				}
 			}
+			
+			String senderAddressServiceHostname = cyProps.getProperties().getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME);
+			if (senderAddressServiceHostname != null) {
+				try {
+					URL url = getSenderAddressServiceURL(senderAddressServiceHostname);
+					System.err.println(url);
+					RemoteLogger.getDefaultLogger().setSenderAddressServiceHostname(senderAddressServiceHostname);
+				} catch (Throwable e) {	
+					logger.error("Could not set remote logging sender address service server from properties");
+					throw e;
+				}
+			}
+			
 		} catch (Throwable e) {
 			RemoteLogger.resetDefaultLogger();
 			logger.error("Could not configure syslog server from properties", e);
 		}
 	}
 
-	public RemoteLogger(UdpSyslogMessageSender messageSender) {
+	public RemoteLogger(UdpSyslogMessageSender messageSender, String senderAddressServiceHostname) {
 		try {	
 			this.messageSender = messageSender;
 			this.messageSender.setDefaultAppName("cytoscape");
@@ -86,13 +110,17 @@ public class RemoteLogger {
 			logger.error("Error instantiating UdpSyslogMessageSender", e);
 			this.messageSender = null;
 		}
+		this.senderAddressServiceHostname = senderAddressServiceHostname;
 	}
 
 	public static final String DEFAULT_SYSLOG_SERVER_HOSTNAME = "35.197.10.101";
+	
+	public static final String DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME = "35.197.44.209";
+	
 	public static final int DEFAULT_SYSLOG_SERVER_PORT = 3333;
 
 	public RemoteLogger() {
-		this(DEFAULT_SYSLOG_SERVER_HOSTNAME, DEFAULT_SYSLOG_SERVER_PORT);
+		this(DEFAULT_SYSLOG_SERVER_HOSTNAME, DEFAULT_SYSLOG_SERVER_PORT, DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME);
 	}
 
 	private static final RemoteLogger defaultLogger = new RemoteLogger();
@@ -128,40 +156,70 @@ public class RemoteLogger {
 	public static void resetDefaultLogger() {
 		defaultLogger.messageSender.setSyslogServerHostname(DEFAULT_SYSLOG_SERVER_HOSTNAME);
 		defaultLogger.messageSender.setSyslogServerPort(DEFAULT_SYSLOG_SERVER_PORT);
+		defaultLogger.setSenderAddressServiceHostname(DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME);
 	}
 
-	public RemoteLogger(UdpSyslogMessageSender messageSender, String syslogServerHostname, int syslogServerPort) {
-		this(messageSender);
+	private String senderAddressServiceHostname;
+	
+	public void setSenderAddressServiceHostname(String senderAddressServiceHostname) {
+		this.senderAddressServiceHostname = senderAddressServiceHostname;
+	}
+	
+	public String getSenderAddressServiceHostname() {
+		return senderAddressServiceHostname;
+	}
+	
+	public RemoteLogger(UdpSyslogMessageSender messageSender, String syslogServerHostname, int syslogServerPort, String senderAddressServiceHostname) {
+		this(messageSender, senderAddressServiceHostname);
 		try {	
 			this.messageSender.setSyslogServerHostname(syslogServerHostname);
 			this.messageSender.setSyslogServerPort(syslogServerPort);
+			this.senderAddressServiceHostname = senderAddressServiceHostname;
 		} catch (Throwable e) {
 			this.messageSender = null;
 			logger.error("Error instantiating UdpSyslogMessageSender", e);
 		}
 	}
-	public RemoteLogger(String syslogServerHostname, int syslogServerPort) {
-		this(new UdpSyslogMessageSender(), syslogServerHostname, syslogServerPort);
+	public RemoteLogger(String syslogServerHostname, int syslogServerPort, String senderAddressServiceHostname) {
+		this(new UdpSyslogMessageSender(), syslogServerHostname, syslogServerPort, senderAddressServiceHostname);
 	}
 
-	private static String publicIP = null;
+	private String publicIP = null;
 
-	public static String getPublicIP() {
+	private String getPublicIP() {
 		try {
 			if (publicIP != null) {
 				return publicIP; 
 			} else {
-				String ip = null;
-				if (ip != null) {
+				
+				final ObjectMapper mapper = new ObjectMapper();;
+
+			    URL url = getSenderAddressServiceURL(senderAddressServiceHostname);
+			    HttpURLConnection request = (HttpURLConnection) url.openConnection();
+				request.setRequestMethod("GET");
+			    request.connect();
+			   
+			    JsonNode root = mapper.readTree(new InputStreamReader((InputStream) request.getContent()));
+		
+			    String ip = root.get("sender_address").asText();
+			    if (ip != null) {
 					publicIP = ip;
+					return publicIP;
+				} else {
+					publicIP = null;
+					return "0.0.0.0";
 				}
-				return publicIP;
+				
+				
 			}
-		}
-		finally {
+		} catch (Throwable e) {
 			publicIP = null;
 			return "0.0.0.0";
 		}
+	}
+	
+	private static URL getSenderAddressServiceURL(String hostname) throws MalformedURLException {
+		return new URL("http://" + hostname);
 	}
 
 	// Main method to manually send a Syslog message for testing.
@@ -170,7 +228,7 @@ public class RemoteLogger {
 			setEnabled(true);
 			RemoteLogger logger = RemoteLogger.defaultLogger;
 			long systemTime = System.currentTimeMillis();
-			logger.logResourceError("dummyHttpMethod",  "dummyPath", 664, "dummy:urn");
+			logger.logResourceError("dummyHttpMethod",  "dummyPath", 664, "urn:dummyurn");
 			long elapsedTime = System.currentTimeMillis() - systemTime;
 
 			System.out.println(elapsedTime);
@@ -211,7 +269,7 @@ public class RemoteLogger {
 			SyslogMessage message = getBaseMessage()
 					.withSDElement(
 							new SDElement(
-									"diffusion@cytoscape", 
+									"cyndex@cytoscape", 
 									newParams));
 			messageSender.sendMessage(message);
 		}
