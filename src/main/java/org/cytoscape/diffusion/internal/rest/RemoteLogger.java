@@ -69,6 +69,8 @@ public class RemoteLogger {
 					logger.error("Could not set remote logging syslog server port from properties");
 					throw e;
 				}
+			} else {
+				syslogServerport = Integer.toString(RemoteLogger.DEFAULT_SYSLOG_SERVER_PORT);
 			}
 			
 			String syslogServer = cyProps.getProperties().getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER);
@@ -79,6 +81,8 @@ public class RemoteLogger {
 					logger.error("Could not set remote logging syslog server from properties");
 					throw e;
 				}
+			} else {
+				syslogServer = DEFAULT_SYSLOG_SERVER_HOSTNAME;
 			}
 			
 			String senderAddressServiceHostname = cyProps.getProperties().getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME);
@@ -91,8 +95,12 @@ public class RemoteLogger {
 					logger.error("Could not set remote logging sender address service server from properties");
 					throw e;
 				}
+			} else {
+				senderAddressServiceHostname = DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME;
 			}
-			
+			cyProps.getProperties().setProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT, syslogServerport);
+			cyProps.getProperties().setProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER, syslogServer);
+			cyProps.getProperties().setProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME, senderAddressServiceHostname);
 		} catch (Throwable e) {
 			RemoteLogger.resetDefaultLogger();
 			logger.error("Could not configure syslog server from properties", e);

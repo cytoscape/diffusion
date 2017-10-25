@@ -13,11 +13,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.anyString;
-
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -302,6 +306,27 @@ public class LoggingTests {
 	}
 	
 	@Test 
+	public void testConfigFromNullProperties() throws UnknownHostException {
+		CyProperty<Properties> cyProps =  mock(CyProperty.class);
+		Properties properties = mock(Properties.class);
+		
+		when(properties.getProperty("installoptions.shareStatistics")).thenReturn("true");
+		when(properties.getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT)).thenReturn(null);
+		when(properties.getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER)).thenReturn(null);
+		when(properties.getProperty(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME)).thenReturn(null);
+		when(cyProps.getProperties()).thenReturn(properties);
+		
+		RemoteLogger.configureFromCyProperties(cyProps);
+		assertEquals(java.net.InetAddress.getByName(RemoteLogger.DEFAULT_SYSLOG_SERVER_HOSTNAME).getHostName(), RemoteLogger.getDefaultLogger().getSyslogServerHostname());
+		assertEquals(RemoteLogger.DEFAULT_SYSLOG_SERVER_PORT, RemoteLogger.getDefaultLogger().getSyslogServerPort());
+		assertEquals(RemoteLogger.DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME, RemoteLogger.getDefaultLogger().getSenderAddressServiceHostname());
+	
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT), eq(Integer.toString(3333)));
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER), eq("35.197.10.101"));
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME), eq("35.197.44.209"));
+	}
+	
+	@Test 
 	public void testConfigFromProperties() {
 		CyProperty<Properties> cyProps =  mock(CyProperty.class);
 		Properties properties = mock(Properties.class);
@@ -316,6 +341,10 @@ public class LoggingTests {
 		assertEquals("1.2.3.4", RemoteLogger.getDefaultLogger().getSyslogServerHostname());
 		assertEquals(668, RemoteLogger.getDefaultLogger().getSyslogServerPort());
 		assertEquals("1.2.3.5", RemoteLogger.getDefaultLogger().getSenderAddressServiceHostname());
+	
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVERPORT), eq("668"));
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SYSLOGSERVER), eq("1.2.3.4"));
+		verify(properties, times(1)).setProperty(eq(RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME), eq("1.2.3.5"));
 	}
 	
 	@Test 
@@ -333,6 +362,8 @@ public class LoggingTests {
 		assertEquals(java.net.InetAddress.getByName(RemoteLogger.DEFAULT_SYSLOG_SERVER_HOSTNAME).getHostName(), RemoteLogger.getDefaultLogger().getSyslogServerHostname());
 		assertEquals(RemoteLogger.DEFAULT_SYSLOG_SERVER_PORT, RemoteLogger.getDefaultLogger().getSyslogServerPort());
 		assertEquals(RemoteLogger.DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME, RemoteLogger.getDefaultLogger().getSenderAddressServiceHostname());
+	
+		verify(properties, never()).setProperty(anyString(), anyString());
 	}
 	
 	@Test 
@@ -349,6 +380,8 @@ public class LoggingTests {
 		assertEquals(java.net.InetAddress.getByName(RemoteLogger.DEFAULT_SYSLOG_SERVER_HOSTNAME).getHostName(), RemoteLogger.getDefaultLogger().getSyslogServerHostname());
 		assertEquals(RemoteLogger.DEFAULT_SYSLOG_SERVER_PORT, RemoteLogger.getDefaultLogger().getSyslogServerPort());
 		assertEquals(RemoteLogger.DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME, RemoteLogger.getDefaultLogger().getSenderAddressServiceHostname());
+	
+		verify(properties, never()).setProperty(anyString(), anyString());
 	}
 	
 	@Test 
@@ -367,6 +400,7 @@ public class LoggingTests {
 		assertEquals(RemoteLogger.DEFAULT_SYSLOG_SERVER_PORT, RemoteLogger.getDefaultLogger().getSyslogServerPort());
 		assertEquals(RemoteLogger.DEFAULT_SENDER_ADDRESS_SERVICE_HOSTNAME, RemoteLogger.getDefaultLogger().getSenderAddressServiceHostname());
 
+		verify(properties, never()).setProperty(anyString(), anyString());
 	}
 	
 	@Test 
