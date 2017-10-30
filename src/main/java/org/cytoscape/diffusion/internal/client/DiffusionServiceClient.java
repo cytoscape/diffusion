@@ -31,7 +31,7 @@ public class DiffusionServiceClient {
 	private final CyProperty<Properties> props;
 	final HttpClient client;
 	private final static Logger logger = LoggerFactory.getLogger(DiffusionServiceClient.class);
-
+	
 	public DiffusionServiceClient(CyProperty<Properties> props) {
 		this.props = props;
 		this.client = HttpClients.createDefault();
