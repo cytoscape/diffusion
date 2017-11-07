@@ -7,8 +7,11 @@ import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
+import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
+import static org.cytoscape.work.ServiceProperties.COMMAND_SUPPORTS_JSON;
+import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
 
 import java.util.Properties;
 import java.util.Set;
@@ -17,9 +20,12 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.ci.CIErrorFactory;
 import org.cytoscape.ci.CIExceptionFactory;
-import org.cytoscape.ci_bridge_impl.CIProvider;
+import org.cytoscape.ci.CIResponseFactory;
+import org.cytoscape.diffusion.internal.rest.RemoteLogger;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
+import org.cytoscape.diffusion.internal.rest.DiffusionResultColumns;
+import org.cytoscape.diffusion.internal.task.DiffuseSelectedTask;
 import org.cytoscape.diffusion.internal.task.DiffusionContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.task.EdgeContextMenuTaskFactory;
 import org.cytoscape.diffusion.internal.ui.OutputPanel;
@@ -71,6 +77,8 @@ public class CyActivator extends AbstractCyActivator {
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
 
+		RemoteLogger.configureFromCyProperties(props);
+
 		// Table Manager
 		final DiffusionTableManager tableManager = new DiffusionTableManager();
 		registerAllServices(context, tableManager, new Properties());
@@ -86,10 +94,17 @@ public class CyActivator extends AbstractCyActivator {
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService,
 				client, tunableSetterServiceRef);
 
+		String exampleJson = DiffuseSelectedTask.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
+		
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		diffusionTaskFactoryProps.setProperty(COMMAND, "diffuse");
 		diffusionTaskFactoryProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion on Selected Nodes");
+		diffusionTaskFactoryProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES + DiffusionDocumentation.ADDITIONAL_SELECTION_SWAGGER_NOTES);
+		diffusionTaskFactoryProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
+		diffusionTaskFactoryProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
+		
+		
 		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
@@ -105,22 +120,20 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(COMMAND_NAMESPACE, "diffusion");
 		wOptsProps.setProperty(COMMAND, "diffuse_advanced");
 		wOptsProps.setProperty(COMMAND_DESCRIPTION, "Execute Diffusion with Options");
+		wOptsProps.setProperty(COMMAND_LONG_DESCRIPTION, DiffusionDocumentation.GENERIC_SWAGGER_NOTES);
+		wOptsProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
+		wOptsProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
+
 		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
 
-	
-
-		//CI Error handlers
-		//CIExceptionFactory ciExceptionFactory = this.getService(bc, CIExceptionFactory.class);
-		//CIErrorFactory ciErrorFactory = this.getService(bc, CIErrorFactory.class);
+		CIResponseFactory ciResponseFactory = this.getService(context, CIResponseFactory.class);
+		CIExceptionFactory ciExceptionFactory = this.getService(context, CIExceptionFactory.class);
+		CIErrorFactory ciErrorFactory = this.getService(context, CIErrorFactory.class);
 		
-		//
-		CIExceptionFactory ciExceptionFactory = CIProvider.getCIExceptionFactory();
-		CIErrorFactory ciErrorFactory = CIProvider.getCIErrorFactory(context);
-		
-		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciExceptionFactory, ciErrorFactory);
+		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager, cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory, ciResponseFactory, ciExceptionFactory, ciErrorFactory);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);

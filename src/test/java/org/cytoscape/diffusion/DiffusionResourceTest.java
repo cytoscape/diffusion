@@ -15,10 +15,15 @@ import java.util.List;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.ci.model.CIError;
+import org.cytoscape.ci.model.CIResponse;
 import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
+
 import org.cytoscape.ci.CIErrorFactory;
 import org.cytoscape.ci.CIExceptionFactory;
+import org.cytoscape.ci.CIResponseFactory;
 import org.cytoscape.ci.model.CIError;
+
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
@@ -166,9 +171,19 @@ public class DiffusionResourceTest {
 		ObservableTask dummyJsonTask = mock(ObservableTask.class);
 		when(dummyJsonTask.getResults(any(Class.class))).thenReturn(null);
 		
+		CIResponseFactory ciResponseFactory = mock(CIResponseFactory.class);
+		
+		doAnswer(new Answer<CIResponse<Object>>() {
+			public CIResponse<Object> answer(InvocationOnMock invocation) {
+				CIResponse<Object> ciResponse = new CIResponse();
+				List<CIError> errorList = new ArrayList<CIError>();
+				ciResponse.data = invocation.getArguments()[0];
+				ciResponse.errors = errorList;
+				return ciResponse;
+			}
+		}).when(ciResponseFactory).getCIResponse(any());
+		
 		CIExceptionFactory ciExceptionFactory = mock(CIExceptionFactory.class);
-		
-		
 		CIErrorFactory ciErrorFactory = mock(CIErrorFactory.class);
 		
 		doAnswer(new Answer<CIError>() {
@@ -204,6 +219,7 @@ public class DiffusionResourceTest {
 				cyNetworkViewManager, 
 				diffusionContextMenuTaskFactory, 
 				null,
+				ciResponseFactory,
 				ciExceptionFactory, 
 				ciErrorFactory);
 
