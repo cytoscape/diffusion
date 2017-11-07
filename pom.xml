@@ -9,8 +9,7 @@
 
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>[3.5.0,3.5.1]</cytoscape.api.version>
-
+		<cytoscape.api.version>[3.6.0,3.7.0)</cytoscape.api.version>
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
 
@@ -18,7 +17,7 @@
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
 
-	<version>1.4.3</version>
+	<version>1.5.0</version>
 
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
@@ -55,12 +54,42 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Private-Package>${bundle.namespace}.internal.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.internal.CyActivator</Bundle-Activator>
-						<Cytoscape-App-Dependencies>CX Support;2.1.0,cyREST;3.4.0</Cytoscape-App-Dependencies>
-						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape;ci-bridge-impl</Embed-Dependency>
+						<Cytoscape-App-Dependencies>CX Support;2.1.0,cyREST;3.6.0-SNAPSHOT</Cytoscape-App-Dependencies>
+						<Embed-Dependency>*;scope=!provided|test;groupId=!org.cytoscape</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>3.1.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.9</version>
+				<configuration>
+					<includes>
+						<include>org/cytoscape/diffusion/**/*</include>
+						<include>org/cytoscape/diffusion/*</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -152,9 +181,10 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.cytoscape-ci</groupId>
-			<artifactId>ci-bridge-impl</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+		 	<groupId>org.cytoscape</groupId>
+  			<artifactId>ci-api</artifactId>
+  			<version>${cytoscape.api.version}</version>
+  			<scope>provided</scope>
 		</dependency>
 
 		<!-- For logging -->
@@ -169,6 +199,14 @@
 			<artifactId>pax-logging-service</artifactId>
 			<version>1.5.3</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- Remote Logging -->
+
+		<dependency>
+			<groupId>com.cloudbees</groupId>
+			<artifactId>syslog-java-client</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 
 		<!-- 3rd party -->
