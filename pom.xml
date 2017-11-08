@@ -9,7 +9,7 @@
 
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>[3.6.0,3.7.0)</cytoscape.api.version>
+		<cytoscape.api.version>3.6.0-SNAPSHOT</cytoscape.api.version>
 		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
 	</properties>
 
@@ -116,7 +116,7 @@
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
 	</repositories>
-    
+
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
@@ -235,13 +235,13 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 			<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 </project>
