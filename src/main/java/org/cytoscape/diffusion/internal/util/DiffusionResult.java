@@ -53,7 +53,12 @@ public class DiffusionResult {
 
 	// Get the heat of the node with the given rank
 	public Double rankToHeat(Integer rank) {
-		return getRowForRank(rank).get(heatName, Double.class);
+		if (rank == null)
+			return new Double(0);
+		CyRow row = getRowForRank(rank);
+		if (row == null)
+			return new Double(0);
+		return row.get(heatName, Double.class);
 	}
 
 	// Get the heat of the first node with the given heat

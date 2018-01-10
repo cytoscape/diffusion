@@ -11,6 +11,7 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
@@ -60,6 +61,11 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 
 	@Override
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+		CyNode node = nodeView.getModel();
+		CyNetwork network = networkView.getModel();
+		CyTable table = network.getDefaultNodeTable();
+		table.getRow(node.getSUID()).set("selected", true);
+		
 		return create(networkView.getModel());
 	}
 

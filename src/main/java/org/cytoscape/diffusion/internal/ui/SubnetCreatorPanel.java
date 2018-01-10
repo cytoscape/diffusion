@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.diffusion.internal.task.EmptyTaskMonitor;
-import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.AbstractNetworkCollectionTask;
@@ -90,6 +89,8 @@ public class SubnetCreatorPanel extends JPanel {
 		final VisualStyle style = getSelectedStyle();
 		final CyNetwork network = this.tableManager.getCurrentTable().getAssociatedNetwork();
 		final CyNetworkView view = createSubnet(network);
+		if (view == null)
+			return;
 		appManager.setCurrentNetwork(view.getModel());
 		vmm.setVisualStyle(style, view);
 		style.apply(view);
@@ -122,6 +123,8 @@ public class SubnetCreatorPanel extends JPanel {
 			}
 		} catch (Exception e) {
 		}
+		if (viewTask == null)
+			return null;
 		final Collection<?> result = ((ObservableTask) viewTask).getResults(Collection.class);
 		return ((CyNetworkView) result.iterator().next());
 	}
