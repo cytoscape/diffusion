@@ -75,6 +75,9 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 	public void handleEvent(final SessionLoadedEvent e) {
 		loadingSession = false;
 		final CyNetwork network = this.appManager.getCurrentNetwork();
+		if (network == null) {
+			return;
+		}
 		DiffusionTable table = tableManager.getTable(network.getSUID());
 		if (table == null) {
 			table = this.tableManager.createTable(network);
@@ -185,7 +188,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 			columnNameComboBox.removeAllItems();
 			for (String col : cols)
 				columnNameComboBox.addItem(col);
-			//columnNameComboBox = new JComboBox<String>(cols);
+			// columnNameComboBox = new JComboBox<String>(cols);
 		}
 
 		columnNameComboBox.addActionListener(new ActionListener() {
@@ -323,8 +326,6 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 		final DiffusionTable newTable = this.tableManager.createTable(net);
 		final String[] cols = newTable.getAvailableOutputColumns();
 		final CyTable localTable = net.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
-
-		
 
 		for (final String colName : cols) {
 			final CyColumn col = localTable.getColumn(colName);
