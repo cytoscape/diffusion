@@ -61,14 +61,14 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 
 	@Override
 	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
-		CyNode node = nodeView.getModel();
-		CyNetwork network = networkView.getModel();
-		CyTable table = network.getDefaultNodeTable();
-		table.getRow(node.getSUID()).set("selected", true);
-		
 		return create(networkView.getModel());
 	}
 
+	@Override
+	public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
+		return isReady(networkView);
+	}
+	
 	@Override
 	public boolean isReady(CyNetworkView networkView) {
 		if (networkView == null) {
