@@ -63,7 +63,7 @@ public class DiffusionTable {
 
 		for (CyColumn column : table.getColumns()) {
 			if ((column.getType().equals(Double.class) || column.getType().equals(Integer.class))
-					&& hasDiffusionSuffix(column.getName())) {
+					&& column.getName().startsWith("diffusion_") && hasDiffusionSuffix(column.getName())) {
 				columns.add(column.getName());
 			}
 		}

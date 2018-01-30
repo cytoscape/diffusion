@@ -13,23 +13,25 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
-
 @SuppressWarnings("serial")
 public class RankSelectionPanel extends AbstractSliderPanel {
 
 	RankSelectionPanel(DiffusionTable diffusionTable, final String title) {
 		super(diffusionTable, title, "Node ", "");
 	}
-	
+
 	private final void setThreshold(final Integer index) {
-	
+
 		final String rankColName = diffusionTable.getCurrentResult().getRankColumnName();
 		final CyNetwork network = this.diffusionTable.getAssociatedNetwork();
 		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
 		
-		
 		for (final CyRow row : localTable.getAllRows()) {
 			final Integer rank = row.get(rankColName, Integer.class);
+			
+			if (rank == null) { // ignore phantom nodes
+				continue;
+			}
 			
 			if (rank <= index) {
 				row.set(CyNetwork.SELECTED, Boolean.TRUE);
@@ -37,6 +39,8 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 				row.set(CyNetwork.SELECTED, Boolean.FALSE);
 			}
 		}
+		
+		
 	}
 
 	@Override
@@ -44,12 +48,12 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		final Integer rankMax = diffusionTable.getCurrentResult().getMaxRank();
 		final JSlider slider = new JSlider(1, rankMax);
 		slider.setOpaque(false);
-		
-		int delta = rankMax/4;
-		
+
+		int delta = rankMax / 4;
+
 		final Hashtable labels = slider.createStandardLabels(delta);
 		slider.setLabelTable(labels);
-		
+
 		slider.setMajorTickSpacing(delta);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
@@ -66,7 +70,7 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		});
 
 		final Double maxRank = diffusionTable.getCurrentResult().getMaxRank().doubleValue();
-		final Integer ninteithPercentile = ((Double)(maxRank * 0.1d)).intValue();
+		final Integer ninteithPercentile = ((Double) (maxRank * 0.1d)).intValue();
 		setThreshold(ninteithPercentile);
 		slider.setValue(ninteithPercentile);
 		valuePanel.setValue(ninteithPercentile);
