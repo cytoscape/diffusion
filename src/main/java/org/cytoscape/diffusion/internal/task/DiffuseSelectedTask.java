@@ -62,7 +62,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	protected DiffusionResultParser resultParser;
 	protected OutputPanel outputPanel;
-	protected final CySwingApplication swingApplication;
+	private final CySwingApplication swingApplication;
 	protected final DiffusionServiceClient client;
 	protected final CyApplicationManager appManager;
 	protected final DiffusionTableManager tableManager;

@@ -25,22 +25,21 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		final String rankColName = diffusionTable.getCurrentResult().getRankColumnName();
 		final CyNetwork network = this.diffusionTable.getAssociatedNetwork();
 		final CyTable localTable = network.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS);
-		
+
 		for (final CyRow row : localTable.getAllRows()) {
 			final Integer rank = row.get(rankColName, Integer.class);
-			
+
 			if (rank == null) { // ignore phantom nodes
 				continue;
 			}
-			
-			if (rank <= index) {
+
+			if (rank < index) {
 				row.set(CyNetwork.SELECTED, Boolean.TRUE);
 			} else {
 				row.set(CyNetwork.SELECTED, Boolean.FALSE);
 			}
 		}
-		
-		
+
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		final JSlider slider = new JSlider(1, rankMax);
 		slider.setOpaque(false);
 
-		int delta = rankMax / 4;
+		int delta = Math.max(1, rankMax / 4);
 
 		final Hashtable labels = slider.createStandardLabels(delta);
 		slider.setLabelTable(labels);
@@ -57,7 +56,7 @@ public class RankSelectionPanel extends AbstractSliderPanel {
 		slider.setMajorTickSpacing(delta);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
-
+		
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {

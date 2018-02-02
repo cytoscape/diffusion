@@ -38,6 +38,7 @@ import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
@@ -69,13 +70,13 @@ public class CyActivator extends AbstractCyActivator {
 		SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyNetworkViewManager cyNetworkViewManager = getService(context, CyNetworkViewManager.class);
-		final CyLayoutAlgorithmManager layoutManager = getService(context, CyLayoutAlgorithmManager.class);
-		final CyNetworkViewManager viewManager = getService(context, CyNetworkViewManager.class);
+		final RenderingEngineManager renderingEngineMgr = getService(context, RenderingEngineManager.class);
+		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 
 		
 		LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
 		Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
-
+		
 		// Create service client instance
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
@@ -89,10 +90,9 @@ public class CyActivator extends AbstractCyActivator {
 		final DiffusionServiceClient client = new DiffusionServiceClient(props);
 
 		OutputPanel outputPanel = new OutputPanel(tableManager, styles, cyApplicationManagerService, vmm,
-				createSubnetworkFactory, layoutManager, viewManager);
+				createSubnetworkFactory, renderingEngineMgr, swingApplication);
 		registerAllServices(context, outputPanel, new Properties());
 
-		final CySwingApplication swingApplication = getService(context, CySwingApplication.class);
 
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client,

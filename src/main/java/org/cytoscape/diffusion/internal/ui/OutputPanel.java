@@ -16,25 +16,29 @@ import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
+import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.application.swing.CytoPanel;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
+import org.cytoscape.application.swing.CytoPanelState;
 import org.cytoscape.diffusion.internal.util.DiffusionResult;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
-import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 
 @SuppressWarnings("serial")
-public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurrentNetworkListener {
+public class OutputPanel extends JPanel
+		implements CytoPanelComponent2, SetCurrentNetworkListener {
 
 	private JComboBox<String> columnNameComboBox;
 	private JPanel selectionPanel;
@@ -43,8 +47,8 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 	private final CyApplicationManager appManager;
 
 	private final DiffusionTableManager tableManager;
-	private final CyLayoutAlgorithmManager layoutManager;
-	private final CyNetworkViewManager viewManager;
+	private final RenderingEngineManager renderingEngineMgr;
+	private final CySwingApplication swingApplication;
 	private final VisualMappingManager vmm;
 	private final Set<VisualStyle> styles;
 
@@ -57,15 +61,16 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 	public OutputPanel(DiffusionTableManager tableManager, Set<VisualStyle> styles,
 			final CyApplicationManager appManager, final VisualMappingManager vmm,
 			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory,
-			final CyLayoutAlgorithmManager layoutManager, final CyNetworkViewManager viewManager) {
+			final RenderingEngineManager renderingEngineMgr,
+			final CySwingApplication swingApplication) {
 		this.appManager = appManager;
 		this.styles = styles;
 		this.vmm = vmm;
 		this.tableManager = tableManager;
 		this.createSubnetworkFactory = createSubnetworkFactory;
-		this.layoutManager = layoutManager;
-		this.viewManager = viewManager;
+		this.renderingEngineMgr = renderingEngineMgr;
 		this.emptyPanel = new NoResultPanel();
+		this.swingApplication = swingApplication;
 
 		this.setBackground(Color.white);
 
@@ -81,7 +86,7 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 		mainPanel = new JPanel();
 
 		subnetPanel = new SubnetCreatorPanel(tableManager, styles, vmm, createSubnetworkFactory, appManager,
-				layoutManager, viewManager);
+				renderingEngineMgr);
 		subnetPanel.setOpaque(false);
 		subnetPanel.setMaximumSize(new Dimension(5000, 56));
 		subnetPanel.setMinimumSize(new Dimension(380, 56));
@@ -121,7 +126,52 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 			this.add(emptyPanel, BorderLayout.CENTER);
 
 		}
+		setPanelVisible(showResult);
 		this.updateUI();
+	}
+
+	public void setPanelVisible(boolean visible) {
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// 1. Dock the EAST Panel
+				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
+				final int componentCount = panel.getCytoPanelComponentCount();
+
+				if (!visible) {
+					if (componentCount > 1) {
+						int ind = (panel.getSelectedIndex() + 1) % componentCount;
+						panel.setSelectedIndex(ind);
+					} else {
+						panel.setState(CytoPanelState.HIDE);
+					}
+				} else {
+					panel.setState(CytoPanelState.DOCK);
+
+					// 2. Find Diffusion Output Panel
+					int targetPanelIdx = 0;
+
+					for (int i = 0; i < componentCount; i++) {
+						final Component panelComponent = panel.getComponentAt(i);
+						if (panelComponent instanceof CytoPanelComponent2) {
+							final CytoPanelComponent2 cp2 = (CytoPanelComponent2) panelComponent;
+							final String panelId = cp2.getIdentifier();
+							if (panelId != null && panelId.equals("diffusion")) {
+								// Found target panel. Force to update
+								final Dimension defSize = new Dimension(300, 400);
+								panelComponent.setPreferredSize(defSize);
+								panelComponent.setSize(defSize);
+								targetPanelIdx = i;
+								break;
+							}
+						}
+					}
+					panel.setSelectedIndex(targetPanelIdx);
+					panel.getThisComponent().repaint();
+				}
+			}
+		});
 	}
 
 	private final JPanel createSelector() {
@@ -279,4 +329,5 @@ public class OutputPanel extends JPanel implements CytoPanelComponent2, SetCurre
 	public String getIdentifier() {
 		return "diffusion";
 	}
+
 }

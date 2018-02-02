@@ -19,12 +19,9 @@ import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.diffusion.internal.task.EmptyTaskMonitor;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.task.AbstractNetworkCollectionTask;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithm;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.ObservableTask;
@@ -46,20 +43,19 @@ public class SubnetCreatorPanel extends JPanel {
 	private Set<VisualStyle> visualStyles;
 
 	private final VisualMappingManager vmm;
-	private final CyLayoutAlgorithmManager layoutManager;
 	private final CyApplicationManager appManager;
-	private final CyNetworkViewManager viewManager;
+	final RenderingEngineManager renderingEngineMgr;
+
 
 	SubnetCreatorPanel(DiffusionTableManager tableManager, Set<VisualStyle> styles, final VisualMappingManager vmm,
 			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory, CyApplicationManager appManager,
-			final CyLayoutAlgorithmManager layoutManager, final CyNetworkViewManager viewManager) {
+			final RenderingEngineManager renderingEngineMgr) {
 
 		this.createSubnetworkFactory = createSubnetworkFactory;
 		this.tableManager = tableManager;
 		this.vmm = vmm;
 		this.appManager = appManager;
-		this.viewManager = viewManager;
-		this.layoutManager = layoutManager;
+		this.renderingEngineMgr = renderingEngineMgr;
 
 		final VisualStyle defStyle = vmm.getDefaultVisualStyle();
 
@@ -81,9 +77,7 @@ public class SubnetCreatorPanel extends JPanel {
 		makeSubnetButton.setMaximumSize(new Dimension(100, 40));
 		makeSubnetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				createSubnetwork();
-
 			}
 		});
 
@@ -95,29 +89,21 @@ public class SubnetCreatorPanel extends JPanel {
 	private final void createSubnetwork() {
 		final VisualStyle style = getSelectedStyle();
 		final CyNetwork network = this.tableManager.getCurrentTable().getAssociatedNetwork();
+
 		CyNetworkView view = createSubnet(network);
-		if (view == null){
-			view = appManager.getCurrentNetworkView();
+
+		if (view == null) {
+			return;
 		}
-		layoutNetwork(view);
+		// createSubnetworkFactory fails to run CopyExistingViewTask for some
+		// reason...
+		// copyLayoutToNewView(network);
+
 		appManager.setCurrentNetwork(view.getModel());
 		vmm.setVisualStyle(style, view);
 		style.apply(view);
 		view.fitContent();
 		view.updateView();
-
-	}
-
-	private final void layoutNetwork(CyNetworkView view) {
-		System.out.println("Applying layout");
-		CyLayoutAlgorithm layout = layoutManager.getDefaultLayout();
-		TaskIterator ti = layout.createTaskIterator(view, layout.createLayoutContext(),
-				CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
-		try {
-			ti.next().run(new EmptyTaskMonitor());
-		} catch (Exception e) {
-			System.out.println("Failed to layout network");
-		}
 	}
 
 	private final VisualStyle getSelectedStyle() {
@@ -130,27 +116,33 @@ public class SubnetCreatorPanel extends JPanel {
 	}
 
 	public CyNetworkView createSubnet(final CyNetwork network) {
-
 		TaskIterator taskIterator = createSubnetworkFactory.createTaskIterator(network);
-		// final TaskIterator finalIterator = new TaskIterator();
-		AbstractNetworkCollectionTask viewTask = null;
-		try {
-			while (taskIterator.hasNext()) {
-				final Task task = taskIterator.next();
-				task.run(new EmptyTaskMonitor());
-				// finalIterator.append(task);
 
-				if (task instanceof ObservableTask) {
-					viewTask = (AbstractNetworkCollectionTask) task;
+		// final TaskIterator finalIterator = new TaskIterator();
+		boolean viewCopied = false;
+		ObservableTask viewTask = null;
+		try {
+			while (!viewCopied || taskIterator.hasNext()) {
+				if (taskIterator.hasNext()) {
+					final Task task = taskIterator.next();
+					// finalIterator.append(task);
+					task.run(new EmptyTaskMonitor());
+					if(task.getClass().getName().endsWith("CopyExistingViewTask"))
+						viewCopied = true;
+					else if (task.getClass().getName().endsWith("RegisterNetworkViewTask")){
+						viewTask = (ObservableTask) task;
+					}
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		if (viewTask == null){
+		if (viewTask == null) {
 			return null;
 		}
-		final Collection<?> result = ((ObservableTask) viewTask).getResults(Collection.class);
+
+		final Collection<?> result = viewTask.getResults(Collection.class);
 		return ((CyNetworkView) result.iterator().next());
 	}
+
 }
