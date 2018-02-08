@@ -52,7 +52,7 @@ import io.swagger.annotations.ApiResponses;
 public class DiffusionResource {
 
 	private final CyApplicationManager cyApplicationManager;
-	private final SynchronousTaskManager<?> taskManager;
+	private final SynchronousTaskManager<Object> taskManager;
 	
 	private final CyNetworkManager cyNetworkManager;
 	private final CyNetworkViewManager cyNetworkViewManager;
@@ -71,7 +71,7 @@ public class DiffusionResource {
 	public static final String CY_NETWORK_VIEW_NOT_FOUND_CODE = "2";
 	public static final String TASK_EXECUTION_ERROR_CODE= "3";
 
-	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<?> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final CIResponseFactory ciResponseFactory, final CIExceptionFactory ciExceptionFactory, final CIErrorFactory ciErrorFactory) {
+	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<Object> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final CIResponseFactory ciResponseFactory, final CIExceptionFactory ciExceptionFactory, final CIErrorFactory ciErrorFactory) {
 		this.cyApplicationManager = cyApplicationManager;
 		this.taskManager = taskManager;
 		this.cyNetworkManager = cyNetworkManager;

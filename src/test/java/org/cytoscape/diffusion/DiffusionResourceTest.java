@@ -154,7 +154,7 @@ public class DiffusionResourceTest {
 
 		TunableSetter tunableSetter = mock(TunableSetter.class);
 
-		SynchronousTaskManager<?> syncTaskManager = mock(SynchronousTaskManager.class);
+		SynchronousTaskManager<Object> syncTaskManager = mock(SynchronousTaskManager.class);
 
 		CyNetworkManager cyNetworkManager = mock(CyNetworkManager.class);
 

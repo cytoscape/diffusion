@@ -67,7 +67,7 @@ public class CyActivator extends AbstractCyActivator {
 
 		CyApplicationManager cyApplicationManagerService = getService(context, CyApplicationManager.class);
 
-		SynchronousTaskManager<?> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
+		SynchronousTaskManager<Object> synchronousTaskManager = getService(context, SynchronousTaskManager.class);
 		final CyNetworkManager cyNetworkManager = getService(context, CyNetworkManager.class);
 		final CyNetworkViewManager cyNetworkViewManager = getService(context, CyNetworkViewManager.class);
 		final RenderingEngineManager renderingEngineMgr = getService(context, RenderingEngineManager.class);
