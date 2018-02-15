@@ -45,6 +45,7 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TunableSetter;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -134,13 +135,16 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
 
-		CIResponseFactory ciResponseFactory = this.getService(context, CIResponseFactory.class);
-		CIExceptionFactory ciExceptionFactory = this.getService(context, CIExceptionFactory.class);
-		CIErrorFactory ciErrorFactory = this.getService(context, CIErrorFactory.class);
+		ServiceTracker ciResponseFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIResponseFactory)"), null);
+				//this.getService(context, CIResponseFactory.class);
+		ServiceTracker ciExceptionFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIExceptionFactory)"), null);
+				//this.getService(context, CIExceptionFactory.class);
+		ServiceTracker ciErrorFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIErrorFactory)"), null);
+				//this.getService(context, CIErrorFactory.class);
 
 		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager,
 				cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory,
-				ciResponseFactory, ciExceptionFactory, ciErrorFactory);
+				ciResponseFactoryTracker, ciExceptionFactoryTracker, ciErrorFactoryTracker);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
