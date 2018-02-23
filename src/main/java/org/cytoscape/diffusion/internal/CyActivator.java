@@ -48,9 +48,9 @@ public class CyActivator extends AbstractCyActivator {
 	private static final String DIFFUSION_MENU = "Tools.Diffuse[2100]";
 	private static final String STYLES = "/styles.xml";
 
-	private ServiceTracker ciResponseFactoryTracker;
-	private ServiceTracker ciExceptionFactoryTracker;
-	private ServiceTracker ciErrorFactoryTracker;
+	private ServiceTracker ciResponseFactoryTracker = null;
+	private ServiceTracker ciExceptionFactoryTracker = null;
+	private ServiceTracker ciErrorFactoryTracker = null;
 	
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -205,9 +205,16 @@ public class CyActivator extends AbstractCyActivator {
 
 	@Override
 	public void shutDown() {
-		ciResponseFactoryTracker.close();;
-		ciExceptionFactoryTracker.close();;
-		ciErrorFactoryTracker.close();;
+		if (ciResponseFactoryTracker != null) {
+		ciResponseFactoryTracker.close();
+		}
+		if (ciExceptionFactoryTracker != null) {
+			ciExceptionFactoryTracker.close(); 
+		}
+		if (ciErrorFactoryTracker != null) {
+			ciErrorFactoryTracker.close();
+		}
+		super.shutDown();
 	}
 	
 }
