@@ -37,6 +37,7 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskObserver;
 
 import org.cytoscape.work.util.ListSingleSelection;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,10 +61,25 @@ public class DiffusionResource {
 	private final DiffusionContextMenuTaskFactory diffusionTaskFactory;
 	private final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory;
 	
-	private final CIResponseFactory ciResponseFactory;
 	
-	private final CIExceptionFactory ciExceptionFactory;
-	private final CIErrorFactory ciErrorFactory;
+	private final ServiceTracker ciResponseFactoryTracker;
+	
+	private CIResponseFactory getCIResponseFactory() {
+		return (CIResponseFactory) ciResponseFactoryTracker.getService();
+	}
+	//private final CIResponseFactory ciResponseFactory;
+	
+	private final ServiceTracker ciExceptionFactoryTracker;
+	private CIExceptionFactory getCIExceptionFactory() {
+		return (CIExceptionFactory) ciExceptionFactoryTracker.getService();
+	}
+	//private final CIExceptionFactory ciExceptionFactory;
+	
+	private final ServiceTracker ciErrorFactoryTracker;
+	private CIErrorFactory getCIErrorFactory() {
+		return (CIErrorFactory) ciErrorFactoryTracker.getService();
+	}
+	//private final CIErrorFactory ciErrorFactory;
 	
 	public static final String POST = "POST";
 	
@@ -71,16 +87,16 @@ public class DiffusionResource {
 	public static final String CY_NETWORK_VIEW_NOT_FOUND_CODE = "2";
 	public static final String TASK_EXECUTION_ERROR_CODE= "3";
 
-	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<Object> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final CIResponseFactory ciResponseFactory, final CIExceptionFactory ciExceptionFactory, final CIErrorFactory ciErrorFactory) {
+	public DiffusionResource(final CyApplicationManager cyApplicationManager, final SynchronousTaskManager<Object> taskManager, final CyNetworkManager cyNetworkManager, final CyNetworkViewManager cyNetworkViewManager, final DiffusionContextMenuTaskFactory diffusionTaskFactory, final DiffusionContextMenuTaskFactory diffusionWithOptionsTaskFactory, final ServiceTracker ciResponseFactoryTracker, final ServiceTracker ciExceptionFactoryTracker, final ServiceTracker ciErrorFactoryTracker) {
 		this.cyApplicationManager = cyApplicationManager;
 		this.taskManager = taskManager;
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyNetworkViewManager = cyNetworkViewManager;
 		this.diffusionTaskFactory = diffusionTaskFactory;
 		this.diffusionWithOptionsTaskFactory = diffusionWithOptionsTaskFactory;
-		this.ciResponseFactory = ciResponseFactory;
-		this.ciExceptionFactory = ciExceptionFactory;
-		this.ciErrorFactory = ciErrorFactory;
+		this.ciResponseFactoryTracker = ciResponseFactoryTracker;
+		this.ciExceptionFactoryTracker = ciExceptionFactoryTracker;
+		this.ciErrorFactoryTracker = ciErrorFactoryTracker;
 		
 	}
 
@@ -94,12 +110,12 @@ public class DiffusionResource {
 	private CIError buildCIError(int status, String resourcePath, String code, String message, Exception e) {
 		String errorUrn = resourceErrorRoot + ":" + resourcePath+ ":"+ code;
 		remoteLogger.logResourceError("POST", resourcePath, status, errorUrn);
-		return ciErrorFactory.getCIError(status, resourceErrorRoot + ":" + resourcePath+ ":"+ code, message);
+		return getCIErrorFactory().getCIError(status, resourceErrorRoot + ":" + resourcePath+ ":"+ code, message);
 	}
 	
 	CIResponse<Object> buildCIErrorResponse(int status, String resourcePath, String code, String message, Exception e)
 	{
-		CIResponse<Object> response = ciResponseFactory.getCIResponse(new Object());
+		CIResponse<Object> response = getCIResponseFactory().getCIResponse(new Object());
 		CIError error = buildCIError(status, resourcePath, code, message, e);
 
 		if (e != null)
@@ -124,7 +140,7 @@ public class DiffusionResource {
 		
 		if (cyNetwork == null) {
 			String messageString = "Could not find current Network";
-			throw ciExceptionFactory.getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
+			throw getCIExceptionFactory().getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
 		}
 		return cyNetwork;
 	}
@@ -133,7 +149,7 @@ public class DiffusionResource {
 		CyNetworkView cyNetworkView = cyApplicationManager.getCurrentNetworkView();
 		if (cyNetworkView == null) {
 			String messageString = "Could not find current Network View";
-			throw ciExceptionFactory.getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
+			throw getCIExceptionFactory().getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
 		}
 		return cyNetworkView;
 	}
@@ -143,12 +159,12 @@ public class DiffusionResource {
 		final CyNetwork network = cyNetworkManager.getNetwork(networkSUID);
 		if (network == null) {
 			String messageString = "Could not find network with SUID: " + networkSUID;
-			throw ciExceptionFactory.getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
+			throw getCIExceptionFactory().getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
 		}
 		final Collection<CyNetworkView> views = cyNetworkViewManager.getNetworkViews(network);
 		if (views.isEmpty()) {
 			String messageString = "No views are available for network with SUID: " + networkSUID;
-			throw ciExceptionFactory.getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
+			throw getCIExceptionFactory().getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
 		}
 		for (final CyNetworkView view : views) {
 			final Long vid = view.getSUID();
@@ -157,7 +173,7 @@ public class DiffusionResource {
 			}
 		}
 		String messageString = "Could not find network view with SUID: " + networkViewSUID + " for network with SUID: " + networkSUID;
-		throw ciExceptionFactory.getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
+		throw getCIExceptionFactory().getCIException(404, new CIError[]{this.buildCIError(404, resourcePath, errorType, messageString, null)});		
 	}
 	
 	@ApiModel(value="Diffusion App Response", description="Diffusion Analysis Results in CI Format", parent=CIResponse.class)

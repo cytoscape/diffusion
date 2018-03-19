@@ -54,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class DiffusionResourceTest {
 	public static String columnName = DiffuseSelectedTask.DIFFUSION_INPUT_COL_NAME;
@@ -171,6 +172,7 @@ public class DiffusionResourceTest {
 		ObservableTask dummyJsonTask = mock(ObservableTask.class);
 		when(dummyJsonTask.getResults(any(Class.class))).thenReturn(null);
 		
+		ServiceTracker ciResponseFactoryTracker = mock(ServiceTracker.class);
 		CIResponseFactory ciResponseFactory = mock(CIResponseFactory.class);
 		
 		doAnswer(new Answer<CIResponse<Object>>() {
@@ -182,8 +184,12 @@ public class DiffusionResourceTest {
 				return ciResponse;
 			}
 		}).when(ciResponseFactory).getCIResponse(any());
+		when(ciResponseFactoryTracker.getService()).thenReturn(ciResponseFactory);
 		
+		ServiceTracker ciExceptionFactoryTracker = mock(ServiceTracker.class);
 		CIExceptionFactory ciExceptionFactory = mock(CIExceptionFactory.class);
+		
+		ServiceTracker ciErrorFactoryTracker = mock(ServiceTracker.class);
 		CIErrorFactory ciErrorFactory = mock(CIErrorFactory.class);
 		
 		doAnswer(new Answer<CIError>() {
@@ -197,6 +203,11 @@ public class DiffusionResourceTest {
 				return ciError;
 			}
 		}).when(ciErrorFactory).getCIError(any(Integer.class), any(String.class), any(String.class));
+		
+		when(ciExceptionFactoryTracker.getService()).thenReturn(ciExceptionFactory);
+		when(ciErrorFactoryTracker.getService()).thenReturn(ciErrorFactory);
+	
+		
 		
 		doAnswer(new Answer<Void>() {
 			public Void answer(InvocationOnMock invocation) {
@@ -219,9 +230,9 @@ public class DiffusionResourceTest {
 				cyNetworkViewManager, 
 				diffusionContextMenuTaskFactory, 
 				null,
-				ciResponseFactory,
-				ciExceptionFactory, 
-				ciErrorFactory);
+				ciResponseFactoryTracker,
+				ciExceptionFactoryTracker, 
+				ciErrorFactoryTracker);
 
 		DiffusionTaskObserver taskObserver = new DiffusionTaskObserver(diffusionResource, "dummy_urn", "dummy_error_code");
 	

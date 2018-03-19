@@ -17,7 +17,7 @@
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
 
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
@@ -136,6 +136,13 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
+			<version>${osgi.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
 			<version>${osgi.api.version}</version>
 			<scope>provided</scope>
 		</dependency>

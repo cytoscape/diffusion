@@ -18,9 +18,6 @@ import java.util.Set;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.ci.CIErrorFactory;
-import org.cytoscape.ci.CIExceptionFactory;
-import org.cytoscape.ci.CIResponseFactory;
 import org.cytoscape.diffusion.internal.rest.RemoteLogger;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
@@ -36,7 +33,6 @@ import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
-import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -45,12 +41,17 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TunableSetter;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class CyActivator extends AbstractCyActivator {
 
 	private static final String DIFFUSION_MENU = "Tools.Diffuse[2100]";
 	private static final String STYLES = "/styles.xml";
 
+	private ServiceTracker ciResponseFactoryTracker = null;
+	private ServiceTracker ciExceptionFactoryTracker = null;
+	private ServiceTracker ciErrorFactoryTracker = null;
+	
 	@Override
 	public void start(BundleContext context) throws Exception {
 
@@ -134,13 +135,19 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
 
-		CIResponseFactory ciResponseFactory = this.getService(context, CIResponseFactory.class);
-		CIExceptionFactory ciExceptionFactory = this.getService(context, CIExceptionFactory.class);
-		CIErrorFactory ciErrorFactory = this.getService(context, CIErrorFactory.class);
+		ciResponseFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIResponseFactory)"), null);
+		ciResponseFactoryTracker.open();
+		//this.getService(context, CIResponseFactory.class);
+		ciExceptionFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIExceptionFactory)"), null);
+		ciExceptionFactoryTracker.open();
+		//this.getService(context, CIExceptionFactory.class);
+		ciErrorFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIErrorFactory)"), null);
+		ciErrorFactoryTracker.open();
+		//this.getService(context, CIErrorFactory.class);
 
 		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager,
 				cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory,
-				ciResponseFactory, ciExceptionFactory, ciErrorFactory);
+				ciResponseFactoryTracker, ciExceptionFactoryTracker, ciErrorFactoryTracker);
 		registerService(context, diffusionResource, DiffusionResource.class, new Properties());
 
 		wOptsProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
@@ -199,4 +206,18 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(context, withOptionsTaskFactoryTool, diffusionTaskFactoryPropsTool2);
 	}
 
+	@Override
+	public void shutDown() {
+		if (ciResponseFactoryTracker != null) {
+		ciResponseFactoryTracker.close();
+		}
+		if (ciExceptionFactoryTracker != null) {
+			ciExceptionFactoryTracker.close(); 
+		}
+		if (ciErrorFactoryTracker != null) {
+			ciErrorFactoryTracker.close();
+		}
+		super.shutDown();
+	}
+	
 }
