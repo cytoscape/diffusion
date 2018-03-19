@@ -136,11 +136,14 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
 
 		ciResponseFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIResponseFactory)"), null);
-				//this.getService(context, CIResponseFactory.class);
+		ciResponseFactoryTracker.open();
+		//this.getService(context, CIResponseFactory.class);
 		ciExceptionFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIExceptionFactory)"), null);
-				//this.getService(context, CIExceptionFactory.class);
+		ciExceptionFactoryTracker.open();
+		//this.getService(context, CIExceptionFactory.class);
 		ciErrorFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIErrorFactory)"), null);
-				//this.getService(context, CIErrorFactory.class);
+		ciErrorFactoryTracker.open();
+		//this.getService(context, CIErrorFactory.class);
 
 		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager,
 				cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory,
