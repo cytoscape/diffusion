@@ -17,7 +17,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.diffusion.internal.rest.RemoteLogger;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;
@@ -92,15 +95,19 @@ public class CyActivator extends AbstractCyActivator {
 
 		OutputPanel outputPanel = new OutputPanel(tableManager, styles, cyApplicationManagerService, vmm,
 				createSubnetworkFactory, renderingEngineMgr, swingApplication);
-		registerAllServices(context, outputPanel, new Properties());
+		Properties outputPanelProps = new Properties();
+		registerService(context, outputPanel, CytoPanelComponent.class, outputPanelProps);
+		registerService(context, outputPanel, SetCurrentNetworkListener.class, outputPanelProps);
+		
+		//registerAllServices(context, outputPanel, new Properties());
 
 
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client,
 				tunableSetterServiceRef);
 
-		String exampleJson = DiffuseSelectedTask
-				.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
+		String exampleJson = DiffusionDocumentation.COMMAND_EXAMPLE_JSON;
+				//iffuseSelectedTask.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
 
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");

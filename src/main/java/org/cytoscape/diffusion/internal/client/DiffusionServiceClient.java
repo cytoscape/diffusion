@@ -29,14 +29,21 @@ public class DiffusionServiceClient {
 	private static final String TIME_PARAM = "time";
 
 	private final CyProperty<Properties> props;
-	final HttpClient client;
+	private HttpClient client = null;
 	private final static Logger logger = LoggerFactory.getLogger(DiffusionServiceClient.class);
 	
 	public DiffusionServiceClient(CyProperty<Properties> props) {
 		this.props = props;
-		this.client = HttpClients.createDefault();
+		
 	}
 
+	private HttpClient getHttpClient() {
+		if (client == null) {
+			client = HttpClients.createDefault();
+		}
+		return client;
+	}
+	
 	public String diffuse(final String cx, final String inputHeatCol, final Double time) throws IOException {
 		try {
 			final URI uri = getReqeuestURI(inputHeatCol, time);
@@ -45,7 +52,7 @@ public class DiffusionServiceClient {
 			final StringEntity cxEntity = new StringEntity(cx);
 			post.setEntity(cxEntity);
 			post.setHeader("Content-type", "application/json");
-			final HttpResponse response = client.execute(post);
+			final HttpResponse response = getHttpClient().execute(post);
 			final HttpEntity entity = response.getEntity();
 			if (entity == null) {
 				throw new IOException(createConnectionError("Response from diffusion service is null."));
