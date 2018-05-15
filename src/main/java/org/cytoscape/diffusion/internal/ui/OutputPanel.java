@@ -32,6 +32,7 @@ import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
+import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
@@ -50,7 +51,8 @@ public class OutputPanel extends JPanel
 	private final RenderingEngineManager renderingEngineMgr;
 	private final CySwingApplication swingApplication;
 	private final VisualMappingManager vmm;
-	private final Set<VisualStyle> styles;
+	private final LoadVizmapFileTaskFactory vizmapLoader;
+	//private final Set<VisualStyle> styles;
 
 	private final NoResultPanel emptyPanel;
 	private JPanel mainPanel;
@@ -58,13 +60,14 @@ public class OutputPanel extends JPanel
 
 	final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory;
 
-	public OutputPanel(DiffusionTableManager tableManager, Set<VisualStyle> styles,
+	public OutputPanel(DiffusionTableManager tableManager, LoadVizmapFileTaskFactory vizmapLoader,
 			final CyApplicationManager appManager, final VisualMappingManager vmm,
 			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory,
 			final RenderingEngineManager renderingEngineMgr,
 			final CySwingApplication swingApplication) {
 		this.appManager = appManager;
-		this.styles = styles;
+		this.vizmapLoader = vizmapLoader;
+		//this.styles = styles;
 		this.vmm = vmm;
 		this.tableManager = tableManager;
 		this.createSubnetworkFactory = createSubnetworkFactory;
@@ -81,11 +84,10 @@ public class OutputPanel extends JPanel
 
 	private final void initPanel() {
 		// Basic setup for this parent panel
-
 		selectionPanel = new JPanel();
 		mainPanel = new JPanel();
 
-		subnetPanel = new SubnetCreatorPanel(tableManager, styles, vmm, createSubnetworkFactory, appManager,
+		subnetPanel = new SubnetCreatorPanel(tableManager, vizmapLoader, vmm, createSubnetworkFactory, appManager,
 				renderingEngineMgr);
 		subnetPanel.setOpaque(false);
 		subnetPanel.setMaximumSize(new Dimension(5000, 56));
@@ -303,6 +305,8 @@ public class OutputPanel extends JPanel
 			table = loadNetworkResults(network);
 		}
 
+		subnetPanel.updateStyles();
+		
 		if (table.getAvailableOutputColumns().length == 0) {
 			// Disable UI
 			return;
@@ -310,6 +314,8 @@ public class OutputPanel extends JPanel
 
 		tableManager.setCurrentTable(table);
 
+		
+		
 		final String[] cols = table.getAvailableOutputColumns();
 
 		if (cols == null || cols.length == 0) {

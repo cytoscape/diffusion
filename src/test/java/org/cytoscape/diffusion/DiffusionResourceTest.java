@@ -40,6 +40,7 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.work.FinishStatus;
@@ -167,7 +168,8 @@ public class DiffusionResourceTest {
 
 		ViewWriterFactoryManager viewWriterFactoryManager = mock(ViewWriterFactoryManager.class);
 		when(viewWriterFactoryManager.getCxFactory()).thenReturn(cyNetworkViewWriterFactory);
-		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(diffusionTableManager, outputPanel, viewWriterFactoryManager, cySwingApplication, cyApplicationManager, client, tunableSetter);
+		
+		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(mock(CyServiceRegistrar.class),diffusionTableManager, outputPanel, viewWriterFactoryManager, cySwingApplication, cyApplicationManager, client, tunableSetter);
 
 		ObservableTask dummyJsonTask = mock(ObservableTask.class);
 		when(dummyJsonTask.getResults(any(Class.class))).thenReturn(null);

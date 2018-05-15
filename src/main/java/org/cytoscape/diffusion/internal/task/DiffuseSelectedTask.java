@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.SwingUtilities;
 
@@ -14,8 +15,10 @@ import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
 import org.cxio.aspects.datamodels.NodeAttributesElement;
 import org.cxio.core.interfaces.AspectElement;
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
+import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
@@ -37,6 +40,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNetworkTask;
 
 import org.cytoscape.work.TaskMonitor;
@@ -60,6 +64,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	private static final String DIFFUSION_OUTPUT_COL_NAME = "diffusion_output";
 
+	private final CyServiceRegistrar registrar;
 	protected DiffusionResultParser resultParser;
 	protected OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
@@ -70,14 +75,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 
 	private final static Logger logger = LoggerFactory.getLogger(DiffuseSelectedTask.class);
 
-	public DiffuseSelectedTask(DiffusionTableManager tableManager, CyNetwork network,
+	public DiffuseSelectedTask(CyServiceRegistrar registrar, DiffusionTableManager tableManager, CyNetwork network,
 			CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel,
 			final CySwingApplication swingApplication, final CyApplicationManager appManager,
 			final DiffusionServiceClient client, final TunableSetter setter) {
 		super(network);
-
+		this.registrar = registrar;
 		this.tableManager = tableManager;
-
 		this.resultParser = new DiffusionResultParser(writerFactory, setter);
 		this.outputPanel = outputPanel;
 		this.swingApplication = swingApplication;
@@ -145,9 +149,10 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
 
 		appManager.setCurrentNetwork(network);
-
+	
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
 		outputPanel.swapPanel(true);
+		
 		showResult();
 		tm.setStatusMessage("Cleaning up");
 	}

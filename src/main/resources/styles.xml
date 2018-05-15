@@ -48,7 +48,7 @@
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_9" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_BORDER_WIDTH" default="0.0"/>
             <visualProperty name="NODE_SIZE" default="12.0">
-                <continuousMapping attributeType="integer" attributeName="diffusion_output__rank">
+                <continuousMapping attributeType="integer" attributeName="diffusion_output_rank">
                     <continuousMappingPoint lesserValue="1.0" greaterValue="39.11245096536507" equalValue="39.11245096536507" attrValue="0.0"/>
                     <continuousMappingPoint lesserValue="13.821692732043733" greaterValue="1.0" equalValue="13.821692732043733" attrValue="99.0"/>
                 </continuousMapping>

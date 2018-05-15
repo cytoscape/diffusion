@@ -4,12 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -20,6 +22,7 @@ import org.cytoscape.diffusion.internal.task.EmptyTaskMonitor;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
+import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -36,28 +39,30 @@ public class SubnetCreatorPanel extends JPanel {
 
 	private static final long serialVersionUID = 7578596629235573519L;
 
+	private static final String STYLES = "/styles.xml";
+
 	private final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory;
 	private final DiffusionTableManager tableManager;
 
 	private JComboBox<String> styleComboBox;
-	private Set<VisualStyle> visualStyles;
+	private final LoadVizmapFileTaskFactory vizmapLoader;
+	private Set<VisualStyle> visualStyles = null;
 
 	private final VisualMappingManager vmm;
 	private final CyApplicationManager appManager;
 	final RenderingEngineManager renderingEngineMgr;
 
 
-	SubnetCreatorPanel(DiffusionTableManager tableManager, Set<VisualStyle> styles, final VisualMappingManager vmm,
+	SubnetCreatorPanel(DiffusionTableManager tableManager, LoadVizmapFileTaskFactory vizmapLoader, final VisualMappingManager vmm,
 			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory, CyApplicationManager appManager,
 			final RenderingEngineManager renderingEngineMgr) {
 
 		this.createSubnetworkFactory = createSubnetworkFactory;
 		this.tableManager = tableManager;
+		this.vizmapLoader = vizmapLoader;
 		this.vmm = vmm;
 		this.appManager = appManager;
 		this.renderingEngineMgr = renderingEngineMgr;
-
-		final VisualStyle defStyle = vmm.getDefaultVisualStyle();
 
 		this.setLayout(new BorderLayout());
 		this.setMaximumSize(new Dimension(1000, 100));
@@ -65,12 +70,13 @@ public class SubnetCreatorPanel extends JPanel {
 
 		JLabel styleLabel = new JLabel("Visual Style: ");
 
-		visualStyles = styles;
-		visualStyles.add(defStyle);
+		//	visualStyles = styles;
+		//	visualStyles.add(defStyle);
 
-		final List<String> styleNames = styles.stream().map(style -> style.getTitle()).collect(Collectors.toList());
-		styleComboBox = new JComboBox<>(styleNames.toArray(new String[styleNames.size()]));
-		styleComboBox.setSelectedItem(defStyle.getTitle());
+		//	final List<String> styleNames = styles.stream().map(style -> style.getTitle()).collect(Collectors.toList());
+		//	styleComboBox = new JComboBox<>(styleNames.toArray(new String[styleNames.size()]));
+		styleComboBox = new JComboBox<>();
+		//	styleComboBox.setSelectedItem(defStyle.getTitle());
 		styleComboBox.setToolTipText("Selected Visual Style will be applied to the new subnetwork.");
 
 		JButton makeSubnetButton = new JButton("Create");
@@ -86,6 +92,23 @@ public class SubnetCreatorPanel extends JPanel {
 		this.add(makeSubnetButton, BorderLayout.LINE_END);
 	}
 
+	protected void updateStyles() {
+		
+		if (this.visualStyles == null) {
+			final VisualStyle defStyle = vmm.getDefaultVisualStyle();
+			try {
+				visualStyles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
+				visualStyles.add(defStyle);
+				final List<String> styleNames = visualStyles.stream().map(style -> style.getTitle()).collect(Collectors.toList());
+				styleComboBox.setModel(new DefaultComboBoxModel(styleNames.toArray()));
+				styleComboBox.setSelectedItem(defStyle.getTitle());
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private final void createSubnetwork() {
 		final VisualStyle style = getSelectedStyle();
 		final CyNetwork network = this.tableManager.getCurrentTable().getAssociatedNetwork();
@@ -98,9 +121,10 @@ public class SubnetCreatorPanel extends JPanel {
 		// createSubnetworkFactory fails to run CopyExistingViewTask for some
 		// reason...
 		// copyLayoutToNewView(network);
-
+	
 		appManager.setCurrentNetwork(view.getModel());
 		vmm.setVisualStyle(style, view);
+		vmm.setCurrentVisualStyle(style);
 		style.apply(view);
 		view.fitContent();
 		view.updateView();
@@ -108,7 +132,7 @@ public class SubnetCreatorPanel extends JPanel {
 
 	private final VisualStyle getSelectedStyle() {
 		for (VisualStyle style : visualStyles) {
-			if (style.getTitle() == styleComboBox.getSelectedItem()) {
+			if (style.getTitle().equals(styleComboBox.getSelectedItem())) {
 				return style;
 			}
 		}
@@ -129,7 +153,7 @@ public class SubnetCreatorPanel extends JPanel {
 					task.run(new EmptyTaskMonitor());
 					if(task.getClass().getName().endsWith("CopyExistingViewTask"))
 						viewCopied = true;
-					else if (task.getClass().getName().endsWith("RegisterNetworkViewTask")){
+					else if (task.getClass().getName().endsWith("RegisterNetworkTask")){
 						viewTask = (ObservableTask) task;
 					}
 				}
@@ -141,8 +165,8 @@ public class SubnetCreatorPanel extends JPanel {
 			return null;
 		}
 
-		final Collection<?> result = viewTask.getResults(Collection.class);
-		return ((CyNetworkView) result.iterator().next());
+		CyNetworkView result = viewTask.getResults(CyNetworkView.class);
+		return result;
 	}
 
 }

@@ -16,6 +16,7 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableSetter;
@@ -38,11 +39,11 @@ public class DiffuseSelectedWithOptionsTask extends DiffuseSelectedTask implemen
 	@Tunable(description = "Heat Column:", longDescription=DiffusionDocumentation.HEAT_COLUMN_NAME_LONG_DESCRIPTION, exampleStringValue=DIFFUSION_INPUT_COL_NAME)
 	public ListSingleSelection<String> heatColumnName;
 
-	public DiffuseSelectedWithOptionsTask(DiffusionTableManager tableManager, CyNetwork network,
+	public DiffuseSelectedWithOptionsTask(CyServiceRegistrar registrar, DiffusionTableManager tableManager, CyNetwork network,
 			CyNetworkViewWriterFactory writerFactory, OutputPanel outputPanel, CySwingApplication swingApplication,
 			CyApplicationManager appManager, DiffusionServiceClient client, TunableSetter setter) {
 
-		super(tableManager, network, writerFactory, outputPanel, swingApplication, appManager, client, setter);
+		super(registrar, tableManager, network, writerFactory, outputPanel, swingApplication, appManager, client, setter);
 
 		initColumnList();
 	}

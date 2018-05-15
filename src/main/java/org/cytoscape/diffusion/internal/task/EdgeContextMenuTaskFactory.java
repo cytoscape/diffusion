@@ -13,6 +13,7 @@ import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractEdgeViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
@@ -21,6 +22,7 @@ import org.cytoscape.work.TunableSetter;
 
 public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 
+	private final CyServiceRegistrar registrar;
 	private final ViewWriterFactoryManager factoryManager;
 	private final OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
@@ -30,10 +32,11 @@ public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 	private final Boolean withOptions;
 	private final DiffusionTableManager tableManager;
 
-	public EdgeContextMenuTaskFactory(DiffusionTableManager tableManager, OutputPanel outputPanel,
+	public EdgeContextMenuTaskFactory(CyServiceRegistrar registrar, DiffusionTableManager tableManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter,
 			final Boolean withOptions) {
+		this.registrar = registrar;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
 		this.swingApplication = swingApplication;
@@ -72,11 +75,11 @@ public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 		}
 
 		if (withOptions) {
-			return new TaskIterator(new DiffuseSelectedWithOptionsTask(tableManager, network, writerFactory, outputPanel,
+			return new TaskIterator(new DiffuseSelectedWithOptionsTask(registrar, tableManager, network, writerFactory, outputPanel,
 					swingApplication, appManager, client, setter));
 		}
 
-		return new TaskIterator(new DiffuseSelectedTask(tableManager, network, writerFactory, outputPanel, swingApplication,
+		return new TaskIterator(new DiffuseSelectedTask(registrar, tableManager, network, writerFactory, outputPanel, swingApplication,
 				appManager, client, setter));
 
 	}
