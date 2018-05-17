@@ -7,7 +7,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -24,6 +24,7 @@ import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.application.swing.CytoPanel;
+import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.application.swing.CytoPanelState;
@@ -31,16 +32,19 @@ import org.cytoscape.diffusion.internal.util.DiffusionResult;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.events.RowsSetListener;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.presentation.RenderingEngineManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.view.vizmap.VisualStyle;
 
 @SuppressWarnings("serial")
 public class OutputPanel extends JPanel
 		implements CytoPanelComponent2, SetCurrentNetworkListener {
 
+	public static String IDENTIFIER = "diffusion";
+	
 	private JComboBox<String> columnNameComboBox;
 	private JPanel selectionPanel;
 	private JPanel bottomPanel;
@@ -52,6 +56,7 @@ public class OutputPanel extends JPanel
 	private final CySwingApplication swingApplication;
 	private final VisualMappingManager vmm;
 	private final LoadVizmapFileTaskFactory vizmapLoader;
+	private final CyServiceRegistrar registrar;
 	//private final Set<VisualStyle> styles;
 
 	private final NoResultPanel emptyPanel;
@@ -60,11 +65,12 @@ public class OutputPanel extends JPanel
 
 	final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory;
 
-	public OutputPanel(DiffusionTableManager tableManager, LoadVizmapFileTaskFactory vizmapLoader,
+	public OutputPanel(CyServiceRegistrar registrar, DiffusionTableManager tableManager, LoadVizmapFileTaskFactory vizmapLoader,
 			final CyApplicationManager appManager, final VisualMappingManager vmm,
 			final NewNetworkSelectedNodesOnlyTaskFactory createSubnetworkFactory,
 			final RenderingEngineManager renderingEngineMgr,
 			final CySwingApplication swingApplication) {
+		this.registrar = registrar;
 		this.appManager = appManager;
 		this.vizmapLoader = vizmapLoader;
 		//this.styles = styles;
@@ -133,33 +139,35 @@ public class OutputPanel extends JPanel
 	}
 
 	public void setPanelVisible(boolean visible) {
+		final CytoPanelComponent2 outputPanel = this;
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
 			public void run() {
-				// 1. Dock the EAST Panel
-				final CytoPanel panel = swingApplication.getCytoPanel(CytoPanelName.EAST);
-				final int componentCount = panel.getCytoPanelComponentCount();
+				
+				CySwingApplication swingApplication = registrar.getService(CySwingApplication.class);
+				CytoPanel cytoPanel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 
-				if (!visible) {
-					if (componentCount > 1) {
-						int ind = (panel.getSelectedIndex() + 1) % componentCount;
-						panel.setSelectedIndex(ind);
-					} else {
-						panel.setState(CytoPanelState.HIDE);
-					}
-				} else {
-					panel.setState(CytoPanelState.DOCK);
+				// If the panel is not already registered, create it
+				if (visible && cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER) < 0) {
+			
+				
+					// Register it
+					registrar.registerService(outputPanel, CytoPanelComponent.class, new Properties());
+					registrar.registerService(outputPanel, SetCurrentNetworkListener.class, new Properties());
 
+					if (cytoPanel.getState() == CytoPanelState.HIDE)
+						cytoPanel.setState(CytoPanelState.DOCK);
+					final int componentCount = cytoPanel.getCytoPanelComponentCount();
 					// 2. Find Diffusion Output Panel
 					int targetPanelIdx = 0;
 
 					for (int i = 0; i < componentCount; i++) {
-						final Component panelComponent = panel.getComponentAt(i);
+						final Component panelComponent = cytoPanel.getComponentAt(i);
 						if (panelComponent instanceof CytoPanelComponent2) {
 							final CytoPanelComponent2 cp2 = (CytoPanelComponent2) panelComponent;
 							final String panelId = cp2.getIdentifier();
-							if (panelId != null && panelId.equals("diffusion")) {
+							if (panelId != null && panelId.equals(OutputPanel.IDENTIFIER)) {
 								// Found target panel. Force to update
 								final Dimension defSize = new Dimension(300, 400);
 								panelComponent.setPreferredSize(defSize);
@@ -169,8 +177,17 @@ public class OutputPanel extends JPanel
 							}
 						}
 					}
-					panel.setSelectedIndex(targetPanelIdx);
-					panel.getThisComponent().repaint();
+					
+					cytoPanel.setSelectedIndex(targetPanelIdx);
+					cytoPanel.getThisComponent().repaint();
+				} else if (!visible && cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER) >= 0) {
+					int compIndex = cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER);
+					Component panel = cytoPanel.getComponentAt(compIndex);
+					if (panel instanceof CytoPanelComponent2) {
+						// Unregister it
+						registrar.unregisterService(outputPanel, CytoPanelComponent.class);
+						registrar.unregisterService(outputPanel, SetCurrentNetworkListener.class);
+					}
 				}
 			}
 		});
@@ -313,8 +330,6 @@ public class OutputPanel extends JPanel
 		}
 
 		tableManager.setCurrentTable(table);
-
-		
 		
 		final String[] cols = table.getAvailableOutputColumns();
 
@@ -333,7 +348,7 @@ public class OutputPanel extends JPanel
 
 	@Override
 	public String getIdentifier() {
-		return "diffusion";
+		return IDENTIFIER;
 	}
 
 }

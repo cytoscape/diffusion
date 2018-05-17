@@ -88,15 +88,14 @@ public class CyActivator extends AbstractCyActivator {
 
 		final DiffusionServiceClient client = new DiffusionServiceClient(props);
 
-		OutputPanel outputPanel = new OutputPanel(tableManager, vizmapLoader, cyApplicationManagerService, vmm,
+		OutputPanel outputPanel = new OutputPanel(registrar, tableManager, vizmapLoader, cyApplicationManagerService, vmm,
 				createSubnetworkFactory, renderingEngineMgr, swingApplication);
 		Properties outputPanelProps = new Properties();
-		registerService(context, outputPanel, CytoPanelComponent.class, outputPanelProps);
+		//registerService(context, outputPanel, CytoPanelComponent.class, outputPanelProps);
 		registerService(context, outputPanel, SetCurrentNetworkListener.class, outputPanelProps);
 		
 		//registerAllServices(context, outputPanel, new Properties());
-
-
+		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				registrar,
 				tableManager, outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client,
