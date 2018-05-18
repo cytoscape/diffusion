@@ -74,8 +74,6 @@ public class CyActivator extends AbstractCyActivator {
 		
 		LoadVizmapFileTaskFactory vizmapLoader = getService(context, LoadVizmapFileTaskFactory.class);
 	
-		//Set<VisualStyle> styles = vizmapLoader.loadStyles(getClass().getResource(STYLES).openStream());
-		
 		// Create service client instance
 		@SuppressWarnings("unchecked")
 		final CyProperty<Properties> props = getService(context, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
@@ -91,10 +89,8 @@ public class CyActivator extends AbstractCyActivator {
 		OutputPanel outputPanel = new OutputPanel(registrar, tableManager, vizmapLoader, cyApplicationManagerService, vmm,
 				createSubnetworkFactory, renderingEngineMgr, swingApplication);
 		Properties outputPanelProps = new Properties();
-		//registerService(context, outputPanel, CytoPanelComponent.class, outputPanelProps);
+	
 		registerService(context, outputPanel, SetCurrentNetworkListener.class, outputPanelProps);
-		
-		//registerAllServices(context, outputPanel, new Properties());
 		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				registrar,
@@ -102,7 +98,7 @@ public class CyActivator extends AbstractCyActivator {
 				tunableSetterServiceRef);
 
 		String exampleJson = DiffusionDocumentation.COMMAND_EXAMPLE_JSON;
-				//iffuseSelectedTask.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
+				//diffuseSelectedTask.getJson(new DiffusionResultColumns("diffusion_output_heat", "diffusion_output_rank"));
 
 		Properties diffusionTaskFactoryProps = new Properties();
 		diffusionTaskFactoryProps.setProperty(COMMAND_NAMESPACE, "diffusion");
@@ -140,14 +136,13 @@ public class CyActivator extends AbstractCyActivator {
 
 		ciResponseFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIResponseFactory)"), null);
 		ciResponseFactoryTracker.open();
-		//this.getService(context, CIResponseFactory.class);
+		
 		ciExceptionFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIExceptionFactory)"), null);
 		ciExceptionFactoryTracker.open();
-		//this.getService(context, CIExceptionFactory.class);
+		
 		ciErrorFactoryTracker = new ServiceTracker(context, context.createFilter("(objectClass=org.cytoscape.ci.CIErrorFactory)"), null);
 		ciErrorFactoryTracker.open();
-		//this.getService(context, CIErrorFactory.class);
-
+		
 		DiffusionResource diffusionResource = new DiffusionResource(cyApplicationManagerService, synchronousTaskManager,
 				cyNetworkManager, cyNetworkViewManager, diffusionContextMenuTaskFactory, withOptionsTaskFactory,
 				ciResponseFactoryTracker, ciExceptionFactoryTracker, ciErrorFactoryTracker);

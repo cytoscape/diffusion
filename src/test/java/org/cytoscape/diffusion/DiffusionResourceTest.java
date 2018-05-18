@@ -22,8 +22,6 @@ import org.cytoscape.diffusion.internal.ViewWriterFactoryManager;
 import org.cytoscape.ci.CIErrorFactory;
 import org.cytoscape.ci.CIExceptionFactory;
 import org.cytoscape.ci.CIResponseFactory;
-import org.cytoscape.ci.model.CIError;
-
 import org.cytoscape.diffusion.internal.client.DiffusionServiceClient;
 import org.cytoscape.diffusion.internal.client.DiffusionServiceException;
 import org.cytoscape.diffusion.internal.rest.DiffusionResource;

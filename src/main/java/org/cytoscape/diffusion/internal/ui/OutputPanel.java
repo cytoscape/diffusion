@@ -14,6 +14,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -32,7 +33,6 @@ import org.cytoscape.diffusion.internal.util.DiffusionResult;
 import org.cytoscape.diffusion.internal.util.DiffusionTable;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
@@ -84,7 +84,10 @@ public class OutputPanel extends JPanel
 		this.setBackground(Color.white);
 
 		initPanel();
-		this.add(emptyPanel);
+		
+		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		this.add(mainPanel);
+		this.add(subnetPanel);
 
 	}
 
@@ -121,23 +124,6 @@ public class OutputPanel extends JPanel
 		mainPanel.add(bottomPanel, BorderLayout.CENTER);
 	}
 
-	public void swapPanel(boolean showResult) {
-		if (showResult) {
-			this.removeAll();
-			this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-			this.add(mainPanel);
-			this.add(subnetPanel);
-
-		} else {
-			this.removeAll();
-			this.setLayout(new BorderLayout());
-			this.add(emptyPanel, BorderLayout.CENTER);
-
-		}
-		setPanelVisible(showResult);
-		this.updateUI();
-	}
-
 	public void setPanelVisible(boolean visible) {
 		final CytoPanelComponent2 outputPanel = this;
 		SwingUtilities.invokeLater(new Runnable() {
@@ -145,17 +131,14 @@ public class OutputPanel extends JPanel
 			@Override
 			public void run() {
 				
-				CySwingApplication swingApplication = registrar.getService(CySwingApplication.class);
 				CytoPanel cytoPanel = swingApplication.getCytoPanel(CytoPanelName.EAST);
 
 				// If the panel is not already registered, create it
 				if (visible && cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER) < 0) {
 			
-				
 					// Register it
 					registrar.registerService(outputPanel, CytoPanelComponent.class, new Properties());
-					registrar.registerService(outputPanel, SetCurrentNetworkListener.class, new Properties());
-
+					
 					if (cytoPanel.getState() == CytoPanelState.HIDE)
 						cytoPanel.setState(CytoPanelState.DOCK);
 					final int componentCount = cytoPanel.getCytoPanelComponentCount();
@@ -183,14 +166,17 @@ public class OutputPanel extends JPanel
 				} else if (!visible && cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER) >= 0) {
 					int compIndex = cytoPanel.indexOfComponent(OutputPanel.IDENTIFIER);
 					Component panel = cytoPanel.getComponentAt(compIndex);
-					if (panel instanceof CytoPanelComponent2) {
+					if (panel == outputPanel) {
 						// Unregister it
 						registrar.unregisterService(outputPanel, CytoPanelComponent.class);
-						registrar.unregisterService(outputPanel, SetCurrentNetworkListener.class);
+					} else {
+						
 					}
 				}
+				((JComponent) outputPanel).updateUI();
 			}
 		});
+	
 	}
 
 	private final JPanel createSelector() {
@@ -306,10 +292,11 @@ public class OutputPanel extends JPanel
 
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent evt) {
-		swapPanel(false);
+		//setPanelVisible(false);
 
-		final CyNetwork network = this.appManager.getCurrentNetwork();
+		final CyNetwork network = evt.getNetwork();
 		if (network == null) {
+			setPanelVisible(false);
 			return;
 		}
 
@@ -322,27 +309,25 @@ public class OutputPanel extends JPanel
 			table = loadNetworkResults(network);
 		}
 
-		subnetPanel.updateStyles();
-		
 		if (table.getAvailableOutputColumns().length == 0) {
-			// Disable UI
+			setPanelVisible(false);
 			return;
 		}
-
+		subnetPanel.updateStyles();
 		tableManager.setCurrentTable(table);
 		
 		final String[] cols = table.getAvailableOutputColumns();
 
 		if (cols == null || cols.length == 0) {
 			columnNameComboBox.setEnabled(false);
-			swapPanel(false);
+			setPanelVisible(false);
 		} else {
 			final DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(cols);
 			columnNameComboBox.setModel(model);
 			columnNameComboBox.setEnabled(true);
 			// Select first item
 			columnNameSelected(cols[0]);
-			swapPanel(true);
+			setPanelVisible(true);
 		}
 	}
 

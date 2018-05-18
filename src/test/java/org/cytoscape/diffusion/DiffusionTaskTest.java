@@ -123,7 +123,6 @@ public class DiffusionTaskTest {
 		
 		TunableSetter tunableSetter = mock(TunableSetter.class);
 		DiffuseSelectedTask task = new DiffuseSelectedTask(
-				mock(CyServiceRegistrar.class),
 				diffusionTableManager, 
 				cyNetwork,
 				cyNetworkViewWriterFactory, 

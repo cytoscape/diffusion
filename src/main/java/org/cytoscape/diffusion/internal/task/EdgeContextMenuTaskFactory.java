@@ -22,7 +22,7 @@ import org.cytoscape.work.TunableSetter;
 
 public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 
-	private final CyServiceRegistrar registrar;
+	
 	private final ViewWriterFactoryManager factoryManager;
 	private final OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
@@ -36,7 +36,6 @@ public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter,
 			final Boolean withOptions) {
-		this.registrar = registrar;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
 		this.swingApplication = swingApplication;
@@ -75,11 +74,11 @@ public class EdgeContextMenuTaskFactory extends AbstractEdgeViewTaskFactory {
 		}
 
 		if (withOptions) {
-			return new TaskIterator(new DiffuseSelectedWithOptionsTask(registrar, tableManager, network, writerFactory, outputPanel,
+			return new TaskIterator(new DiffuseSelectedWithOptionsTask(tableManager, network, writerFactory, outputPanel,
 					swingApplication, appManager, client, setter));
 		}
 
-		return new TaskIterator(new DiffuseSelectedTask(registrar, tableManager, network, writerFactory, outputPanel, swingApplication,
+		return new TaskIterator(new DiffuseSelectedTask(tableManager, network, writerFactory, outputPanel, swingApplication,
 				appManager, client, setter));
 
 	}

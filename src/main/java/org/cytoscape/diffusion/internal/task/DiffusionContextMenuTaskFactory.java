@@ -11,7 +11,6 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
@@ -24,7 +23,6 @@ import org.cytoscape.work.TunableSetter;
 public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory 
 	implements NetworkViewTaskFactory {
 
-	private final CyServiceRegistrar registrar;
 	private final ViewWriterFactoryManager factoryManager;
 	private final OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
@@ -45,7 +43,6 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter,
 			final Boolean withOptions) {
-		this.registrar = registrar;
 		this.outputPanel = outputPanel;
 		this.factoryManager = factoryManager;
 		this.swingApplication = swingApplication;
@@ -97,11 +94,11 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 		}
 
 		if(withOptions) {
-			return new TaskIterator(new DiffuseSelectedWithOptionsTask(registrar, tableManager, network, writerFactory, outputPanel, swingApplication,
+			return new TaskIterator(new DiffuseSelectedWithOptionsTask(tableManager, network, writerFactory, outputPanel, swingApplication,
 				appManager, client, setter));
 		}
 		
-		return new TaskIterator(new DiffuseSelectedTask(registrar, tableManager, network, writerFactory, outputPanel, swingApplication,
+		return new TaskIterator(new DiffuseSelectedTask(tableManager, network, writerFactory, outputPanel, swingApplication,
 				appManager, client, setter));
 
 	}
