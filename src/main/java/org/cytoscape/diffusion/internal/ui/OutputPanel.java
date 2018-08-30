@@ -276,6 +276,7 @@ public class OutputPanel extends JPanel
 	}
 
 	public DiffusionTable loadNetworkResults(CyNetwork network) {
+		subnetPanel.updateStyles();
 		DiffusionTable table = tableManager.createTable(network);
 		HashSet<String> bases = new HashSet<String>();
 		for (String column : table.getAvailableOutputColumns()) {

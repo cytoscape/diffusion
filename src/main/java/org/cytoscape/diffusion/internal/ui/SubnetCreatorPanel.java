@@ -113,6 +113,9 @@ public class SubnetCreatorPanel extends JPanel {
 		final VisualStyle style = getSelectedStyle();
 		final CyNetwork network = this.tableManager.getCurrentTable().getAssociatedNetwork();
 
+		if (network.getDefaultNodeTable().getMatchingRows(CyNetwork.SELECTED, true).isEmpty()) {
+			return;
+		}
 		CyNetworkView view = createSubnet(network);
 
 		if (view == null) {
