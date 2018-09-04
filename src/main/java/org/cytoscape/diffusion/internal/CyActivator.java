@@ -28,6 +28,10 @@ import org.cytoscape.diffusion.internal.ui.OutputPanel;
 import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
+import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.NetworkDestroyedEvent;
+import org.cytoscape.model.events.NetworkDestroyedListener;
 import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.task.create.NewNetworkSelectedNodesOnlyTaskFactory;
@@ -91,6 +95,8 @@ public class CyActivator extends AbstractCyActivator {
 		Properties outputPanelProps = new Properties();
 	
 		registerService(context, outputPanel, SetCurrentNetworkListener.class, outputPanelProps);
+		registerService(context, outputPanel, NetworkAboutToBeDestroyedListener.class);
+		
 		
 		DiffusionContextMenuTaskFactory diffusionContextMenuTaskFactory = new DiffusionContextMenuTaskFactory(
 				registrar,

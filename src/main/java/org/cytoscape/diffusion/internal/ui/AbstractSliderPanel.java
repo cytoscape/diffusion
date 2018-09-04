@@ -82,4 +82,8 @@ public abstract class AbstractSliderPanel extends JPanel implements PropertyChan
 
 	protected abstract JSlider createSlider();
 
+	public CyNetwork getNetwork() {
+		return diffusionTable.getAssociatedNetwork();
+	}
+
 }

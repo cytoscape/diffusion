@@ -72,4 +72,17 @@ public class DiffusionTableManager implements SetCurrentNetworkListener {
 			this.currentTable = tables.get(currentNetwork.getSUID());
 		}
 	}
+
+
+	public void removeNetwork(CyNetwork network) {
+		if (currentTable.getAssociatedNetwork() == network) {
+			currentTable = null;
+		}
+		for (long suid: tables.keySet()) {
+			if(tables.get(suid).getAssociatedNetwork() == network) {
+				tables.remove(suid);
+			}
+		}
+		
+	}
 }

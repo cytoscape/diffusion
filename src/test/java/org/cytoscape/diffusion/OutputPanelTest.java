@@ -277,6 +277,10 @@ public class OutputPanelTest {
 		assertEquals(true, serviceRegistered);
 		verify(serviceRegistrar, never()).registerService(same(outputPanel), same(CytoPanelComponent.class), any(Properties.class));
 		verify(serviceRegistrar, never()).unregisterService(any(Object.class), any(Class.class));
+		
+		network.dispose();
+		when(diffusionTableManager.getTable(eq(networkSUID))).thenReturn(null);
+		when(diffusionTableManager.getCurrentTable()).thenReturn(null);
 	}
 	
 	@Test
