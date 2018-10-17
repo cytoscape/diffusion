@@ -11,8 +11,8 @@ import org.cytoscape.diffusion.internal.util.DiffusionTableManager;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
 import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
@@ -33,13 +33,13 @@ public class DiffusionContextMenuTaskFactory extends AbstractNodeViewTaskFactory
 	
 	private Boolean withOptions = false;
 
-	public DiffusionContextMenuTaskFactory(DiffusionTableManager tableManager, OutputPanel outputPanel,
+	public DiffusionContextMenuTaskFactory(CyServiceRegistrar registrar, DiffusionTableManager tableManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter) {
-		this(tableManager, outputPanel, factoryManager, swingApplication, appManager, client, setter, false);
+		this(registrar, tableManager, outputPanel, factoryManager, swingApplication, appManager, client, setter, false);
 	}
 
-	public DiffusionContextMenuTaskFactory(DiffusionTableManager tableManager, OutputPanel outputPanel,
+	public DiffusionContextMenuTaskFactory(CyServiceRegistrar registrar, DiffusionTableManager tableManager, OutputPanel outputPanel,
 			final ViewWriterFactoryManager factoryManager, final CySwingApplication swingApplication,
 			final CyApplicationManager appManager, final DiffusionServiceClient client, final TunableSetter setter,
 			final Boolean withOptions) {

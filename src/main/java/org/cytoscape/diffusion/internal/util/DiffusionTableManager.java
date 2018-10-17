@@ -64,10 +64,24 @@ public class DiffusionTableManager implements SetCurrentNetworkListener {
 	@Override
 	public void handleEvent(SetCurrentNetworkEvent cne) {
 		final CyNetwork currentNetwork = cne.getNetwork();
-		if (currentNetwork == null)
+		if (currentNetwork == null) {
+			this.currentTable = null;
 			return;
+		}
 		if(this.tables.get(currentNetwork.getSUID()) != null) {
 			this.currentTable = tables.get(currentNetwork.getSUID());
 		}
+	}
+
+
+	public void removeNetwork(CyNetwork network) {
+		if (currentTable != null && currentTable.getAssociatedNetwork() == network) {
+			currentTable = null;
+		}
+		long suid = network.getSUID();
+		if (tables.containsKey(suid)) {
+			tables.remove(suid);
+		}
+		
 	}
 }

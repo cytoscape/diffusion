@@ -89,7 +89,7 @@ public class RemoteLogger {
 			if (senderAddressServiceHostname != null) {
 				try {
 					URL url = getSenderAddressServiceURL(senderAddressServiceHostname);
-					System.err.println(url);
+					logger.info("No property set for " + RemoteLogger.CYTOSCAPE_REMOTELOGGING_SENDERADDRESSSERVICEHOSTNAME + "; setting logger sender address service hostname to: " + url);
 					RemoteLogger.getDefaultLogger().setSenderAddressServiceHostname(senderAddressServiceHostname);
 				} catch (Throwable e) {	
 					logger.error("Could not set remote logging sender address service server from properties");

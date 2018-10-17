@@ -14,4 +14,9 @@ public class DiffusionDocumentation {
 	public static final String HEAT_COLUMN_NAME_LONG_DESCRIPTION =  "A node column name intended to override the default table column 'diffusion_input'. This represents the query vector and corresponds to h in the diffusion equation.";
 			
 	public static final String TIME_LONG_DESCRIPTION = "The extent of spread over the network. This corresponds to t in the diffusion equation.";
+
+	public static final String COMMAND_EXAMPLE_JSON = "{\n" + 
+			"    \"heatColumn\": \"diffusion_output_heat\",\n" + 
+			"    \"rankColumn\": \"diffusion_output_rank\"\n" + 
+			"}";
 }

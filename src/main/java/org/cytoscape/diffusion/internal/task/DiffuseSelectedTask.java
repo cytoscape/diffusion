@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.SwingUtilities;
 
 import org.cxio.aspects.datamodels.ATTRIBUTE_DATA_TYPE;
@@ -59,7 +58,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 	public static final String DIFFUSION_INPUT_COL_NAME = "diffusion_input";
 
 	private static final String DIFFUSION_OUTPUT_COL_NAME = "diffusion_output";
-
+	
 	protected DiffusionResultParser resultParser;
 	protected OutputPanel outputPanel;
 	private final CySwingApplication swingApplication;
@@ -75,9 +74,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 			final CySwingApplication swingApplication, final CyApplicationManager appManager,
 			final DiffusionServiceClient client, final TunableSetter setter) {
 		super(network);
-
 		this.tableManager = tableManager;
-
 		this.resultParser = new DiffusionResultParser(writerFactory, setter);
 		this.outputPanel = outputPanel;
 		this.swingApplication = swingApplication;
@@ -145,9 +142,10 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		diffusionResultColumns.rankColumn = String.format("%s_rank", outputColumnName);
 
 		appManager.setCurrentNetwork(network);
-
+	
 		outputPanel.setColumnName(String.format("%s_rank", outputColumnName));
-		outputPanel.swapPanel(true);
+		outputPanel.setPanelVisible(true);
+		
 		showResult();
 		tm.setStatusMessage("Cleaning up");
 	}
