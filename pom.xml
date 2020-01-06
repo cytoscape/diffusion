@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<properties>
 		<bundle.symbolicName>org.cytoscape.diffusion.cy-diffusion</bundle.symbolicName>
 		<bundle.namespace>org.cytoscape.diffusion</bundle.namespace>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<osgi.api.version>4.2.0</osgi.api.version>
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.6.0</cytoscape.api.version>
-		<maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+		<cytoscape.api.version>3.7.0</cytoscape.api.version>
+
+		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+		<maven-bundle-plugin.version>4.1.0</maven-bundle-plugin.version>
+		<osgi.api.version>6.0.0</osgi.api.version>
+		<osgi.compendium.version>5.0.0</osgi.compendium.version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -69,7 +73,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
+				<version>0.8.4</version>
 				<configuration>
 					<includes>
 						<include>org/cytoscape/diffusion/**/*</include>
@@ -96,37 +100,39 @@
 
 	<repositories>
 		<repository>
-			<id>cytoscape_snapshots</id>
-			<snapshots>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<name>Cytoscape Snapshots</name>
-			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
 			<releases>
+				<enabled>true</enabled>
 			</releases>
 			<name>Cytoscape Releases</name>
-			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
+			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
+		</repository>
+		<repository>
+			<id>cytoscape_snapshots</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<name>Cytoscape Snapshots</name>
+			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
 		</repository>
 	</repositories>
 
 	<distributionManagement>
 		<repository>
-			<id>releases</id>
-			<name>Internal Releases</name>
-			<url>http://code.cytoscape.org/nexus/content/repositories/releases</url>
+			<id>cytoscape_releases</id>
+			<name>Cytoscape Releases</name>
+			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshots</id>
-			<name>Internal Snapshots</name>
-			<url>http://code.cytoscape.org/nexus/content/repositories/snapshots</url>
+			<id>cytoscape_snapshots</id>
+			<name>Cytoscape Snapshots</name>
+			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -139,11 +145,11 @@
 			<version>${osgi.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<version>${osgi.api.version}</version>
+			<version>${osgi.compendium.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -186,19 +192,19 @@
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>
-		
+
 		<dependency>
-		 	<groupId>org.cytoscape</groupId>
-  			<artifactId>ci-api</artifactId>
-  			<version>${cytoscape.api.version}</version>
-  			<scope>provided</scope>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>ci-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
-		 	<groupId>org.cytoscape</groupId>
-  			<artifactId>layout-api</artifactId>
-  			<version>${cytoscape.api.version}</version>
-  			<scope>provided</scope>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>layout-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- For logging -->
 		<dependency>
@@ -249,7 +255,7 @@
 			<scope>test</scope>
 		</dependency>
 
-			<dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.10.19</version>
