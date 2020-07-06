@@ -15,7 +15,6 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TunableSetter;
 import org.cytoscape.work.util.ListMultipleSelection;
@@ -119,7 +118,7 @@ public class DiffusionTaskTest {
 		
 		DiffusionServiceClient client = mock(DiffusionServiceClient.class);
 		
-		when(client.diffuse(any(String.class), any(String.class), any(Double.class))).thenReturn(errorServiceResponse);
+		when(client.diffuse(any(String.class), any(String.class), any(Double.class), any(DiffuseSelectedTask.class))).thenReturn(errorServiceResponse);
 		
 		TunableSetter tunableSetter = mock(TunableSetter.class);
 		DiffuseSelectedTask task = new DiffuseSelectedTask(

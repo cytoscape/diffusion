@@ -150,7 +150,7 @@ public class DiffusionResourceTest {
 
 		DiffusionServiceClient client = mock(DiffusionServiceClient.class);
 
-		when(client.diffuse(any(String.class), any(String.class), any(Double.class))).thenReturn(errorServiceResponse);
+		when(client.diffuse(any(String.class), any(String.class), any(Double.class), any(DiffuseSelectedTask.class))).thenReturn(errorServiceResponse);
 
 		TunableSetter tunableSetter = mock(TunableSetter.class);
 

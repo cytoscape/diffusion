@@ -49,6 +49,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DiffuseSelectedTask extends AbstractNetworkTask implements ObservableTask {
 
+    
+
 	private static final String heatSuffix = "_heat";
 	private static final String rankSuffix = "_rank";
 
@@ -108,8 +110,11 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		tm.setStatusMessage("Running diffusion");
 
 		// Call the service
-		final String responseJSONString = client.diffuse(cx, columnName, time);
-
+		final String responseJSONString = client.diffuse(cx, columnName, time, this);
+                if (responseJSONString == null && this.cancelled == true){
+                    tm.setStatusMessage("User canceled task");
+                    return;
+                }
 		tm.setStatusMessage("Decoding response");
 		// System.out.println("\n\n" + responseJSONString);
 
@@ -382,5 +387,13 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		return Collections
 				.unmodifiableList(Arrays.asList(String.class, DiffusionResultColumns.class, JSONResult.class));
 	}
+        
+        /**
+         * Lets caller know if this task has been canceled
+         * @return 
+         */
+        public boolean isCanceled(){
+            return this.cancelled;
+        }
 
 }
