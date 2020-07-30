@@ -21,8 +21,6 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.Invocation;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import static org.mockito.Mockito.doAnswer;
@@ -32,8 +30,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.awt.Component;
-import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingUtilities;
 
@@ -81,6 +79,8 @@ public class OutputPanelTest {
 				{
 					serviceRegistered = true;
 				} else {
+                                        System.err.println("Failing call");
+                                        System.err.flush();
 					fail(); 
 				}
 				return null;
@@ -93,6 +93,8 @@ public class OutputPanelTest {
 				{
 					serviceRegistered = false;
 				} else {
+                                        System.err.println("Failing call");
+                                        System.err.flush();
 					fail();
 				}
 				return null;
@@ -151,36 +153,32 @@ public class OutputPanelTest {
 		
 	}
 	
+        /**
+         * Adds a trivial task to UI thread and waits for it to be
+         * run which implies all other tasks have been completed. 
+         * Had to switch this cause the notify() logic earlier was failing
+         * on Ubuntu boxes (and only Ubuntu boxes) which was very
+         * weird
+         */
 	private void waitForSwingEDT() {
+            final AtomicBoolean swingUpdated = new AtomicBoolean(false);
 		final Runnable runnable = new Runnable() {
-
 			@Override
 			public void run() {
-				synchronized(this) {
-					/*
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}*/
-					notify();
-				};
+                                swingUpdated.set(true);
 			};
 		};
-		SwingUtilities.invokeLater(runnable);
-		synchronized(runnable) {
-		try {
-			runnable.wait();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		}
+                SwingUtilities.invokeLater(runnable);
+
+                // wait until 
+                while(swingUpdated.get() == false){
+                    try{
+                        Thread.sleep(100);
+                    } catch(InterruptedException ie){
+                        
+                    } 
+                }
 	}
-	
-	
-	
-	
 	
 	@Test
 	public void testExistingOutputPanelReceivesNullNetwork() throws Exception {
