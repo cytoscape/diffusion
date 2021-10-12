@@ -1,3 +1,5 @@
+
+import os
 from Diffusion import Diffusion
 from CyRESTInstance import CyRESTInstance
 from TestConfig import BASE_URL, IMPOSSIBLE_URL
@@ -17,7 +19,9 @@ _core = Core(CyRESTInstance(base_url=BASE_URL))  # assumes Cytoscape answers at 
 
 
 class DiffusionTestCase(unittest.TestCase):
-    _SESSION_FILE = "/git/cytoscape/cytoscape/gui-distribution/assembly/target/cytoscape/sampleData/galFiltered.cys" # this must be modified if your local galFiltered.cys is not in this location.
+    _SESSION_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                 'testsessions',
+                                                 'galFiltered.cys'))
 
     def setUp(self):
         result = _core.read_session_file(self._SESSION_FILE)
