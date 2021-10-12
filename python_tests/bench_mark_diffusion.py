@@ -30,7 +30,7 @@ LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
              "%(filename)s::%(funcName)s():%(lineno)d %(message)s"
 
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'testnetworks')
 
 JSON_HEADERS = {'Content-Type': 'application/json',
                 'Accept': 'application/json'}
@@ -55,10 +55,10 @@ def _parse_arguments(desc, args):
                         help='CyREST endpoint')
     parser.add_argument('--number_iterations', default=5, type=int,
                         help='# of diffusions to run on each network')
-    parser.add_argument('--nodes_to_select', default='1%',
+    parser.add_argument('--nodes_to_select', default='1%', type=str,
                         help='Number or percent of nodes to select. '
                              'If a number, then that number of nodes will '
-                             'be selected in network. If suffixed with % then '
+                             'be selected in network. If suffixed with %% then '
                              'that percentage of nodes will be selected')
     parser.add_argument('--jsonreport',
                         help='If set, dumps results of '
