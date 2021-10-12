@@ -449,6 +449,8 @@ def run_diffusion_benchmarks(theargs):
         df = get_report_as_pandas(benchmark_run=benchmark_run)
         print('\n\n\n')
         print(df.to_csv(index=False))
+        if theargs.csvreport is not None:
+            df.to_csv(theargs.csvreport, index=False)
     finally:
         revert_cytoscape_to_original_diffusion_url(theargs,
                                                    orig_diffusion_prop=orig_diffusion_prop)
