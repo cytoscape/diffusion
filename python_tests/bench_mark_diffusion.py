@@ -5,12 +5,12 @@ import sys
 import traceback
 import argparse
 import logging
-import requests
 import random
 import time
 import json
 import pandas
 import statistics
+import diffusiontestutil
 import py4cytoscape as py4
 from tqdm import tqdm
 
@@ -23,17 +23,11 @@ class Formatter(argparse.ArgumentDefaultsHelpFormatter,
     pass
 
 
-DEFAULT_CYREST_API = 'http://localhost:1234/v1'
-
-
 LOG_FORMAT = "%(asctime)-15s %(levelname)s %(relativeCreated)dms " \
              "%(filename)s::%(funcName)s():%(lineno)d %(message)s"
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'testnetworks')
-
-JSON_HEADERS = {'Content-Type': 'application/json',
-                'Accept': 'application/json'}
 
 
 def _parse_arguments(desc, args):
@@ -51,7 +45,7 @@ def _parse_arguments(desc, args):
                         help='Comma delimited list of REST endpoints')
     parser.add_argument('--cxdir', default=DATA_DIR,
                         help='Directory containing CX files to use for comparison')
-    parser.add_argument('--cyresturl', default=DEFAULT_CYREST_API,
+    parser.add_argument('--cyresturl', default=diffusiontestutil.CYREST_URL,
                         help='CyREST endpoint')
     parser.add_argument('--number_iterations', default=5, type=int,
                         help='# of diffusions to run on each network')
@@ -128,86 +122,6 @@ def _get_cx_files(cxdir):
     return cxfiles
 
 
-def delete_diffusion_url_property(base_url=DEFAULT_CYREST_API):
-    """
-
-    :param base_url:
-    :return:
-    """
-    resp = requests.delete(base_url + '/properties/cytoscape3.props/diffusion.url',
-                           headers=JSON_HEADERS)
-    if resp.status_code == 200:
-        return None
-    return resp.json()
-
-
-def get_diffusion_url_property(base_url=DEFAULT_CYREST_API):
-    """
-
-    :param base_url:
-    :return:
-    """
-    resp = requests.get(base_url + '/properties/cytoscape3.props/diffusion.url',
-                        headers=JSON_HEADERS)
-    if resp.status_code != 200:
-        return None
-    return resp.json()['data']['value']
-
-
-def set_diffusion_url_property(new_value, base_url=DEFAULT_CYREST_API):
-    """
-    Sets ``diffusion.url`` property in Cytoscape to **new_value**
-    :param new_value: Value to set ``diffusion.url`` property
-    :type new_value: str
-    :param base_url: Endpoint of Cytoscape cyREST service
-    :type base_url: str
-    :return: ``None`` upon success or output from endpoint upon error
-    :rtype: str
-    """
-    orig_prop = get_diffusion_url_property(base_url=base_url)
-    if orig_prop is None:
-        resp = requests.post(base_url + '/properties/cytoscape3.props',
-                            headers=JSON_HEADERS,
-                            json={'key': 'diffusion.url',
-                                  'value': new_value})
-    else:
-        resp = requests.put(base_url + '/properties/cytoscape3.props/diffusion.url',
-                            headers=JSON_HEADERS,
-                            json={'value': new_value})
-    if resp.status_code == 200:
-        return None
-
-    return resp.text
-
-
-def import_network_from_file(input_cx_file,
-                             base_url=DEFAULT_CYREST_API):
-    """
-    Calls :py:func:`py4cytoscape.networks.import_network_from_file`
-    :param input_cx_file:
-    :param base_url:
-    :return: See return value of
-             :py:func:`py4cytoscape.networks.import_network_from_file`
-    """
-    return py4.import_network_from_file(input_cx_file,
-                                        base_url=base_url)
-
-
-def delete_network(network=None,
-                   base_url=DEFAULT_CYREST_API):
-    """
-    Calls :py:func:`py4cytoscape.networks.delete_network`
-    :param network:
-    :type network: SUID or str or None
-    :param base_url:
-    :type base_url: str
-    :return: See return value of
-             :py:func:`py4cytoscape.networks.delete_network`
-    """
-    return py4.delete_network(network=network,
-                              base_url=base_url)
-
-
 def revert_cytoscape_to_original_diffusion_url(theargs, orig_diffusion_prop=None):
     """
     Reverts Cytoscape back to original diffusion service either by setting
@@ -222,15 +136,15 @@ def revert_cytoscape_to_original_diffusion_url(theargs, orig_diffusion_prop=None
     :return: None
     """
     if orig_diffusion_prop is None:
-        res = delete_diffusion_url_property(base_url=theargs.cyresturl)
+        res = diffusiontestutil.delete_diffusion_url_property(base_url=theargs.cyresturl)
         if res is not None:
             raise Exception('Unable to delete diffusion.url: ' + str(res))
     else:
         logger.info('Setting diffusion.url back to: ' + str(orig_diffusion_prop))
-        set_diffusion_url_property(orig_diffusion_prop, base_url=theargs.cyresturl)
+        diffusiontestutil.set_diffusion_url_property(orig_diffusion_prop, base_url=theargs.cyresturl)
 
 
-def load_network_in_cytoscape(cxfile=None, base_url=DEFAULT_CYREST_API):
+def load_network_in_cytoscape(cxfile=None, base_url=diffusiontestutil.CYREST_URL):
     """
 
     :param cxfile:
@@ -238,8 +152,8 @@ def load_network_in_cytoscape(cxfile=None, base_url=DEFAULT_CYREST_API):
     :return:
     """
     logger.debug('Importing network: ' + cxfile)
-    res = import_network_from_file(cxfile,
-                                   base_url=base_url)
+    res = py4.import_network_from_file(cxfile,
+                                       base_url=base_url)
     net_suid = None
     if 'networks' in res:
         net_suid = res['networks']
@@ -251,7 +165,7 @@ def load_network_in_cytoscape(cxfile=None, base_url=DEFAULT_CYREST_API):
 
 def select_nodes_for_diffusion(net_suid=None,
                                nodes_to_select='1',
-                               base_url=DEFAULT_CYREST_API):
+                               base_url=diffusiontestutil.CYREST_URL):
     """
 
     :param net_suid:
@@ -279,7 +193,7 @@ def select_nodes_for_diffusion(net_suid=None,
 
 
 def run_diffusion(net_suid=None, time_val=None,
-                  base_url=DEFAULT_CYREST_API):
+                  base_url=diffusiontestutil.CYREST_URL):
     """
 
     :param net_suid:
@@ -301,7 +215,7 @@ def run_diffusion(net_suid=None, time_val=None,
     return run_sum
 
 
-def diffusion_loop(net_suid=None, base_url=DEFAULT_CYREST_API,
+def diffusion_loop(net_suid=None, base_url=diffusiontestutil.CYREST_URL,
                    number_iterations=5, nodes_to_select=1,
                    endpoints=None):
     """
@@ -322,7 +236,7 @@ def diffusion_loop(net_suid=None, base_url=DEFAULT_CYREST_API,
         cur_run['selected_nodes'] = selected_nodes
         cur_run['endpoints'] = {}
         for service_endpoint in tqdm(endpoints, desc='Diffusion'):
-            set_diffusion_url_property(service_endpoint, base_url=base_url)
+            diffusiontestutil.set_diffusion_url_property(service_endpoint, base_url=base_url)
             run_sum = run_diffusion(net_suid=net_suid,
                                     base_url=base_url)
             cur_run['endpoints'][service_endpoint] = run_sum
@@ -332,7 +246,7 @@ def diffusion_loop(net_suid=None, base_url=DEFAULT_CYREST_API,
 
 
 def annotate_run_summary(net_suid=None, run_summary=None,
-                         base_url=DEFAULT_CYREST_API):
+                         base_url=diffusiontestutil.CYREST_URL):
     """
 
     :param net_suid:
@@ -421,7 +335,7 @@ def run_diffusion_benchmarks(theargs):
     if cxfiles is None or len(cxfiles) == 0:
         raise Exception('No CX files found')
 
-    orig_diffusion_prop = get_diffusion_url_property(base_url=theargs.cyresturl)
+    orig_diffusion_prop = diffusiontestutil.get_diffusion_url_property(base_url=theargs.cyresturl)
     logger.info('Original diffusion.url property value: ' +
                 str(orig_diffusion_prop))
 
@@ -445,7 +359,7 @@ def run_diffusion_benchmarks(theargs):
             finally:
                 if net_suid is not None:
                     logger.debug('Deleting network: ' + str(net_suid))
-                    delete_network(net_suid, base_url=theargs.cyresturl)
+                    py4.delete_network(net_suid, base_url=theargs.cyresturl)
         df = get_report_as_pandas(benchmark_run=benchmark_run)
         print('\n\n\n')
         print(df.to_csv(index=False))
