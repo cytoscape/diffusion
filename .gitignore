@@ -6,3 +6,4 @@ target
 /python_tests/.idea/
 /python_tests/__pycache__
 *.iml
+/python_tests/logs
