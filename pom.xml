@@ -21,7 +21,7 @@
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
 
-	<version>1.6.1</version>
+	<version>1.6.2</version>
 
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
@@ -112,7 +112,7 @@
 				<enabled>true</enabled>
 			</releases>
 			<name>Cytoscape Releases</name>
-			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
+			<url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
 		</repository>
 		<repository>
 			<id>cytoscape_snapshots</id>
@@ -123,7 +123,7 @@
 				<enabled>false</enabled>
 			</releases>
 			<name>Cytoscape Snapshots</name>
-			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
+			<url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
 		</repository>
 	</repositories>
 
@@ -131,12 +131,12 @@
 		<repository>
 			<id>cytoscape_releases</id>
 			<name>Cytoscape Releases</name>
-			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
+			<url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>cytoscape_snapshots</id>
 			<name>Cytoscape Snapshots</name>
-			<url>http://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
+			<url>https://nrnb-nexus.ucsd.edu/repository/cytoscape_snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -214,13 +214,13 @@
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
-			<version>1.5.3</version>
+			<version>1.11.11</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-service</artifactId>
-			<version>1.5.3</version>
+			<version>1.11.11</version>
 			<scope>provided</scope>
 		</dependency>
 
