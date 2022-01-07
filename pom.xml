@@ -21,7 +21,7 @@
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
 
-	<version>1.6.2</version>
+	<version>1.6.3-SNAPSHOT</version>
 
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
