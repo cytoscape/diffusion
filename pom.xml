@@ -8,7 +8,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.8.0</cytoscape.api.version>
+		<cytoscape.api.version>3.9.1</cytoscape.api.version>
 
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
@@ -21,7 +21,7 @@
 	<groupId>org.cytoscape.diffusion</groupId>
 	<artifactId>diffusion</artifactId>
 
-	<version>1.6.3</version>
+	<version>1.6.4-SNAPSHOT</version>
 
 	<name>Diffusion</name>
 	<packaging>bundle</packaging>
@@ -214,13 +214,13 @@
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
-			<version>1.11.12</version>
+			<version>1.11.13</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-service</artifactId>
-			<version>1.11.12</version>
+			<version>1.11.13</version>
 			<scope>provided</scope>
 		</dependency>
 
