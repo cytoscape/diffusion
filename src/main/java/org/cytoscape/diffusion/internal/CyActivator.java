@@ -47,7 +47,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class CyActivator extends AbstractCyActivator {
 
 	private static final String DIFFUSION_MENU = "Tools.Diffuse[2100]";
-	
+	private static final String DIFFUSION_CONTEXT_MENU = "Diffuse[0.0]";
 
 	private ServiceTracker ciResponseFactoryTracker = null;
 	private ServiceTracker ciExceptionFactoryTracker = null;
@@ -115,7 +115,7 @@ public class CyActivator extends AbstractCyActivator {
 		diffusionTaskFactoryProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
 		diffusionTaskFactoryProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
 
-		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, "Diffuse");
+		diffusionTaskFactoryProps.setProperty(PREFERRED_MENU, DIFFUSION_CONTEXT_MENU);
 		diffusionTaskFactoryProps.setProperty(IN_MENU_BAR, "false");
 		diffusionTaskFactoryProps.setProperty(IN_CONTEXT_MENU, "true");
 		diffusionTaskFactoryProps.setProperty("title", "Selected Nodes");
@@ -135,7 +135,7 @@ public class CyActivator extends AbstractCyActivator {
 		wOptsProps.setProperty(COMMAND_SUPPORTS_JSON, "true");
 		wOptsProps.setProperty(COMMAND_EXAMPLE_JSON, exampleJson);
 
-		wOptsProps.setProperty(PREFERRED_MENU, "Diffuse");
+		wOptsProps.setProperty(PREFERRED_MENU, DIFFUSION_CONTEXT_MENU);
 		wOptsProps.setProperty(IN_MENU_BAR, "false");
 		wOptsProps.setProperty(IN_CONTEXT_MENU, "true");
 		wOptsProps.setProperty("title", "Selected Nodes with Options");
@@ -160,7 +160,7 @@ public class CyActivator extends AbstractCyActivator {
 				outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client,
 				tunableSetterServiceRef, false);
 		Properties edgeProps = new Properties();
-		edgeProps.setProperty(PREFERRED_MENU, "Diffuse");
+		edgeProps.setProperty(PREFERRED_MENU, DIFFUSION_CONTEXT_MENU);
 		edgeProps.setProperty(IN_MENU_BAR, "false");
 		edgeProps.setProperty(IN_CONTEXT_MENU, "true");
 		edgeProps.setProperty("title", "Selected Nodes");
@@ -170,7 +170,7 @@ public class CyActivator extends AbstractCyActivator {
 				outputPanel, viewWriterManager, swingApplication, cyApplicationManagerService, client,
 				tunableSetterServiceRef, true);
 		Properties edgePropsOpt = new Properties();
-		edgePropsOpt.setProperty(PREFERRED_MENU, "Diffuse");
+		edgePropsOpt.setProperty(PREFERRED_MENU, DIFFUSION_CONTEXT_MENU);
 		edgePropsOpt.setProperty(IN_MENU_BAR, "false");
 		edgePropsOpt.setProperty(IN_CONTEXT_MENU, "true");
 		edgePropsOpt.setProperty("title", "Selected Nodes with Options");
