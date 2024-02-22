@@ -104,7 +104,7 @@ public class DiffuseSelectedTask extends AbstractNetworkTask implements Observab
 		}
 
 		// Case 2: Use existing column as-is
-		final String cx = resultParser.encode(network, inputCol);
+		final String cx = resultParser.encode(network, inputCol, this.tm);
 
 		// System.out.println("\n\n" + cx);
 		tm.setStatusMessage("Running diffusion");
