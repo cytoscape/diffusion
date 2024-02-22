@@ -20,6 +20,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.TunableSetter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.cytoscape.work.TaskMonitor;
 
 public class DiffusionResultParser {
 
@@ -30,8 +31,12 @@ public class DiffusionResultParser {
 		this.writerFactory = writerFactory;
 		this.tunableSetter = setter;
 	}
-
+	
 	public String encode(final CyNetwork network, final String inputHeatColumn) throws IOException {
+		return encode(network, inputHeatColumn, null);
+	}
+
+	public String encode(final CyNetwork network, final String inputHeatColumn, TaskMonitor taskMonitor) throws IOException {
 
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -85,10 +90,11 @@ public class DiffusionResultParser {
 
 		String jsonString = null;
 		try {
-			writer.run(null);
+			writer.run(taskMonitor);
 			jsonString = stream.toString("UTF-8");
 			stream.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IOException();
 		}
 		return jsonString;
